@@ -18,6 +18,19 @@ import java.sql.SQLException;
 public class MySQLHelper {
 
     /**
+     * Overloaded method van de onderstaande methodes. Om gemakkelijk zowel de connectie,
+     * als PreparedStatement als ResultSet te sluiten.
+     * Sluit eerst resultset, dan preparedstatement en dan connection.
+     *
+     * @param connection Meegegeven connectie om te sluiten
+     */
+    public static void close(Connection connection, PreparedStatement preparedStatement, ResultSet resultSet) {
+        close(resultSet);
+        close(preparedStatement);
+        close(connection);
+    }
+
+    /**
      * Als er een connectie is wordt deze gesloten.
      * @param connection Meegegeven connectie om te sluiten
      */
