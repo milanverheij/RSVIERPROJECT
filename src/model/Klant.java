@@ -3,7 +3,7 @@ package model;
 /**
  * Created by Milan_Verheij on 06-06-16.
  *
- * Model van Klant_ID. Variabelen komen overeen met de tabel KLANT
+ * Model van Klant. Variabelen komen overeen met de tabel KLANT
  * in de database. Standaard POJO.
  *
  */
