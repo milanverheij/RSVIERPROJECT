@@ -15,6 +15,12 @@ public class Klant {
     private String achternaam;
     private String tussenvoegsel;
     private String email;
+    private Adres adresGegevens;
+
+    // Als er een klant aangemaakt wordt, wordt er een Adres-object aan gekoppeld
+    public Klant() {
+        adresGegevens = new Adres();
+    }
 
     // Getters & setters
     public long getKlant_id() {
@@ -46,5 +52,8 @@ public class Klant {
     }
     public void setEmail(String email) {
         this.email = email;
+    }
+    public Adres getAdresGegevens() {
+        return adresGegevens;
     }
 }

@@ -1,6 +1,6 @@
 public abstract class DAOFactory {
 
-	public DAOFactory getDAOFactory(String s){
+	public static DAOFactory getDAOFactory(String s){
 		if(s.equals("MySQL")) 
 			return new DAOFactoryMySQL();
 //		else if(s.equals("FireBird"))

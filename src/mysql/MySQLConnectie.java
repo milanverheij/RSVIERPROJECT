@@ -37,9 +37,9 @@ public class MySQLConnectie {
         try {
             // Laden van de mysql Driver en log in console als dit gelukt is
             Class.forName(DRIVER_CLASS);
-            System.out.println("\n\tDRIVER SUCCESVOL GELADEN");
+            System.out.println("\n\tMySQLConnectie: DRIVER SUCCESVOL GELADEN");
         } catch (ClassNotFoundException e) {
-            System.out.println("\n\tDRIVER LADEN MISLUKT");
+            System.out.println("\n\tMySQLConnectie: DRIVER LADEN MISLUKT");
             e.printStackTrace();
         }
     }
@@ -57,9 +57,9 @@ public class MySQLConnectie {
         if (connection == null) {
             try {
                 connection = DriverManager.getConnection(URL, USER, PASSWORD);
-                System.out.println("\n\tDATABASE SUCCESVOL VERBONDEN");
+                System.out.println("\n\tMySQLConnectie: DATABASE SUCCESVOL VERBONDEN");
             } catch (SQLException e) {
-                System.out.println("\n\tMISLUKT MET DATABASE TE VERBINDEN");
+                System.out.println("\n\tMySQLConnectie: MISLUKT MET DATABASE TE VERBINDEN");
                 e.printStackTrace();
             }
         }

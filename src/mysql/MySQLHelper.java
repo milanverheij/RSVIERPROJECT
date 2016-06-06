@@ -31,6 +31,47 @@ public class MySQLHelper {
     }
 
     /**
+     * Overloaded method van de onderstaande methodes. Om gemakkelijk zowel de connectie,
+     * als PreparedStatement te sluiten.
+     * Sluit eerst preparedstatement en dan connection.
+     *
+     * @param preparedStatement Meegegeven statement om te sluiten
+     * @param connection Meegegeven connectie om te sluiten
+     */
+    public static void close(Connection connection, PreparedStatement preparedStatement) {
+        close(preparedStatement);
+        close(connection);
+    }
+
+    /**
+     * Overloaded method van de onderstaande methodes. Om gemakkelijk zowel de resultset,
+     * als PreparedStatement te sluiten.
+     * Sluit eerst resultset en dan preparedstatement.
+     *
+     * @param preparedStatement Meegegeven statement om te sluiten
+     * @param resultSet Meegegeven resultset om te sluiten
+     */
+    public static void close(PreparedStatement preparedStatement, ResultSet resultSet) {
+        close(resultSet);
+        close(preparedStatement);
+    }
+
+    /**
+     * Als er een connectie is wordt deze gesloten.
+     */
+    public static void close() {
+        if (MySQLConnectie.getConnection() != null) {
+            try {
+                MySQLConnectie.getConnection().close();
+                System.out.println("\n\tMySQLHelper: CONNECTIE GESLOTEN");
+            } catch (SQLException e) {
+                System.out.println("\n\tMySQLHelper: FOUT TIJDENS SLUITEN CONNECTIE");
+                e.printStackTrace();
+            }
+        }
+
+    }
+    /**
      * Als er een connectie is wordt deze gesloten.
      * @param connection Meegegeven connectie om te sluiten
      */
@@ -38,9 +79,9 @@ public class MySQLHelper {
         if (connection != null) {
             try {
                 connection.close();
-                System.out.println("\n\tCONNECTIE GESLOTEN");
+                System.out.println("\n\tMySQLHelper: CONNECTIE GESLOTEN");
             } catch (SQLException e) {
-                System.out.println("\n\tFOUT TIJDENS SLUITEN CONNECTIE");
+                System.out.println("\n\tMySQLHelper: FOUT TIJDENS SLUITEN CONNECTIE");
                 e.printStackTrace();
             }
         }
@@ -54,9 +95,9 @@ public class MySQLHelper {
         if (statement != null) {
             try {
                 statement.close();
-                System.out.println("\n\tSTATEMENT GESLOTEN");
+                System.out.println("\n\tMySQLHelper: STATEMENT GESLOTEN");
             } catch (SQLException e) {
-                System.out.println("\n\tFOUT TIJDENS SLUITEN STATEMENT");
+                System.out.println("\n\tMySQLHelper: FOUT TIJDENS SLUITEN STATEMENT");
             }
         }
     }
@@ -69,9 +110,9 @@ public class MySQLHelper {
         if (resultSet != null) {
             try {
                 resultSet.close();
-                System.out.println("\n\tRESULTSET GESLOTEN");
+                System.out.println("\n\tMySQLHelper: RESULTSET GESLOTEN");
             } catch (SQLException e) {
-                System.out.println("\n\tFOUT TIJDENS SLUITEN RESULTSET");
+                System.out.println("\n\tMySQLHelper: FOUT TIJDENS SLUITEN RESULTSET");
             }
         }
     }
@@ -84,9 +125,9 @@ public class MySQLHelper {
         if (rowSet != null) {
             try {
                 rowSet.close();
-                System.out.println("\n\tROWSET gesloten");
+                System.out.println("\n\tMySQLHelper: ROWSET gesloten");
             } catch (SQLException e) {
-                System.out.println("\n\tFOUT TIJDENS SLUITEN ROWSET");
+                System.out.println("\n\tMySQLHelper: FOUT TIJDENS SLUITEN ROWSET");
             }
         }
     }
