@@ -15,6 +15,7 @@ import java.sql.SQLException;
  *
  * Er wordt door de klasse zelf een private instance aangemaakt. De constructor is tevens ook private,
  * dit is dus de enige instance die er is en kan zijn.
+ *
  */
 
 public class MySQLConnectie {
