@@ -1,7 +1,7 @@
-Interfaces	"Interface" package
-POJOs/models 	"Model" package
-MySQL classes	"MySQL" package
-Firebird	"Firebird" package
+Interfaces	"interfaces" package
+POJOs/models 	"model" package
+MySQL classes	"mySQL" package
+Firebird	"firebird" package
 Factory		default
 
 
