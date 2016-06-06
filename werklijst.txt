@@ -17,6 +17,7 @@ Bestelling POJO een LinkedHashSet<Artikel>
 
 get'X'OpKlantGegevens
 get'X'OpAdresGegevens
+get'X'OpBestellingGegevens
 
 
 Naamconventies: Nederlandse methoden Nederlandse variabelen (get, set, close mogen wel)
