@@ -12,6 +12,9 @@ import java.sql.SQLException;
  * Het is een singleton klasse welke een mysql-connectie aanmaakt als deze er nog niet is.
  * Het heeft een private methode om een connectie te maken en een publieke methode
  * om een instance van de connectie aan de caller te geven.
+ *
+ * Er wordt door de klasse zelf een private instance aangemaakt. De constructor is tevens ook private,
+ * dit is dus de enige instance die er is en kan zijn.
  */
 
 public class MySQLConnectie {
@@ -49,7 +52,7 @@ public class MySQLConnectie {
      * @return De gemaakte connectie met de database.
      */
 
-    private static Connection connectToDatabase() {
+    private synchronized static Connection connectToDatabase() {
         if (connection == null) {
             try {
                 connection = DriverManager.getConnection(URL, USER, PASSWORD);
