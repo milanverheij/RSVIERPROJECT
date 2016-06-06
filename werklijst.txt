@@ -1,0 +1,27 @@
+Interfaces	"Interface" package
+POJOs/models 	"Model" package
+MySQL classes	"MySQL" package
+Firebird	"Firebird" package
+Factory		default
+
+
+MySQLConnectie geen factory maken, spuugt 1 connectie terug
+AbstractDAOMySQL tussen concrete factory en DAOs
+
+
+Bestelling POJO een LinkedHashSet<Artikel>
+-bestelling_id: long
+-klant_id: long
+-artikelen: LinkedHashSet<Artikel>
+
+
+get'X'OpKlantGegevens
+get'X'OpAdresGegevens
+
+
+Naamconventies: Nederlandse methoden Nederlandse variabelen (get, set, close mogen wel)
+
+
+Milan:	MySQLHelper, MySQLConnectie, KlantDao
+Albert:	Factories, BestellingDAO, 
+Douwe:	Artikel, Adres, Scrum uitzoeken
