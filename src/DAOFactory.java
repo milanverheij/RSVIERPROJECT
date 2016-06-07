@@ -10,9 +10,9 @@ public abstract class DAOFactory {
 	}
 	
 	public abstract interfaces.KlantDAO getKlantDAO();
-//	public abstract interfaces.AdresDAO getAdresDAO();
+	public abstract interfaces.AdresDAO getAdresDAO();
 	public abstract interfaces.BestellingDAO getBestellingDAO();
-//	public abstract interfaces.ArtikelDAO getArtikelDAO();
+	public abstract interfaces.ArtikelDAO getArtikelDAO();
 	
 	
 }
