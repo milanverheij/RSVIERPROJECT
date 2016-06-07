@@ -3,6 +3,8 @@ package interfaces;
 import model.Adres;
 import model.Klant;
 
+import javax.xml.transform.Result;
+import java.sql.ResultSet;
 import java.util.ListIterator;
 
 /**
@@ -21,10 +23,7 @@ public interface KlantDAO {
     /** CREATE */
     void nieuweKlant(String voornaam,
                      String achternaam,
-                     String straatnaam,
-                     String postcode,
-                     int huisnummer,
-                     String woonplaats);
+                     Adres adresgegevens);
 
     void nieuweKlant(String voornaam,
                      String achternaam);
@@ -39,13 +38,10 @@ public interface KlantDAO {
 
     void getKlantOpKlant(String voornaam);
 
-    void getKlantOKlant(String voornaam,
+    void getKlantOpKlant(String voornaam,
                         String achternaam);
 
-    void getKlantOpAdres(String straatnaam,
-                         String postcode,
-                         int huisnummer,
-                         String woonplaats);
+    void getKlantOpAdres(Adres adresgegevens);
 
     void getKlantOpAdres(String straatnaam);
 
@@ -60,16 +56,7 @@ public interface KlantDAO {
 
     void updateKlant(String voornaam,
                      String achternaam,
-                     String straatnaam,
-                     String postcode,
-                     int huisnummer,
-                     String woonplaats);
-
-    void updateKlant(String straatnaam,
-                     String postcode,
-                     int huisnummer,
-                     String woonplaats);
-
+                     Adres adresgegevens);
 
     /** DELETE */
     void verwijderKlant(long klantId);

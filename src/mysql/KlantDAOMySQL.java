@@ -1,5 +1,6 @@
 package mysql;
 
+import com.mysql.jdbc.Statement;
 import com.sun.rowset.internal.Row;
 import interfaces.KlantDAO;
 import model.Adres;
@@ -30,35 +31,45 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
 
     /** CREATE */
     @Override
-    public void nieuweKlant(String voornaam, String achternaam, String straatnaam, String postcode, int huisnummer, String woonplaats) {
+    public void nieuweKlant(String voornaam,
+                            String achternaam,
+                            Adres adresgegevens) {
+        ResultSet generatedKeys = null;
         try {
             query = "INSERT INTO KLANT " +
                     "(voornaam, achternaam, straatnaam, postcode, huisnummer, woonplaats) " +
                     "VALUES " +
                     "(?, ?, ?, ?, ?, ?);";
-            statement = connection.prepareStatement(query);
+            statement = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
 
             statement.setString(1, voornaam);
             statement.setString(2, achternaam);
-            statement.setString(3, straatnaam);
-            statement.setString(4, postcode);
-            statement.setInt(5, huisnummer);
-            statement.setString(6, woonplaats);
+            // TODO, vanaf hier AdresDAO gaan gebruiken?
+            statement.setString(3, adresgegevens.getStraatnaam());
+            statement.setString(4, adresgegevens.getPostcode());
+            statement.setInt(5, adresgegevens.getHuisnummer());
+            statement.setString(6, adresgegevens.getWoonplaats());
 
             System.out.println("\n\tKlantDAOMySQL: KLANT: " + voornaam + " SUCCESVOL GEMAAKT");
             statement.execute();
+
+            generatedKeys = statement.getGeneratedKeys();
+            if (generatedKeys.next()) {
+                System.out.println(generatedKeys.getInt(1));
+            }
+
         } catch (SQLException ex) {
             System.out.println("\n\tKlantDAOMySQL: SQL FOUT TIJDENS AANMAKEN KLANT");
             ex.printStackTrace();
         } finally {
-            MySQLHelper.close(statement);
+            MySQLHelper.close(statement, generatedKeys);
         }
 
     }
 
     @Override
     public void nieuweKlant(String voornaam, String achternaam) {
-        nieuweKlant(voornaam, achternaam, "onbekend", "onb.", 0 ,"onbekend");
+        nieuweKlant(voornaam, achternaam, new Adres("onbekend", "onbekend", "onbekend", 0, "onbekend"));
     }
 
     /** READ */
@@ -123,21 +134,55 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
 
     @Override
     public void getKlantOpKlant(long klantId) {
+        try {
+            query = "SELECT * FROM " +
+                    "KLANT WHERE " +
+                    "klant_id = ?;";
+            statement = connection.prepareStatement(query);
+            statement.setLong(1, klantId);
+            resultSet = statement.executeQuery();
 
+            while (resultSet.next()) {
+                System.out.println(resultSet.getString(2));
+            }
+
+        } catch (SQLException ex) {
+            System.out.println("\n\tKlantDAOMySQL: SQL FOUT TIJDENS OPZOEKEN KLANT OP KLANTID");
+            ex.printStackTrace();
+        } finally {
+            MySQLHelper.close(statement, resultSet);
+        }
     }
 
     @Override
     public void getKlantOpKlant(String voornaam) {
+        try {
+            query = "SELECT * FROM " +
+                    "KLANT WHERE " +
+                    "voornaam LIKE ?;";
+            statement = connection.prepareStatement(query);
+            statement.setString(1, voornaam);
+            resultSet = statement.executeQuery();
+
+            while (resultSet.next()) {
+                System.out.println(resultSet.getString(2));
+            }
+
+        }catch (SQLException ex) {
+            System.out.println("\n\tKlantDAOMySQL: SQL FOUT TIJDENS OPZOEKEN KLANT OP VOORNAAM");
+            ex.printStackTrace();
+        } finally {
+            MySQLHelper.close(statement, resultSet);
+        }
+    }
+
+    @Override
+    public void getKlantOpKlant(String voornaam, String achternaam) {
 
     }
 
     @Override
-    public void getKlantOKlant(String voornaam, String achternaam) {
-
-    }
-
-    @Override
-    public void getKlantOpAdres(String straatnaam, String postcode, int huisnummer, String woonplaats) {
+    public void getKlantOpAdres(Adres adresgegevens) {
 
     }
 
@@ -163,12 +208,9 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
     }
 
     @Override
-    public void updateKlant(String voornaam, String achternaam, String straatnaam, String postcode, int huisnummer, String woonplaats) {
-
-    }
-
-    @Override
-    public void updateKlant(String straatnaam, String postcode, int huisnummer, String woonplaats) {
+    public void updateKlant(String voornaam,
+                            String achternaam,
+                            Adres adresgegevens) {
 
     }
 
