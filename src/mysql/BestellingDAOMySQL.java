@@ -1,11 +1,26 @@
 package mysql;
 
+/*
+ *  Deze klasse regelt de verbinding tussen het programma en de database
+ *  voor de bestellingen. De no-args constructor maakt verbinding en vervolgens
+ *  kunnen de methoden lezen, schrijven, updaten, en verwijderen.
+ *  Lezen op klant_id geeft alle bestellingen van de klant terug in Iterator<Bestelling> formaat
+ *  Lezen op bestelling_id geeft een enkel Bestelling object terug
+ *
+ * */
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+
+import interfaces.BestellingDAO;
 import model.Artikel;
+import model.Bestelling;
 
 
-public class BestellingDAOMySQL extends AbstractDAOMySQL implements interfaces.BestellingDAO{
+public class BestellingDAOMySQL extends AbstractDAOMySQL implements BestellingDAO{
 
 	public BestellingDAOMySQL(){
 		connection = MySQLConnectie.getConnection();
@@ -13,7 +28,7 @@ public class BestellingDAOMySQL extends AbstractDAOMySQL implements interfaces.B
 
 	//Create
 	@Override
-	public void nieuweBestelling(int klantId, Artikel a1, Artikel a2, Artikel a3) {
+	public void nieuweBestelling(long klantId, Artikel a1, Artikel a2, Artikel a3) {
 		try {
 			statement = connection.prepareStatement("INSERT INTO `BESTELLING` "
 					+ "(klant_id, "
@@ -23,16 +38,16 @@ public class BestellingDAOMySQL extends AbstractDAOMySQL implements interfaces.B
 					+ "VALUES "
 					+ "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?);");
 
-			statement.setInt(1, klantId);
-			
-			statement.setInt(2, a1.getArtikel_id());
-			statement.setInt(3, a2.getArtikel_id());
-			statement.setInt(4, a3.getArtikel_id());
-			
+			statement.setLong(1, klantId);
+
+			statement.setLong(2, a1.getArtikel_id());
+			statement.setLong(3, a2.getArtikel_id());
+			statement.setLong(4, a3.getArtikel_id());
+
 			statement.setString(5, a1.getArtikel_naam());
 			statement.setString(6, a2.getArtikel_naam());
 			statement.setString(7, a3.getArtikel_naam());
-			
+
 			statement.setString(8, "" + a1.getArtikel_prijs());
 			statement.setString(9, "" + a2.getArtikel_prijs());
 			statement.setString(10, "" + a3.getArtikel_prijs());
@@ -41,9 +56,11 @@ public class BestellingDAOMySQL extends AbstractDAOMySQL implements interfaces.B
 
 		} catch (SQLException e) {
 			e.printStackTrace();
+		}finally{
+			MySQLHelper.close(statement);
 		}
 	}
-	public void nieuweBestelling(int klantId, Artikel a1, Artikel a2) {
+	public void nieuweBestelling(long klantId, Artikel a1, Artikel a2) {
 		try {
 			statement = connection.prepareStatement("INSERT INTO `BESTELLING` "
 					+ "(klant_id, "
@@ -53,10 +70,10 @@ public class BestellingDAOMySQL extends AbstractDAOMySQL implements interfaces.B
 					+ "VALUES "
 					+ "(?, ?, ?, ?, ?, ?, ?);");
 
-			statement.setInt(1, klantId);
-			statement.setInt(2, a1.getArtikel_id());
-			statement.setInt(3, a2.getArtikel_id());
-			
+			statement.setLong(1, klantId);
+			statement.setLong(2, a1.getArtikel_id());
+			statement.setLong(3, a2.getArtikel_id());
+
 			statement.setString(4, a1.getArtikel_naam());
 			statement.setString(5, a2.getArtikel_naam());
 
@@ -67,9 +84,11 @@ public class BestellingDAOMySQL extends AbstractDAOMySQL implements interfaces.B
 
 		} catch (SQLException e) {
 			e.printStackTrace();
+		}finally{
+			MySQLHelper.close(statement);
 		}
 	}
-	public void nieuweBestelling(int klantId, Artikel a1) {
+	public void nieuweBestelling(long klantId, Artikel a1) {
 		try {
 			statement = connection.prepareStatement("INSERT INTO `BESTELLING` "
 					+ "(klant_id, artikel1_id, "
@@ -78,8 +97,8 @@ public class BestellingDAOMySQL extends AbstractDAOMySQL implements interfaces.B
 					+ "VALUES "
 					+ "(?, ?, ?, ?);");
 
-			statement.setInt(1, klantId);
-			statement.setInt(2, a1.getArtikel_id());
+			statement.setLong(1, klantId);
+			statement.setLong(2, a1.getArtikel_id());
 			statement.setString(3, a1.getArtikel_naam());
 			statement.setString(4, "" + a1.getArtikel_prijs());
 
@@ -87,126 +106,202 @@ public class BestellingDAOMySQL extends AbstractDAOMySQL implements interfaces.B
 
 		} catch (SQLException e) {
 			e.printStackTrace();
+		}finally{
+			MySQLHelper.close(statement);
 		}
 	}
-	
+
 	//Read
 	@Override
-	public ResultSet getBestellingOpKlantGegevens(int klantId) {
+	public Iterator<Bestelling> getBestellingOpKlantGegevens(long klantId) {
+		//Alle bestellingen voor de klant
+		LinkedHashSet<Bestelling> bestellijst = new LinkedHashSet<Bestelling>();
+
+		//Individuele bestelling
+		Bestelling bestelling;
+
+		//De artikelen binnen een bestelling
+		LinkedHashMap<Artikel, Integer> map;
+
+		ResultSet rs;
+
 		try {
-			statement = connection.prepareStatement("SELECT * FROM `BESTELLING` WHERE klant_id =  ? ;");
-			statement.setInt(1, klantId);
-			ResultSet rs = statement.executeQuery();
-			return rs;
-		} catch (SQLException e) {
+			//Alle bestellingen van de klant in de ResultSet laden
+			statement = connection.prepareStatement("SELECT * FROM `BESTELLING` WHERE klant_id =  ?;");
+			statement.setLong(1, klantId);
+			rs = statement.executeQuery();
+
+			while(rs.next()){ 			//Zolang er meer entries zijn
+				Artikel artikel;
+				map = new LinkedHashMap<Artikel, Integer>();
+				bestelling = new Bestelling();
+
+				bestelling.setBestelling_id(rs.getLong(1));
+				bestelling.setKlant_id(rs.getLong(2));
+
+				for(int x = 0; x < 3; x++){
+
+					if(!(rs.getString(x + 9) == null)){
+						artikel = new Artikel();
+						artikel.setArtikel_id(rs.getInt(x + 3));
+						artikel.setArtikel_naam(rs.getString(x + 6));
+						artikel.setArtikel_prijs(Double.parseDouble(rs.getString(x + 9)));
+
+						if(map.containsKey(artikel)){
+							map.put(artikel, map.get(artikel) + 1);
+						}else{
+							map.put(artikel, 1);
+						}
+					}
+				}
+
+				bestelling.setArtikelLijst(map);
+				bestellijst.add(bestelling);
+			}
+		} catch (Exception e) {
 			e.printStackTrace();
+		}finally{
+			MySQLHelper.close(statement);
 		}
-		return null;
+		Iterator<Bestelling> it = bestellijst.iterator();
+		return it;
 	}
 	@Override
-	public ResultSet getBestellingOpBestelling(int bestellingId) {
+	public Bestelling getBestellingOpBestelling(long bestellingId) {
 		try {
 			statement = connection.prepareStatement("SELECT * FROM `BESTELLING` WHERE bestelling_id =  ? ;");
-			statement.setInt(1, bestellingId);
+			statement.setLong(1, bestellingId);
 			ResultSet rs = statement.executeQuery();
-			return rs;
+
+			Bestelling bestelling = new Bestelling();
+			LinkedHashMap<Artikel, Integer> map = new LinkedHashMap<Artikel, Integer>();
+
+			rs.next();
+
+			bestelling.setBestelling_id(rs.getInt(1));
+			bestelling.setKlant_id(rs.getInt(2));
+			for(int x = 0; x < 3; x++){
+				model.Artikel artikel = new model.Artikel();
+				artikel.setArtikel_id(rs.getInt(x + 2));
+				artikel.setArtikel_naam(rs.getString(x + 5));
+				artikel.setArtikel_prijs(Double.valueOf(rs.getString(x + 8)));
+
+				if(map.containsKey(artikel)){
+					map.put(artikel, map.get(artikel) + 1);
+				}else{
+					map.put(artikel, 1);
+				}
+			}
+			return bestelling;
 		} catch (SQLException e) {
 			e.printStackTrace();
+		}finally{
+			MySQLHelper.close(statement);
 		}
 		return null;
 	}
 
 	//Update
 	@Override
-	public void updateBestelling(int bestellingId, Artikel a1) {
-		
+	public void updateBestelling(long bestellingId, Artikel a1) {
+
 		try {
 			statement = connection.prepareStatement("UPDATE `BESTELLING` "
 					+ "SET artikel1_id = ?, artikel1_naam = ?, artikel1_prijs = ?"
 					+ "WHERE bestelling_id = ?;");
-			
-			statement.setInt(1, a1.getArtikel_id());
+
+			statement.setLong(1, a1.getArtikel_id());
 			statement.setString(2, a1.getArtikel_naam());
 			statement.setString(3, "" + a1.getArtikel_prijs());
-			
-			statement.setInt(4, bestellingId);
+
+			statement.setLong(4, bestellingId);
 			statement.executeUpdate();
 		} catch (SQLException e) {
 			e.printStackTrace();
+		}finally{
+			MySQLHelper.close(statement);
 		}
 	}
 	@Override
-	public void updateBestelling(int bestellingId, Artikel a1, Artikel a2) {
-		
+	public void updateBestelling(long bestellingId, Artikel a1, Artikel a2) {
+
 		try {
 			statement = connection.prepareStatement("UPDATE `BESTELLING` "
 					+ "SET artikel1_id = ?, artikel1_naam = ?, artikel1_prijs = ?, "
 					+ "artikel2_id = ?, artikel2_naam = ?, artikel2_prijs = ?"
 					+ "WHERE bestelling_id = ?;");
-			
-			statement.setInt(1, a1.getArtikel_id());
+
+			statement.setLong(1, a1.getArtikel_id());
 			statement.setString(2, a1.getArtikel_naam());
 			statement.setString(3, "" + a1.getArtikel_prijs());
-			
-			statement.setInt(4, a2.getArtikel_id());
+
+			statement.setLong(4, a2.getArtikel_id());
 			statement.setString(5, a2.getArtikel_naam());
 			statement.setString(6, "" + a2.getArtikel_prijs());
-			
-			statement.setInt(7, bestellingId);
-			
+
+			statement.setLong(7, bestellingId);
+
 			statement.executeUpdate();
-			
+
 		} catch (SQLException e) {
 			e.printStackTrace();
+		}finally{
+			MySQLHelper.close(statement);
 		}
 	}
 	@Override
-	public void updateBestelling(int bestellingId, Artikel a1, Artikel a2, Artikel a3) {
+	public void updateBestelling(long bestellingId, Artikel a1, Artikel a2, Artikel a3) {
 		try {
 			statement = connection.prepareStatement("UPDATE `BESTELLING` "
 					+ "SET artikel1_id = ?, artikel1_naam = ?, artikel1_prijs = ?, "
 					+ "artikel2_id = ?, artikel2_naam = ?, artikel2_prijs = ?, "
 					+ "artikel3_id = ?, artikel3_naam = ?, artikel3_prijs = ? "
 					+ "WHERE bestelling_id = ?;");
-			
-			statement.setInt(1, a1.getArtikel_id());
+
+			statement.setLong(1, a1.getArtikel_id());
 			statement.setString(2, a1.getArtikel_naam());
 			statement.setString(3, "" + a1.getArtikel_prijs());
-			
-			statement.setInt(4, a2.getArtikel_id());
+
+			statement.setLong(4, a2.getArtikel_id());
 			statement.setString(5, a2.getArtikel_naam());
 			statement.setString(6, "" + a2.getArtikel_prijs());
-			
-			statement.setInt(7, a3.getArtikel_id());
+
+			statement.setLong(7, a3.getArtikel_id());
 			statement.setString(8, a3.getArtikel_naam());
 			statement.setString(9, "" + a3.getArtikel_prijs());
-			statement.setInt(10, bestellingId);
-			
+			statement.setLong(10, bestellingId);
+
 			statement.executeUpdate();
 		} catch (SQLException e) {
 			e.printStackTrace();
+		}finally{
+			MySQLHelper.close(statement);
 		}
 	}
 
 	//Delete
 	@Override
-	public void verwijderAlleBestellingenKlant(int klantId) {
+	public void verwijderAlleBestellingenKlant(long klantId) {
 		try {
 			statement = connection.prepareStatement("DELETE FROM `BESTELLING` WHERE klant_id = ?;");
-			statement.setInt(1, klantId);
+			statement.setLong(1, klantId);
 			statement.executeUpdate();
 		} catch (SQLException e) {
 			e.printStackTrace();
+		}finally{
+			MySQLHelper.close(statement);
 		}
 	}
 	@Override
-	public void verwijderEnkeleBestelling(int bestellingId) {
+	public void verwijderEnkeleBestelling(long bestellingId) {
 		try {
 			statement = connection.prepareStatement("DELETE FROM `BESTELLING` WHERE bestelling_id = ?;");
-			statement.setInt(1, bestellingId);
+			statement.setLong(1, bestellingId);
 			statement.executeUpdate();
 		} catch (SQLException e) {
 			e.printStackTrace();
+		}finally{
+			MySQLHelper.close(statement);
 		}
 	}
 }

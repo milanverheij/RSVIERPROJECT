@@ -1,10 +1,9 @@
 package interfaces;
 
 import model.Adres;
+import model.Bestelling;
 import model.Klant;
 
-import javax.xml.transform.Result;
-import java.sql.ResultSet;
 import java.util.ListIterator;
 
 /**
@@ -28,34 +27,47 @@ public interface KlantDAO {
     void nieuweKlant(String voornaam,
                      String achternaam);
 
+    void nieuweKlant(String voornaam,
+                    String achternaam,
+                    String tussenvoegsel,
+                    String email,
+                    Adres adresgegevens,
+                    Bestelling bestelGegevens);
+
     /** READ */
     ListIterator<Klant> getAlleKlanten();
 
     // TODO: Tijdelijk om naar console te printen, aangezien later naar GUI gaat
-    public void printKlantenInConsole();
+    public void printKlantenInConsole(ListIterator<Klant> klantenIterator);
 
-    void getKlantOpKlant(long klantId);
+    ListIterator<Klant> getKlantOpKlant(long klantId);
 
-    void getKlantOpKlant(String voornaam);
+    ListIterator<Klant> getKlantOpKlant(String voornaam);
 
-    void getKlantOpKlant(String voornaam,
+    ListIterator<Klant> getKlantOpKlant(String voornaam,
                         String achternaam);
 
-    void getKlantOpAdres(Adres adresgegevens);
+    ListIterator<Klant> getKlantOpAdres(Adres adresgegevens);
 
-    void getKlantOpAdres(String straatnaam);
+    ListIterator<Klant> getKlantOpAdres(String straatnaam);
 
-    void getKlantOpAdres(String postcode,
+    ListIterator<Klant> getKlantOpAdres(String postcode,
                          int huisnummer);
 
-    void getKlantOpBestelling(long bestellingId);
+    ListIterator<Klant> getKlantOpBestelling(long bestellingId);
 
     /** UPDATE */
-    void updateKlant(String voornaam,
-                     String achternaam);
-
-    void updateKlant(String voornaam,
+    void updateKlant(Long klantId,
+                     String voornaam,
                      String achternaam,
+                     String tussenvoegsel,
+                     String email);
+
+    void updateKlant(Long KlantId,
+                     String voornaam,
+                     String achternaam,
+                     String tussenvoegsel,
+                     String email,
                      Adres adresgegevens);
 
     /** DELETE */

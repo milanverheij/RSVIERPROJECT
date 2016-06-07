@@ -5,7 +5,7 @@ import java.util.LinkedHashMap;
 public class Bestelling {
 	long bestelling_id;
 	long klant_id;
-	LinkedHashMap<Artikel, Integer> artikel;
+	LinkedHashMap<Artikel, Integer> artikelLijst;
 
 	public void setBestelling_id(long bestelling_id) {
 		this.bestelling_id = bestelling_id;
@@ -13,8 +13,8 @@ public class Bestelling {
 	public void setKlant_id(long klant_id) {
 		this.klant_id = klant_id;
 	}
-	public void setArtikel(LinkedHashMap<Artikel, Integer> artikel) {
-		this.artikel = artikel;
+	public void setArtikelLijst(LinkedHashMap<Artikel, Integer> artikelLijst) {
+		this.artikelLijst = artikelLijst;
 	}
 	public long getBestelling_id() {
 		return bestelling_id;
@@ -23,6 +23,6 @@ public class Bestelling {
 		return klant_id;
 	}
 	public LinkedHashMap<Artikel, Integer> getArtikel() {
-		return artikel;
+		return artikelLijst;
 	}
 }
