@@ -44,5 +44,15 @@ public class Artikel {
 		this.artikel_prijs = artikel_prijs;
 	}
 	
+	//Voor het vergelijken van artikelen
+	//Ik ga er van uit dat een artikel uniek is als de naam en prijs combinatie niet eerder voorkomt
+	@Override
+	public int hashCode(){ 
+		return artikel_naam.hashCode() + (int)(artikel_prijs * 100);
+	}
 
+	@Override
+	public boolean equals(Object o) {
+		return (artikel_naam.equals(((Artikel)o).getArtikel_naam()) && artikel_prijs == ((Artikel)o).getArtikel_prijs());
+	}
 }
