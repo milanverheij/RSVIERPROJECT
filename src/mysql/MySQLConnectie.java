@@ -9,7 +9,7 @@ import java.sql.SQLException;
  *
  * Dit is de MySQLConnectie klasse in het RSVIERPROJECT.
  *
- * Het is een singleton klasse welke een mysql-connectie aanmaakt als deze er nog niet is.
+ * Het is een singleton klasse welke een mysql-connectie aanmaakt en geeft aan de gebruiker.
  * Het heeft een private methode om een connectie te maken en een publieke methode
  * om een instance van de connectie aan de caller te geven.
  *
@@ -20,6 +20,7 @@ import java.sql.SQLException;
 
 public class MySQLConnectie {
     // Instant van deze klasse. De enige instance die er zal zijn.
+    @SuppressWarnings("unused")
     private static MySQLConnectie instance = new MySQLConnectie();
     private static Connection connection;
     private static final String URL = "jdbc:mysql://milanverheij.nl/RSVIERPROJECT";
@@ -37,33 +38,30 @@ public class MySQLConnectie {
         try {
             // Laden van de mysql Driver en log in console als dit gelukt is
             Class.forName(DRIVER_CLASS);
-            System.out.println("\n\tMySQLConnectie: DRIVER SUCCESVOL GELADEN");
+            System.out.println("\n\tMySQLConnectie: DRIVER SUCCESVOL GELADEN" );
+
         } catch (ClassNotFoundException e) {
-            System.out.println("\n\tMySQLConnectie: DRIVER LADEN MISLUKT");
+            System.out.println("\n\tMySQLConnectie: DRIVER LADEN MISLUKT" );
             e.printStackTrace();
         }
     }
 
 
-    /** Private method om een connectie aan te maken als deze er niet is (null) en
+    /** Private method om een connectie aan te maken en
      * connectie proberen te maken en naar console loggen als dit gelukt is.
-     *
-     * Zal altijd een connectie teruggeven.
      *
      * @return De gemaakte connectie met de database.
      */
-
     private synchronized static Connection connectToDatabase() {
-        if (connection == null) {
             try {
                 connection = DriverManager.getConnection(URL, USER, PASSWORD);
-                System.out.println("\n\tMySQLConnectie: DATABASE SUCCESVOL VERBONDEN");
+                System.out.println("\n\tMySQLConnectie: DATABASE SUCCESVOL VERBONDEN" );
+                return connection;
             } catch (SQLException e) {
-                System.out.println("\n\tMySQLConnectie: MISLUKT MET DATABASE TE VERBINDEN");
+                System.out.println("\n\tMySQLConnectie: MISLUKT MET DATABASE TE VERBINDEN" );
                 e.printStackTrace();
             }
-        }
-        return connection;
+        return null;
     }
 
     /** Publieke methode om de connectie mee te verkrijgen

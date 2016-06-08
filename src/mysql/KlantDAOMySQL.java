@@ -1,13 +1,12 @@
 package mysql;
 
 import com.mysql.jdbc.Statement;
-import interfaces.BestellingDAO;
-//import interfaces.AdresDAO;
 import interfaces.KlantDAO;
 import model.Adres;
 import model.Bestelling;
 import model.Klant;
 
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -28,14 +27,8 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
     String query = "";
     ArrayList<Klant> klantenLijst;
     BestellingDAOMySQL bestellingDAO;
-//    AdresDAOMySQL adresDAO;
-
-    /**
-     * Public Constructor initialiseert de connectie met de database.
-     */
-    public KlantDAOMySQL() {
-        connection = MySQLConnectie.getConnection();
-    }
+    AdresDAOMySQL adresDAO;
+    Connection connection;
 
     // =================================================================================================================
     /** CREATE METHODS */
@@ -90,6 +83,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
                             Bestelling bestelGegevens) {
 
         ResultSet generatedKeys = null;
+        connection = MySQLConnectie.getConnection();
         try {
             query = "INSERT INTO KLANT " +
                     "(voornaam, achternaam, tussenvoegsel, email) " +
@@ -101,14 +95,17 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
             statement.setString(3, tussenvoegsel);
             statement.setString(4, email);
             statement.execute();
+
+            // TODO IN 1 statement
+            long nieuwId = 0;
             generatedKeys = statement.getGeneratedKeys();
             if (generatedKeys.next()) {
-                System.out.println(generatedKeys.getInt(1));
+                nieuwId = generatedKeys.getInt(1);
             }
 
             if (adresgegevens != null) {
-//                adresDAO = new AdresDAOMySQL(); // TODO: Wachten op Douwe met AdresDAO
-//                adresDAO.nieuwAdres();
+                adresDAO = new AdresDAOMySQL();
+                adresDAO.updateAdres(nieuwId, adresgegevens);
             }
 
             if (bestelGegevens != null) {
@@ -122,7 +119,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
             System.out.println("\n\tKlantDAOMySQL: SQL FOUT TIJDENS AANMAKEN KLANT");
             ex.printStackTrace();
         } finally {
-            MySQLHelper.close(statement, generatedKeys);
+            MySQLHelper.close(connection, statement, generatedKeys);
         }
     }
 
@@ -138,7 +135,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
     @Override
     public ListIterator<Klant> getAlleKlanten() {
         resultSet = null;
-
+        connection = MySQLConnectie.getConnection();
         try {
             query = "SELECT * FROM KLANT";
             statement = connection.prepareStatement(query);
@@ -151,7 +148,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
             System.out.println("\n\tKlantDAOMySQL: SQL FOUT TIJDEN OPHALEN KLANTEN");
             ex.printStackTrace();
         } finally {
-            MySQLHelper.close(statement, resultSet);
+            MySQLHelper.close(connection, statement, resultSet);
         }
         return null;
     }
@@ -165,6 +162,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
      */
     @Override
     public ListIterator<Klant> getKlantOpKlant(long klantId) {
+        connection = MySQLConnectie.getConnection();
         try {
             query = "SELECT * FROM " +
                     "KLANT WHERE " +
@@ -179,7 +177,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
             System.out.println("\n\tKlantDAOMySQL: SQL FOUT TIJDENS OPZOEKEN KLANT OP KLANTID");
             ex.printStackTrace();
         } finally {
-            MySQLHelper.close(statement, resultSet);
+            MySQLHelper.close(connection, statement, resultSet);
         }
         return null;
     }
@@ -193,6 +191,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
      */
     @Override
     public ListIterator<Klant> getKlantOpKlant(String voornaam) {
+        connection = MySQLConnectie.getConnection();
         try {
             query = "SELECT * FROM " +
                     "KLANT WHERE " +
@@ -207,7 +206,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
             System.out.println("\n\tKlantDAOMySQL: SQL FOUT TIJDENS OPZOEKEN KLANT OP VOORNAAM");
             ex.printStackTrace();
         } finally {
-            MySQLHelper.close(statement, resultSet);
+            MySQLHelper.close(connection, statement, resultSet);
         }
         return null;
     }
@@ -223,6 +222,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
     @Override
     public ListIterator<Klant> getKlantOpKlant(String voornaam,
                                                String achternaam) {
+        connection = MySQLConnectie.getConnection();
         try {
             query = "SELECT * FROM " +
                     "KLANT WHERE " +
@@ -238,7 +238,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
             System.out.println("\n\tKlantDAOMySQL: SQL FOUT TIJDENS OPZOEKEN KLANT OP VOOR & ACHTERNAAM");
             ex.printStackTrace();
         } finally {
-            MySQLHelper.close(statement, resultSet);
+            MySQLHelper.close(connection, statement, resultSet);
         }
         return null;
     }
@@ -252,12 +252,13 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
      */
     @Override
     public ListIterator<Klant> getKlantOpAdres(Adres adresgegevens) {
+        connection = MySQLConnectie.getConnection();
         try {
             query = "SELECT * FROM " +
                     "KLANT WHERE " +
                     "straatnaam LIKE ? AND " +
                     "postcode LIKE ? AND " +
-                    "toevoeging LIKE ? AND " +
+                    "toevoeging = ? AND " +
                     "huisnummer LIKE ? AND " +
                     "woonplaats LIKE ?;";
             statement = connection.prepareStatement(query);
@@ -274,7 +275,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
             System.out.println("\n\tKlantDAOMySQL: SQL FOUT TIJDENS OPZOEKEN KLANT OP VOLLE ADRES");
             ex.printStackTrace();
         } finally {
-            MySQLHelper.close(statement, resultSet);
+            MySQLHelper.close(connection, statement, resultSet);
         }
         return null;
     }
@@ -288,6 +289,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
      */
     @Override
     public ListIterator<Klant> getKlantOpAdres(String straatnaam) {
+        connection = MySQLConnectie.getConnection();
         try {
             query = "SELECT * FROM " +
                     "KLANT WHERE " +
@@ -302,7 +304,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
             System.out.println("\n\tKlantDAOMySQL: SQL FOUT TIJDENS OPZOEKEN KLANT OP STRAATNAAM");
             ex.printStackTrace();
         } finally {
-            MySQLHelper.close(statement, resultSet);
+            MySQLHelper.close(connection, statement, resultSet);
         }
         return null;
     }
@@ -318,6 +320,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
     @Override
     public ListIterator<Klant> getKlantOpAdres(String postcode,
                                                int huisnummer) {
+        connection = MySQLConnectie.getConnection();
         try {
             query = "SELECT * FROM " +
                     "KLANT WHERE " +
@@ -334,7 +337,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
             System.out.println("\n\tKlantDAOMySQL: SQL FOUT TIJDENS OPZOEKEN KLANT OP POSTCODE EN HUISNUMMER");
             ex.printStackTrace();
         } finally {
-            MySQLHelper.close(statement, resultSet);
+            MySQLHelper.close(connection, statement, resultSet);
         }
         return null;
     }
@@ -348,6 +351,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
      */
     @Override
     public ListIterator<Klant> getKlantOpBestelling(long bestellingId) {
+        connection = MySQLConnectie.getConnection();
         try {
             query = "SELECT klant_id FROM " +
                     "BESTELLING WHERE " +
@@ -363,7 +367,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
             System.out.println("\n\tKlantDAOMySQL: SQL FOUT TIJDENS OPZOEKEN KLANT OP BESTELLINGID");
             ex.printStackTrace();
         } finally {
-            MySQLHelper.close(statement, resultSet);
+            MySQLHelper.close(connection, statement, resultSet);
         }
         return null;
     }
@@ -387,6 +391,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
                             String achternaam,
                             String tussenvoegsel,
                             String email) {
+        connection = MySQLConnectie.getConnection();
         try {
             query = "UPDATE KLANT " +
                     "SET " +
@@ -408,7 +413,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
             System.out.println("\n\tKlantDAOMySQL: SQL FOUT TIJDENS UPDATEN KLANT");
             ex.printStackTrace();
         } finally {
-            MySQLHelper.close(statement);
+            MySQLHelper.close(connection, statement);
         }
     }
 
@@ -446,6 +451,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
      */
     @Override
     public void verwijderKlant(long klantId) {
+        connection = MySQLConnectie.getConnection();
         try {
             bestellingDAO = new BestellingDAOMySQL();
             bestellingDAO.verwijderAlleBestellingenKlant(klantId);
@@ -462,7 +468,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
             System.out.println("\n\tKlantDAOMySQL: SQL FOUT TIJDENS VERWIJDEREN KLANT OP ID");
             ex.printStackTrace();
         } finally {
-            MySQLHelper.close(statement);
+            MySQLHelper.close(connection, statement);
         }
     }
 
@@ -478,6 +484,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
     public void verwijderKlant(String voornaam,
                                String achternaam,
                                String tussenvoegsel) {
+        connection = MySQLConnectie.getConnection();
         try {
             query = "SELECT klant_id FROM " +
                     "KLANT " +
@@ -500,7 +507,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
                     "TUSSENVOEGSEL");
             ex.printStackTrace();
         } finally {
-            MySQLHelper.close(statement, resultSet);
+            MySQLHelper.close(connection, statement, resultSet);
         }
     }
 

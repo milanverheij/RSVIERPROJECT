@@ -9,6 +9,7 @@ package mysql;
  *
  * */
 
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Iterator;
@@ -21,6 +22,7 @@ import model.Artikel;
 import model.Bestelling;
 
 public class BestellingDAOMySQL extends AbstractDAOMySQL implements BestellingDAO{
+	Connection connection;
 
 	public BestellingDAOMySQL(){
 		connection = MySQLConnectie.getConnection();

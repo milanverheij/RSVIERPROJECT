@@ -58,5 +58,4 @@ public class Adres {
     public void setWoonplaats(String woonplaats) {
         this.woonplaats = woonplaats;
     }
-
 }
