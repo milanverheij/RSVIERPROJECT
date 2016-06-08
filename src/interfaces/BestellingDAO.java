@@ -9,6 +9,7 @@ public interface BestellingDAO {
 	public void nieuweBestelling(long klantId, Artikel a1, Artikel a2, Artikel a3);
 	public void nieuweBestelling(long klantId, Artikel a1, Artikel a2);
 	public void nieuweBestelling(long klantId, Artikel a1);
+	public void nieuweBestelling(Bestelling bestelling);
 	//Read
 	public Iterator<Bestelling> getBestellingOpKlantGegevens(long klantId);
 	public model.Bestelling getBestellingOpBestelling(long bestellingId);

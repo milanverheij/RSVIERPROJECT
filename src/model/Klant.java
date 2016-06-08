@@ -17,6 +17,21 @@ public class Klant {
     private String email;
     private Adres adresGegevens;
 
+    // Standaard public constructor met alle paramaters
+    public Klant(long klant_id,
+                 String voornaam,
+                 String achternaam,
+                 String tussenvoegsel,
+                 String email,
+                 Adres adresGegevens) {
+        super();
+        this.klant_id = klant_id;
+        this.voornaam = voornaam;
+        this.achternaam = achternaam;
+        this.tussenvoegsel = tussenvoegsel;
+        this.email = email;
+    }
+
     // Als er een klant aangemaakt wordt, wordt er een Adres-object aan gekoppeld
     public Klant() {
         adresGegevens = new Adres();

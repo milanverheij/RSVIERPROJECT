@@ -14,11 +14,11 @@ import java.sql.SQLException;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.Set;
 
 import interfaces.BestellingDAO;
 import model.Artikel;
 import model.Bestelling;
-
 
 public class BestellingDAOMySQL extends AbstractDAOMySQL implements BestellingDAO{
 
@@ -60,6 +60,7 @@ public class BestellingDAOMySQL extends AbstractDAOMySQL implements BestellingDA
 			MySQLHelper.close(statement);
 		}
 	}
+	@Override
 	public void nieuweBestelling(long klantId, Artikel a1, Artikel a2) {
 		try {
 			statement = connection.prepareStatement("INSERT INTO `BESTELLING` "
@@ -88,6 +89,7 @@ public class BestellingDAOMySQL extends AbstractDAOMySQL implements BestellingDA
 			MySQLHelper.close(statement);
 		}
 	}
+	@Override
 	public void nieuweBestelling(long klantId, Artikel a1) {
 		try {
 			statement = connection.prepareStatement("INSERT INTO `BESTELLING` "
@@ -110,7 +112,46 @@ public class BestellingDAOMySQL extends AbstractDAOMySQL implements BestellingDA
 			MySQLHelper.close(statement);
 		}
 	}
+	@Override
+	public void nieuweBestelling(Bestelling bestelling) {
+		try {
+			statement = connection.prepareStatement("INSERT INTO `BESTELLING` "
+					+ "(klant_id, "
+					+ "artikel1_id, 	artikel2_id, 	artikel3_id, " 					//2, 3, 4
+					+ "artikel1_naam, 	artikel2_naam, 	artikel3_naam, " 				//5, 6, 7
+					+ "artikel1_prijs, 	artikel2_prijs, artikel3_prijs) "				//8, 9, 10
+					+ "VALUES "
+					+ "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"); //TODO 10 stuks
 
+			statement.setLong(1, bestelling.getKlant_id());
+
+			int count = 1;
+			LinkedHashMap<Artikel, Integer> artikelen = bestelling.getArtikelLijst();
+			Set<Artikel> artikelSet = artikelen.keySet();
+
+			for(Artikel artikel : artikelSet){
+				for(int x = 0; x < artikelen.get(artikel); x++){
+					statement.setLong(count + 1, artikel.getArtikel_id());				//2, 3, 4
+					statement.setString(count + 4, artikel.getArtikel_naam());			//5, 6, 7
+					statement.setString(count + 7, "" + artikel.getArtikel_prijs());	//8, 9, 10
+					count++;
+				}
+			}
+
+			while(count < 4){
+				statement.setString(count + 1, null);									//2, 3, 4
+				statement.setString(count + 4, null);									//5, 6, 7
+				statement.setString(count + 7, null);									//8, 9, 10
+				count++;
+			}
+			statement.executeUpdate();
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}finally{
+			MySQLHelper.close(statement);
+		}
+	}
 	//Read
 	@Override
 	public Iterator<Bestelling> getBestellingOpKlantGegevens(long klantId) {
@@ -130,31 +171,13 @@ public class BestellingDAOMySQL extends AbstractDAOMySQL implements BestellingDA
 			statement = connection.prepareStatement("SELECT * FROM `BESTELLING` WHERE klant_id =  ?;");
 			statement.setLong(1, klantId);
 			rs = statement.executeQuery();
-
 			while(rs.next()){ 			//Zolang er meer entries zijn
-				Artikel artikel;
 				map = new LinkedHashMap<Artikel, Integer>();
 				bestelling = new Bestelling();
 
 				bestelling.setBestelling_id(rs.getLong(1));
 				bestelling.setKlant_id(rs.getLong(2));
-
-				for(int x = 0; x < 3; x++){
-
-					if(!(rs.getString(x + 9) == null)){
-						artikel = new Artikel();
-						artikel.setArtikel_id(rs.getInt(x + 3));
-						artikel.setArtikel_naam(rs.getString(x + 6));
-						artikel.setArtikel_prijs(Double.parseDouble(rs.getString(x + 9)));
-
-						if(map.containsKey(artikel)){
-							map.put(artikel, map.get(artikel) + 1);
-						}else{
-							map.put(artikel, 1);
-						}
-					}
-				}
-
+				voegArtikelToe(rs, map);
 				bestelling.setArtikelLijst(map);
 				bestellijst.add(bestelling);
 			}
@@ -177,21 +200,10 @@ public class BestellingDAOMySQL extends AbstractDAOMySQL implements BestellingDA
 			LinkedHashMap<Artikel, Integer> map = new LinkedHashMap<Artikel, Integer>();
 
 			rs.next();
-
-			bestelling.setBestelling_id(rs.getInt(1));
-			bestelling.setKlant_id(rs.getInt(2));
-			for(int x = 0; x < 3; x++){
-				model.Artikel artikel = new model.Artikel();
-				artikel.setArtikel_id(rs.getInt(x + 2));
-				artikel.setArtikel_naam(rs.getString(x + 5));
-				artikel.setArtikel_prijs(Double.valueOf(rs.getString(x + 8)));
-
-				if(map.containsKey(artikel)){
-					map.put(artikel, map.get(artikel) + 1);
-				}else{
-					map.put(artikel, 1);
-				}
-			}
+			bestelling.setBestelling_id(rs.getLong(1));
+			bestelling.setKlant_id(rs.getLong(2));
+			voegArtikelToe(rs, map);
+			bestelling.setArtikelLijst(map);
 			return bestelling;
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -304,4 +316,27 @@ public class BestellingDAOMySQL extends AbstractDAOMySQL implements BestellingDA
 			MySQLHelper.close(statement);
 		}
 	}
+
+	//Utility
+	private void voegArtikelToe(ResultSet rs, LinkedHashMap<Artikel, Integer> map){
+		for(int x = 0; x < 3; x++){
+			try {
+				if(!(rs.getString(x + 9) == null)){
+					Artikel artikel = new Artikel();
+					artikel.setArtikel_id(rs.getInt(x + 3));
+					artikel.setArtikel_naam(rs.getString(x + 6));
+					artikel.setArtikel_prijs(Double.parseDouble(rs.getString(x + 9)));
+
+					if(map.containsKey(artikel)){
+						map.put(artikel, map.get(artikel) + 1);
+					}else{
+						map.put(artikel, 1);
+					}
+				}
+			} catch (NumberFormatException | SQLException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
 }

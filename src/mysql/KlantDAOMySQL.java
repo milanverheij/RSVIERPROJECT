@@ -16,10 +16,10 @@ import java.util.ListIterator;
 /**
  * Created by Milan_Verheij on 06-06-16.
  *
- * KlantDAOMySQL is de DAO van de Klant POJO.
- * Het verzorgt de database-operaties tussen MySQL en de objecten.
+ * KlantDAOMySQL is de DAO van de Klant POJO. <p>
+ * Het verzorgt de database-operaties tussen MySQL en de objecten. <p>
  *
- * De DAO is opgezet in CRUD volgorde (Create, Read, Update, Delete)
+ * De DAO is opgezet in CRUD volgorde (Create, Read, Update, Delete)<p>
  *
  * Zie de afzonderlijke methods en constructor voor commentaar.
  */
@@ -58,7 +58,6 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
     /**
      * Maakt een nieuwe klant aan in de database met voor- en achternaam.
      * Er wordt in de database automatisch een uniek ID gegenereerd welke automatisch verhoogd wordt.
-
      *
      * @param voornaam De voornaam van de klant (max 50 karakters).
      * @param achternaam De achternaam van de klant (max 51 karakters).
@@ -113,8 +112,8 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
             }
 
             if (bestelGegevens != null) {
-//                bestellingDAO = new BestellingDAOMySQL();
-//                bestellingDAO.nieuweBestelling(); // TODO: Wachten op Albert met extra method
+                bestellingDAO = new BestellingDAOMySQL();
+                bestellingDAO.nieuweBestelling(bestelGegevens);
             }
 
             System.out.println("\n\tKlantDAOMySQL: KLANT: " + voornaam + " SUCCESVOL GEMAAKT");
@@ -243,7 +242,6 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
         }
         return null;
     }
-
 
     /**
      * Deze methode haalt op basis van adresgegevens klanten op uit de database en geeft dit
@@ -438,7 +436,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
 
     // =================================================================================================================
 
-    /** REMOVE METHODS */
+    /** DELETE METHODS */
 
     /**
      * Methode om een klant te verwijderen op basis van ID. Alle bestellingen van de klant worden
@@ -534,7 +532,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
      * @param resultSet De resultset met klantrijen.
      * @return Een ArrayList met Klant objecten.
      */
-    public ArrayList<Klant> voegResultSetInLijst(ResultSet resultSet) {
+    private ArrayList<Klant> voegResultSetInLijst(ResultSet resultSet) {
         try {
             klantenLijst = new ArrayList<>();
             int klantenTeller = 0;
