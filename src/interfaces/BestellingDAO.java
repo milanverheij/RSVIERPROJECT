@@ -1,21 +1,25 @@
 package interfaces;
 
-import java.sql.ResultSet;
+import java.util.Iterator;
+import model.Artikel;
+import model.Bestelling;
 
 public interface BestellingDAO {
 	//Create
-	public void nieuweBestelling(int klantId, model.Artikel a1, model.Artikel a2, model.Artikel a3);
-	
+	public void nieuweBestelling(long klantId, Artikel a1, Artikel a2, Artikel a3);
+	public void nieuweBestelling(long klantId, Artikel a1, Artikel a2);
+	public void nieuweBestelling(long klantId, Artikel a1);
+	public void nieuweBestelling(Bestelling bestelling);
 	//Read
-	public ResultSet getBestellingOpKlantGegevens(int klantId);
-	public ResultSet getBestellingOpBestelling(int bestellingId);
+	public Iterator<Bestelling> getBestellingOpKlantGegevens(long klantId);
+	public model.Bestelling getBestellingOpBestelling(long bestellingId);
 	
 	//Update
-	public void updateBestelling(int bestellingId, model.Artikel a1);
-	public void updateBestelling(int bestellingId, model.Artikel a1, model.Artikel a2);
-	public void updateBestelling(int bestellingId, model.Artikel a1, model.Artikel a2, model.Artikel a3);
+	public void updateBestelling(long bestellingId, Artikel a1);
+	public void updateBestelling(long bestellingId, Artikel a1, Artikel a2);
+	public void updateBestelling(long bestellingId, Artikel a1, Artikel a2, Artikel a3);
 	
 	//Delete
-	public void verwijderAlleBestellingenKlant(int klantId);
-	public void verwijderEnkeleBestelling(int bestellingId);
+	public void verwijderAlleBestellingenKlant(long klantId);
+	public void verwijderEnkeleBestelling(long bestellingId);
 }
