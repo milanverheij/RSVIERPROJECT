@@ -15,7 +15,14 @@ public class Adres {
     private String woonplaats;
 
     //Consturctors
-    public Adres() { //standaard een no-args constructor
+    public Adres() {
+        //standaard een no-args constructor met lege gegevens. Komt enkel voor als er 'null' als Adres wordt
+        // meegegeven in de updateMethode van de AdresDAO
+        straatnaam = "";
+        postcode = "";
+        toevoeging = "";
+        huisnummer = 0;
+        woonplaats = "";
     }
 
     public Adres(String straatnaam, String postcode, String toevoeging,

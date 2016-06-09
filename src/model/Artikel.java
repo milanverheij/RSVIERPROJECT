@@ -7,7 +7,7 @@ package model;
  * in een LinkedHasMap kunnen worden opgeslagen in de database.
  */
 
-public class Artikel {
+public class Artikel implements Comparable{
 	//Data field
 	private int artikel_id;
 	private String artikel_naam;
@@ -32,8 +32,7 @@ public class Artikel {
 	public double getArtikel_prijs() {
 		return artikel_prijs;
 	}
-	
-	//Hebben we alle setters nodig of laten we setnaam en setprijs weg?
+
 	public void setArtikel_id(int artikel_id) {
 		this.artikel_id = artikel_id;
 	}
@@ -54,5 +53,23 @@ public class Artikel {
 	@Override
 	public boolean equals(Object o) {
 		return (artikel_naam.equals(((Artikel)o).getArtikel_naam()) && artikel_prijs == ((Artikel)o).getArtikel_prijs());
+	}
+
+	@Override
+	public String toString(){
+		return "" + artikel_id + " " + artikel_naam + " $" + artikel_prijs;
+	}
+
+	@Override
+	public int compareTo(Object o) {
+		if (this.artikel_id == ((Artikel)o).getArtikel_id()) {
+			return 0;
+		}
+		else if (this.artikel_id > ((Artikel)o).getArtikel_id()) {
+			return 1;
+		}
+		else {
+			return -1;
+		}
 	}
 }
