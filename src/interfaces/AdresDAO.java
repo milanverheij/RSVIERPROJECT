@@ -5,7 +5,6 @@ import model.Adres;
 
 /**
  * Created by Milan_Verheij on 08-06-16.
-
  * Adres DAO Interface. Gooit een RSVIERException bij fouten.
  *
  */

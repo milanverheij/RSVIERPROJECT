@@ -1,4 +1,6 @@
 /**
+ * @author Milan_Verheij
+ * <p>
  * Deze abstract factory verzorgt de creatie van de juiste type concrete
  * DAO factory op basis van de database keuze.
  */
@@ -37,7 +39,7 @@ public abstract class DAOFactory {
 	 * @return Een BestellingDAO van het eerder gekozen database-type.
      */
 	public abstract interfaces.BestellingDAO getBestellingDAO();
-//	public abstract interfaces.ArtikelDAO getArtikelDAO();
+	public abstract interfaces.ArtikelDAO getArtikelDAO();
 	
 	
 }

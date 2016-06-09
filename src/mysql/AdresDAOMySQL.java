@@ -26,6 +26,12 @@ public class AdresDAOMySQL extends AbstractDAOMySQL implements AdresDAO {
     @Override
     public void updateAdres(long klant_id, Adres adresgegevens) throws RSVIERException {
         connection = MySQLConnectie.getConnection();
+
+        // Als er null wordt meegegeven als Adres wordt er een standaard leeg-adres geschrevne.
+        if (adresgegevens == null) {
+            adresgegevens = new Adres();
+        }
+
         try {
             query = "UPDATE KLANT " +
                     "SET " +
