@@ -8,7 +8,7 @@ package model;
  */
 
 public class Artikel {
-	//Datafield
+	//Data field
 	private int artikel_id;
 	private String artikel_naam;
 	private double artikel_prijs;

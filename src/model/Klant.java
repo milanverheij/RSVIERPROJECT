@@ -17,9 +17,27 @@ public class Klant {
     private String email;
     private Adres adresGegevens;
 
+    // Standaard public constructor met alle paramaters
+    public Klant(long klant_id,
+                 String voornaam,
+                 String achternaam,
+                 String tussenvoegsel,
+                 String email,
+                 Adres adresGegevens) {
+
+        if (adresGegevens != null)
+            this.adresGegevens = adresGegevens;
+
+        this.klant_id = klant_id;
+        this.voornaam = voornaam;
+        this.achternaam = achternaam;
+        this.tussenvoegsel = tussenvoegsel;
+        this.email = email;
+    }
+
     // Als er een klant aangemaakt wordt, wordt er een Adres-object aan gekoppeld
     public Klant() {
-        adresGegevens = new Adres();
+        adresGegevens = null;
     }
 
     // Getters & setters
@@ -55,5 +73,26 @@ public class Klant {
     }
     public Adres getAdresGegevens() {
         return adresGegevens;
+    }
+
+    // Overrided methoden van Object etc.
+
+    @Override
+    public String toString() {
+        return "[" + klant_id + ", " +
+                     voornaam + ", " +
+                     achternaam + ", " +
+                     tussenvoegsel + ", " +
+                     email + ", " +
+                     "Adresgegevens aanwezig:" +
+                     (adresGegevens != null ? " ja" : " nee") +
+                    "]";
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (klant_id == ((Klant)obj).getKlant_id())
+            return true;
+        return false;
     }
 }
