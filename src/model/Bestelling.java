@@ -3,19 +3,9 @@ package model;
 import java.util.LinkedHashMap;
 
 public class Bestelling {
-	long bestelling_id;
-	long klant_id;
-	LinkedHashMap<Artikel, Integer> artikelLijst;
-
-	public Bestelling() {}
-
-	public Bestelling(long bestelling_id,
-					  long klant_id,
-					  LinkedHashMap<Artikel, Integer> artikelLijst) {
-		this.bestelling_id = bestelling_id;
-		this.klant_id = klant_id;
-		this.artikelLijst = artikelLijst;
-	}
+	private long bestelling_id;
+	private long klant_id;
+	private LinkedHashMap<Artikel, Integer> artikelLijst;
 
 	public void setBestelling_id(long bestelling_id) {
 		this.bestelling_id = bestelling_id;

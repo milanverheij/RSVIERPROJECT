@@ -39,7 +39,6 @@ public class AdresDAOMySQL extends AbstractDAOMySQL implements AdresDAO {
             statement = connection.prepareStatement(query);
             statement.setString(1, adresgegevens.getStraatnaam());
             statement.setString(2, adresgegevens.getPostcode());
-//            statement.setString(3, adresgegevens.getToevoeging());
             statement.setString(3, adresgegevens.getToevoeging().equals("") ? null : adresgegevens.getToevoeging());
             statement.setInt(4, adresgegevens.getHuisnummer());
             statement.setString(5, adresgegevens.getWoonplaats());
