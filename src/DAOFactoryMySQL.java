@@ -1,5 +1,7 @@
 //import interfaces.AdresDAO;
 //import interfaces.ArtikelDAO;
+import exceptions.RSVIERException;
+import interfaces.AdresDAO;
 import interfaces.BestellingDAO;
 import interfaces.KlantDAO;
 
@@ -21,10 +23,10 @@ public class DAOFactoryMySQL extends DAOFactory{
 		return new mysql.KlantDAOMySQL();
 	}
 
-//	@Override
-//	public AdresDAO getAdresDAO() {
-//		return new mysql.AdresDAOMySQL();
-//	}
+	@Override
+	public AdresDAO getAdresDAO() {
+		return new mysql.AdresDAOMySQL();
+	}
 
 	/**
 	 * Methode om een BestellingDAO te maken.

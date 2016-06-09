@@ -28,7 +28,7 @@ public abstract class DAOFactory {
      */
 	public abstract interfaces.KlantDAO getKlantDAO();
 
-//	public abstract interfaces.AdresDAO getAdresDAO();
+	public abstract interfaces.AdresDAO getAdresDAO();
 
 	/**
 	 * De methode die geimplementeerd dient te worden door de concrete fabriek

@@ -58,28 +58,13 @@ public class MySQLHelper {
 
     /**
      * Als er een connectie is wordt deze gesloten.
-     */
-    public static void close() {
-        if (MySQLConnectie.getConnection() != null) {
-            try {
-                MySQLConnectie.getConnection().close();
-                System.out.println("\n\tMySQLHelper: CONNECTIE GESLOTEN");
-            } catch (SQLException e) {
-                System.out.println("\n\tMySQLHelper: FOUT TIJDENS SLUITEN CONNECTIE");
-                e.printStackTrace();
-            }
-        }
-
-    }
-    /**
-     * Als er een connectie is wordt deze gesloten.
      * @param connection Meegegeven connectie om te sluiten
      */
     public static void close(Connection connection) {
         if (connection != null) {
             try {
                 connection.close();
-                System.out.println("\n\tMySQLHelper: CONNECTIE GESLOTEN");
+                System.out.println("\n\tMySQLHelper: CONNECTIE GESLOTEN" );
             } catch (SQLException e) {
                 System.out.println("\n\tMySQLHelper: FOUT TIJDENS SLUITEN CONNECTIE");
                 e.printStackTrace();
@@ -95,7 +80,7 @@ public class MySQLHelper {
         if (statement != null) {
             try {
                 statement.close();
-                System.out.println("\n\tMySQLHelper: STATEMENT GESLOTEN");
+                System.out.println("\n\tMySQLHelper: STATEMENT GESLOTEN" );
             } catch (SQLException e) {
                 System.out.println("\n\tMySQLHelper: FOUT TIJDENS SLUITEN STATEMENT");
             }
@@ -110,7 +95,7 @@ public class MySQLHelper {
         if (resultSet != null) {
             try {
                 resultSet.close();
-                System.out.println("\n\tMySQLHelper: RESULTSET GESLOTEN");
+                System.out.println("\n\tMySQLHelper: RESULTSET GESLOTEN" );
             } catch (SQLException e) {
                 System.out.println("\n\tMySQLHelper: FOUT TIJDENS SLUITEN RESULTSET");
             }
@@ -125,7 +110,7 @@ public class MySQLHelper {
         if (rowSet != null) {
             try {
                 rowSet.close();
-                System.out.println("\n\tMySQLHelper: ROWSET gesloten");
+                System.out.println("\n\tMySQLHelper: ROWSET gesloten" );
             } catch (SQLException e) {
                 System.out.println("\n\tMySQLHelper: FOUT TIJDENS SLUITEN ROWSET");
             }
