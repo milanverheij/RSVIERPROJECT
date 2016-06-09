@@ -17,6 +17,7 @@ public class Adres {
     //Consturctors
     public Adres() { //standaard een no-args constructor
     }
+
     public Adres(String straatnaam, String postcode, String toevoeging,
                  int huisnummer, String woonplaats) {
         this.straatnaam = straatnaam;
@@ -57,5 +58,24 @@ public class Adres {
     }
     public void setWoonplaats(String woonplaats) {
         this.woonplaats = woonplaats;
+    }
+
+    @Override
+    public String toString() {
+        return "[" +
+                straatnaam + ", " +
+                postcode + ", " +
+                toevoeging + ", " +
+                huisnummer + ", " +
+                woonplaats + "]";
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (postcode.equals(((Adres)obj).getPostcode()) &&
+                huisnummer == ((Adres)obj).getHuisnummer() &&
+                toevoeging.equals(((Adres)obj).getToevoeging()))
+            return true;
+        return false;
     }
 }

@@ -1,5 +1,7 @@
 package mysql;
 
+import exceptions.RSVIERException;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -52,23 +54,21 @@ public class MySQLConnectie {
      *
      * @return De gemaakte connectie met de database.
      */
-    private synchronized static Connection connectToDatabase() {
+    private synchronized static Connection connectToDatabase() throws RSVIERException {
             try {
                 connection = DriverManager.getConnection(URL, USER, PASSWORD);
                 System.out.println("\n\tMySQLConnectie: DATABASE SUCCESVOL VERBONDEN" );
                 return connection;
             } catch (SQLException e) {
-                System.out.println("\n\tMySQLConnectie: MISLUKT MET DATABASE TE VERBINDEN" );
-                e.printStackTrace();
+                throw new RSVIERException("MySQLConnectie: MISLUKT MET DATABASE TE VERBINDEN");
             }
-        return null;
     }
 
     /** Publieke methode om de connectie mee te verkrijgen
      *
      * @return de connectie gemaakt in de methode connecToDatabase
      */
-    public static Connection getConnection() {
+    public static Connection getConnection() throws RSVIERException {
         return connectToDatabase();
     }
 
