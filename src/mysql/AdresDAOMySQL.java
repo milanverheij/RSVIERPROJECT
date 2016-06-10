@@ -32,6 +32,7 @@ public class AdresDAOMySQL extends AbstractDAOMySQL implements AdresDAO {
             adresgegevens = new Adres();
         }
 
+        // TODO: Een check op juiste invoer van gegevens.
         try {
             query = "UPDATE KLANT " +
                     "SET " +

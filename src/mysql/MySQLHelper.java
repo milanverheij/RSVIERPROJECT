@@ -16,6 +16,7 @@ import java.sql.SQLException;
  *
  */
 public class MySQLHelper {
+    private static int logModus = 0; // 0 is standaard uit, 1 is aan
 
     /**
      * Overloaded method van de onderstaande methodes. Om gemakkelijk zowel de connectie,
@@ -64,7 +65,8 @@ public class MySQLHelper {
         if (connection != null) {
             try {
                 connection.close();
-                System.out.println("\n\tMySQLHelper: CONNECTIE GESLOTEN" );
+                if (logModus == 1)
+                    System.out.println("\n\tMySQLHelper: CONNECTIE GESLOTEN" );
             } catch (SQLException e) {
                 System.out.println("\n\tMySQLHelper: FOUT TIJDENS SLUITEN CONNECTIE");
                 e.printStackTrace();
@@ -80,7 +82,8 @@ public class MySQLHelper {
         if (statement != null) {
             try {
                 statement.close();
-                System.out.println("\n\tMySQLHelper: STATEMENT GESLOTEN" );
+                if (logModus == 1)
+                    System.out.println("\n\tMySQLHelper: STATEMENT GESLOTEN" );
             } catch (SQLException e) {
                 System.out.println("\n\tMySQLHelper: FOUT TIJDENS SLUITEN STATEMENT");
             }
@@ -95,7 +98,8 @@ public class MySQLHelper {
         if (resultSet != null) {
             try {
                 resultSet.close();
-                System.out.println("\n\tMySQLHelper: RESULTSET GESLOTEN" );
+                if (logModus == 1)
+                    System.out.println("\n\tMySQLHelper: RESULTSET GESLOTEN" );
             } catch (SQLException e) {
                 System.out.println("\n\tMySQLHelper: FOUT TIJDENS SLUITEN RESULTSET");
             }
@@ -110,10 +114,19 @@ public class MySQLHelper {
         if (rowSet != null) {
             try {
                 rowSet.close();
-                System.out.println("\n\tMySQLHelper: ROWSET gesloten" );
+                if (logModus == 1)
+                    System.out.println("\n\tMySQLHelper: ROWSET gesloten" );
             } catch (SQLException e) {
                 System.out.println("\n\tMySQLHelper: FOUT TIJDENS SLUITEN ROWSET");
             }
         }
+    }
+
+    /** Methode om logmodus aan of uit te zetten
+     *
+     * @param logModus: Logmodus uit(0) of aan(1)
+     */
+    public static void setLogModus(int logModus) {
+        MySQLHelper.logModus = logModus;
     }
 }

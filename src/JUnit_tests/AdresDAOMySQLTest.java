@@ -54,7 +54,7 @@ public class AdresDAOMySQLTest {
     }
 
     @Test
-    public void TestUpdateAdresDAOnullAlleVeldenLeeg() throws Exception {
+    public void TestUpdateAdresDAOBijNullAlleVeldenLeeg() throws Exception {
         adresDAO.updateAdres(klant_id_te_testen, null);
         testAdres = klantDAO.getKlantOpKlant(klant_id_te_testen).next().getAdresGegevens();
         assertEquals("", testAdres.getStraatnaam());
@@ -113,11 +113,22 @@ public class AdresDAOMySQLTest {
     public final ExpectedException exception = ExpectedException.none();
 
     @Test
-    public void TestUpdateAdreDAOPostCodeTeLang() throws Exception {
-        // Een te lange postcode kan niet en ik verwacht dan ook dat er een exception wordt gegooid
+    public void TestUpdateAdresDAOEenFoutieveInvoergRSVIERException() throws Exception {
+        // Een te lange postcode kan niet en ik verwacht dan ook dat er een RSVIERException wordt gegooid
         // en wel een RSVierException
+        // Dit geld voor elke foutieve invoer, het gedrag zal hetzelfde zijn.
         exception.expect(RSVIERException.class);
         adresDAO.updateAdres(klant_id_te_testen,
                 new Adres("", "TELANGEPOSTCODE", "", 0, ""));
     }
+
+    @Test
+    public void TestUpdateAdresDAOConsistentGedragFoutieveInvoer() throws Exception {
+        // Test of dat ook bij een andere foutieve invoer eenzelfde fout wordt gegooid.
+        exception.expect(RSVIERException.class);
+        adresDAO.updateAdres(klant_id_te_testen,
+                new Adres("", "", "ABCDEFG", 0, ""));
+    }
+
+
 }

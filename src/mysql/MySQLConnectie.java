@@ -29,6 +29,7 @@ public class MySQLConnectie {
     private static final String USER = "rsvierproject";
     private static final String PASSWORD = "slechtwachtwoord";
     private static final String DRIVER_CLASS = "com.mysql.jdbc.Driver";
+    private static int logModus = 0; // Standaard 0(uit), 1(aan)
 
 
     /** Private constructor zodat alleen de klasse zelf mag instantiaten (wat hierboven reeds is gebeurd).
@@ -55,13 +56,14 @@ public class MySQLConnectie {
      * @return De gemaakte connectie met de database.
      */
     private synchronized static Connection connectToDatabase() throws RSVIERException {
-            try {
-                connection = DriverManager.getConnection(URL, USER, PASSWORD);
+        try {
+            connection = DriverManager.getConnection(URL, USER, PASSWORD);
+            if(logModus == 1)
                 System.out.println("\n\tMySQLConnectie: DATABASE SUCCESVOL VERBONDEN" );
-                return connection;
-            } catch (SQLException e) {
-                throw new RSVIERException("MySQLConnectie: MISLUKT MET DATABASE TE VERBINDEN");
-            }
+            return connection;
+        } catch (SQLException e) {
+            throw new RSVIERException("MySQLConnectie: MISLUKT MET DATABASE TE VERBINDEN");
+        }
     }
 
     /** Publieke methode om de connectie mee te verkrijgen
@@ -72,4 +74,11 @@ public class MySQLConnectie {
         return connectToDatabase();
     }
 
+    /**
+     * Methode om de logModus van de connector aan en uit te zetten
+     * @param logModus Logmodus uit (0) of logModus aan (1).
+     */
+    public static void setLogModus(int logModus) {
+        MySQLConnectie.logModus = logModus;
+    }
 }
