@@ -1,8 +1,6 @@
 package JUnit_tests;
 
-import interfaces.AdresDAO;
 import model.Adres;
-import model.Bestelling;
 import model.Klant;
 import mysql.AdresDAOMySQL;
 import mysql.KlantDAOMySQL;
@@ -10,7 +8,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.awt.datatransfer.DataFlavor;
+import java.util.ArrayList;
 import java.util.ListIterator;
 
 import static org.junit.Assert.*;
@@ -52,10 +50,9 @@ public class KlantDAOMySQLTest {
 
     @After
     public void tearDown() throws Exception {
-        // Als er ergens in een test een nieuwe klant is aangemaakt, wordt deze verwijderd. Helaas wel
-        // AFHANKELIJK van de verwijdermethode.
-        if (nieuweKlantAangemaakt)
-            klantDAO.verwijderKlant(VOORNAAM, ACHTERNAAM);
+        // Vangnet
+        klantDAO.verwijderKlant(VOORNAAM, ACHTERNAAM);
+        klantDAO.verwijderKlant(VOORNAAM, ACHTERNAAM + "2");
 
         AdresDAOMySQL.klantWordtGetest = false; // Mocht er iets fout zijn gegaan in de tests..
     }
@@ -211,52 +208,160 @@ public class KlantDAOMySQLTest {
     }
 
     @Test
-    public void getKlantOpKlant1() throws Exception {
+    public void getKlantOpKlantVoornaam() throws Exception {
         // Deze methode test of dat de juiste klant wordt gevonden op basis van voornaam
+        // Om te controleren of daadwerkelijke alle klanten met dezelfde voornaam worden
+        // meegegeven worden er twee klanten met dezelfde voornaam aangemaakt. Maar met
+        // net andere andere gegegevens. Vervolgens wordt nagegaan of deze gegevens ook
+        // daadwerkelijk zijn teruggegeven. Vervolgens worden deze klanten weer verwijderd.
 
         nieuweKlantAangemaakt = true;
         klantDAO.nieuweKlant(VOORNAAM, ACHTERNAAM, TUSSENVOEGSEL, EMAIL, null, null);
         klantDAO.nieuweKlant(VOORNAAM, ACHTERNAAM + "2", TUSSENVOEGSEL + "2", EMAIL + "2", null, null);
 
-        tijdelijkeKlant = klantDAO.getKlantOpKlant(VOORNAAM).next();
-        Klant tijdelijkeKlant2 = klantDAO.getKlantOpKlant(VOORNAAM).next();
+        ListIterator<Klant> klantIterator = klantDAO.getKlantOpKlant(VOORNAAM);
+        ArrayList<Klant> klantenLijst = new ArrayList<>();
+        while (klantIterator.hasNext()) {
+            klantenLijst.add(klantIterator.next());
+        }
 
-        assertEquals(VOORNAAM, tijdelijkeKlant.getVoornaam());
-        assertEquals(ACHTERNAAM, tijdelijkeKlant.getAchternaam());
-        assertEquals(TUSSENVOEGSEL, tijdelijkeKlant.getTussenvoegsel());
-        assertEquals(EMAIL, tijdelijkeKlant.getEmail());
+        assertEquals(VOORNAAM, klantenLijst.get(0).getVoornaam());
+        assertEquals(ACHTERNAAM, klantenLijst.get(0).getAchternaam());
+        assertEquals(TUSSENVOEGSEL, klantenLijst.get(0).getTussenvoegsel());
+        assertEquals(EMAIL, klantenLijst.get(0).getEmail());
 
-        assertEquals(VOORNAAM, tijdelijkeKlant2.getVoornaam());
-        assertEquals(ACHTERNAAM + "2", tijdelijkeKlant2.getAchternaam());
-        assertEquals(TUSSENVOEGSEL + "2", tijdelijkeKlant2.getTussenvoegsel());
-        assertEquals(EMAIL + "2", tijdelijkeKlant2.getEmail());
+        assertEquals(VOORNAAM, klantenLijst.get(1).getVoornaam());
+        assertEquals(ACHTERNAAM + "2", klantenLijst.get(1).getAchternaam());
+        assertEquals(TUSSENVOEGSEL + "2", klantenLijst.get(1).getTussenvoegsel());
+        assertEquals(EMAIL + "2", klantenLijst.get(1).getEmail());
 
+        klantDAO.verwijderKlant(VOORNAAM, ACHTERNAAM);
+        klantDAO.verwijderKlant(VOORNAAM, ACHTERNAAM + "2");
+    }
+
+    @Test
+    public void getKlantOpKlantVoornaamAchternaam() throws Exception {
+        // Deze methode test of dat de juiste klant wordt gevonden op basis van voornaam en achternaam
+        // Om te controleren of daadwerkelijke alle klanten met dezelfde voornaam worden
+        // meegegeven worden er twee klanten met dezelfde voornaam aangemaakt. Maar met
+        // net andere andere gegegevens. Vervolgens wordt nagegaan of deze gegevens ook
+        // daadwerkelijk zijn teruggegeven. Vervolgens worden deze klanten weer verwijderd.
+
+        nieuweKlantAangemaakt = true;
+        klantDAO.nieuweKlant(VOORNAAM, ACHTERNAAM, TUSSENVOEGSEL, EMAIL, null, null);
+        klantDAO.nieuweKlant(VOORNAAM, ACHTERNAAM, TUSSENVOEGSEL + "2", EMAIL + "2", null, null);
+
+        ListIterator<Klant> klantIterator = klantDAO.getKlantOpKlant(VOORNAAM);
+        ArrayList<Klant> klantenLijst = new ArrayList<>();
+        while (klantIterator.hasNext()) {
+            klantenLijst.add(klantIterator.next());
+        }
+
+        assertEquals(VOORNAAM, klantenLijst.get(0).getVoornaam());
+        assertEquals(ACHTERNAAM, klantenLijst.get(0).getAchternaam());
+        assertEquals(TUSSENVOEGSEL, klantenLijst.get(0).getTussenvoegsel());
+        assertEquals(EMAIL, klantenLijst.get(0).getEmail());
+
+        assertEquals(VOORNAAM, klantenLijst.get(1).getVoornaam());
+        assertEquals(ACHTERNAAM, klantenLijst.get(1).getAchternaam());
+        assertEquals(TUSSENVOEGSEL + "2", klantenLijst.get(1).getTussenvoegsel());
+        assertEquals(EMAIL + "2", klantenLijst.get(1).getEmail());
+
+        klantDAO.verwijderKlant(VOORNAAM, ACHTERNAAM);
+    }
+
+    @Test
+    public void getKlantOpVolledigAdres() throws Exception {
+        // Deze methode test of dat de juiste klant wordt gevonden op basis van de volledige adresdegevens
+        // Om te controleren of daadwerkelijke alle klanten met dezelfde voornaam worden
+        // meegegeven worden er twee klanten met dezelfde voornaam aangemaakt. Maar met
+        // net andere andere gegegevens. Vervolgens wordt nagegaan of deze gegevens ook
+        // daadwerkelijk zijn teruggegeven. Vervolgens worden deze klanten weer verwijderd.
+
+        nieuweKlantAangemaakt = true;
+        Adres tijdelijkAdres = new Adres(STRAATNAAM, POSTCODE, TOEVOEGING, HUISNUMMER, WOONPLAATS);
+        klantDAO.nieuweKlant(VOORNAAM, ACHTERNAAM, TUSSENVOEGSEL, EMAIL, tijdelijkAdres, null);
+        klantDAO.nieuweKlant(VOORNAAM, ACHTERNAAM + "2", TUSSENVOEGSEL, EMAIL, tijdelijkAdres, null);
+
+        ListIterator<Klant> klantIterator = klantDAO.getKlantOpAdres(tijdelijkAdres);
+        ArrayList<Klant> klantenLijst = new ArrayList<>();
+        while (klantIterator.hasNext()) {
+            klantenLijst.add(klantIterator.next());
+        }
+
+        // Check op klant 1 gevonden
+        assertEquals(ACHTERNAAM, klantenLijst.get(0).getAchternaam());
+
+        // Check of klant twee ook werd gevonden
+        assertEquals(ACHTERNAAM + "2", klantenLijst.get(1).getAchternaam());
+
+        klantDAO.verwijderKlant(VOORNAAM, ACHTERNAAM);
+        klantDAO.verwijderKlant(VOORNAAM, ACHTERNAAM + "2");
+    }
+
+    @Test
+    public void getKlantOpAdresStraatnaam() throws Exception {
+        // Deze methode test of dat de juiste klant wordt gevonden op basis van de straatnaam
+        // Om te controleren of daadwerkelijke alle klanten met dezelfde voornaam worden
+        // meegegeven worden er twee klanten met dezelfde voornaam aangemaakt. Maar met
+        // net andere andere gegegevens. Vervolgens wordt nagegaan of deze gegevens ook
+        // daadwerkelijk zijn teruggegeven. Vervolgens worden deze klanten weer verwijderd.
+
+        nieuweKlantAangemaakt = true;
+        Adres tijdelijkAdres = new Adres(STRAATNAAM, POSTCODE, TOEVOEGING, HUISNUMMER, WOONPLAATS);
+        klantDAO.nieuweKlant(VOORNAAM, ACHTERNAAM, TUSSENVOEGSEL, EMAIL, tijdelijkAdres, null);
+        klantDAO.nieuweKlant(VOORNAAM, ACHTERNAAM + "2", TUSSENVOEGSEL, EMAIL, tijdelijkAdres, null);
+
+        ListIterator<Klant> klantIterator = klantDAO.getKlantOpAdres(STRAATNAAM);
+        ArrayList<Klant> klantenLijst = new ArrayList<>();
+        while (klantIterator.hasNext()) {
+            klantenLijst.add(klantIterator.next());
+        }
+
+        // Check op klant 1 gevonden
+        assertEquals(ACHTERNAAM, klantenLijst.get(0).getAchternaam());
+
+        // Check of klant twee ook werd gevonden
+        assertEquals(ACHTERNAAM + "2", klantenLijst.get(1).getAchternaam());
+
+        klantDAO.verwijderKlant(VOORNAAM, ACHTERNAAM);
+        klantDAO.verwijderKlant(VOORNAAM, ACHTERNAAM + "2");
         tijdelijkeKlant = null;
     }
 
     @Test
-    public void getKlantOpKlant2() throws Exception {
+    public void getKlantOpAdresPostcodeHuisNR() throws Exception {
+        // Deze methode test of dat de juiste klant wordt gevonden op basis van de postcode en het huisnummer
+        // Om te controleren of daadwerkelijke alle klanten met dezelfde voornaam worden
+        // meegegeven worden er twee klanten met dezelfde voornaam aangemaakt. Maar met
+        // net andere andere gegegevens. Vervolgens wordt nagegaan of deze gegevens ook
+        // daadwerkelijk zijn teruggegeven. Vervolgens worden deze klanten weer verwijderd.
 
-    }
+        nieuweKlantAangemaakt = true;
+        Adres tijdelijkAdres = new Adres(STRAATNAAM, POSTCODE, TOEVOEGING, HUISNUMMER, WOONPLAATS);
+        klantDAO.nieuweKlant(VOORNAAM, ACHTERNAAM, TUSSENVOEGSEL, EMAIL, tijdelijkAdres, null);
+        klantDAO.nieuweKlant(VOORNAAM, ACHTERNAAM + "2", TUSSENVOEGSEL, EMAIL, tijdelijkAdres, null);
 
-    @Test
-    public void getKlantOpAdres() throws Exception {
+        ListIterator<Klant> klantIterator = klantDAO.getKlantOpAdres(POSTCODE, HUISNUMMER);
+        ArrayList<Klant> klantenLijst = new ArrayList<>();
+        while (klantIterator.hasNext()) {
+            klantenLijst.add(klantIterator.next());
+        }
 
-    }
+        // Check op klant 1 gevonden
+        assertEquals(ACHTERNAAM, klantenLijst.get(0).getAchternaam());
 
-    @Test
-    public void getKlantOpAdres1() throws Exception {
+        // Check of klant twee ook werd gevonden
+        assertEquals(ACHTERNAAM + "2", klantenLijst.get(1).getAchternaam());
 
-    }
-
-    @Test
-    public void getKlantOpAdres2() throws Exception {
-
+        klantDAO.verwijderKlant(VOORNAAM, ACHTERNAAM);
+        klantDAO.verwijderKlant(VOORNAAM, ACHTERNAAM + "2");
+        tijdelijkeKlant = null;
     }
 
     @Test
     public void getKlantOpBestelling() throws Exception {
-
+        // TODO: Wachten op Albert met Bestelling
     }
 
     @Test
