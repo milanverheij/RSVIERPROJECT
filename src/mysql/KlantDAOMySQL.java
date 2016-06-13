@@ -44,10 +44,12 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
      * @throws RSVIERException Foutmelding bij SQLException, info wordt meegegeven.
      */
     @Override
-    public void nieuweKlant(String voornaam,
+    public long nieuweKlant(String voornaam,
                             String achternaam,
                             Adres adresgegevens) throws RSVIERException {
-        nieuweKlant(voornaam, achternaam, "", "", adresgegevens, null);
+        long nieuwID = nieuweKlant(voornaam, achternaam, "", "", adresgegevens, null);
+
+        return nieuwID;
     }
 
     /**
@@ -58,9 +60,11 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
      * @param achternaam De achternaam van de klant (max 51 karakters).
      */
     @Override
-    public void nieuweKlant(String voornaam,
+    public long nieuweKlant(String voornaam,
                             String achternaam) throws RSVIERException {
-        nieuweKlant(voornaam, achternaam, new Adres("", "", "", 0, ""));
+        long nieuwID = nieuweKlant(voornaam, achternaam, null);
+
+        return nieuwID;
     }
 
     /**
@@ -78,7 +82,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
      */
 
     @Override
-    public void nieuweKlant(String voornaam,
+    public long nieuweKlant(String voornaam,
                             String achternaam,
                             String tussenvoegsel,
                             String email,
@@ -120,6 +124,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
             }
             System.out.println("\n\tKlantDAOMySQL: KLANT: " + voornaam + " SUCCESVOL GEMAAKT");
 
+            return nieuwId;
         } catch (SQLException ex) {
             throw new RSVIERException("KlantDAOMySQL: SQL FOUT TIJDENS AANMAKEN KLANT");
         } finally {
@@ -470,6 +475,40 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
             throw new RSVIERException("KlantDAOMySQL: SQL FOUT TIJDENS VERWIJDEREN KLANT OP ID");
         } finally {
             MySQLHelper.close(connection, statement);
+        }
+    }
+
+
+    @Override
+    public void verwijderKlant(String voornaam, String achternaam) throws RSVIERException {
+        /**
+         * Methode om een klant te verwijderen op basis van alleen voor- en achternaam;
+         *
+         * @param voornaam Voornaam van de te verwijderen
+         * @param achternaam Achternaam van de te verwijderen klant
+         * @throws RSVIERException Foutmelding bij SQLException, info wordt meegegeven.
+         */
+
+        connection = MySQLConnectie.getConnection();
+        try {
+            query = "SELECT klant_id FROM " +
+                    "KLANT " +
+                    "WHERE " +
+                    "voornaam LIKE ? AND " +
+                    "achternaam LIKE ?;";
+            statement = connection.prepareStatement(query);
+            statement.setString(1, voornaam);
+            statement.setString(2, achternaam);
+            resultSet = statement.executeQuery();
+
+            while (resultSet.next()) {
+                verwijderKlant(resultSet.getInt(1));
+            }
+
+        } catch (SQLException ex) {
+            throw new RSVIERException("KlantDAOMySQL: SQL FOUT TIJDENS VERWIJDEREN KLANT OP VOORNAAM & ACHTERNAAM");
+        } finally {
+            MySQLHelper.close(connection, statement, resultSet);
         }
     }
 
