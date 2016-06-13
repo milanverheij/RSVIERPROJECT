@@ -40,9 +40,9 @@ public class BestellingDAOMySQL extends AbstractDAOMySQL implements BestellingDA
 	}
 	@Override
 	public long nieuweBestelling(Bestelling bestelling) throws SQLException, RSVIERException{
-		if(bestellingWordGetest = true)
+		if(bestellingWordGetest){
 			aangeroepenBestellingInTest = bestelling;
-		else{
+		}else{
 			Connection connection = MySQLConnectie.getConnection();
 			ResultSet rs = null;
 			try {
