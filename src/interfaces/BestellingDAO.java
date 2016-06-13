@@ -9,10 +9,10 @@ import model.Bestelling;
 
 public interface BestellingDAO {
 	//Create
-	public void nieuweBestelling(long klantId, Artikel a1, Artikel a2, Artikel a3) throws SQLException, RSVIERException;
-	public void nieuweBestelling(long klantId, Artikel a1, Artikel a2) throws SQLException, RSVIERException;
-	public void nieuweBestelling(long klantId, Artikel a1) throws SQLException, RSVIERException;
-	public void nieuweBestelling(Bestelling bestelling) throws SQLException, RSVIERException;
+	public long nieuweBestelling(long klantId, Artikel a1, Artikel a2, Artikel a3) throws SQLException, RSVIERException;
+	public long nieuweBestelling(long klantId, Artikel a1, Artikel a2) throws SQLException, RSVIERException;
+	public long nieuweBestelling(long klantId, Artikel a1) throws SQLException, RSVIERException;
+	public long nieuweBestelling(Bestelling bestelling) throws SQLException, RSVIERException;
 
 	//Read
 	public Iterator<Bestelling> getBestellingOpKlantGegevens(long klantId) throws RSVIERException;
