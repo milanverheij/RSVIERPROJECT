@@ -191,14 +191,47 @@ public class KlantDAOMySQLTest {
 
     }
 
+    // TODO: Dit is eigenlijk precies hetzelfde als het aanmaken van een klant?
     @Test
     public void getKlantOpKlant() throws Exception {
+        // Deze methode test of dat de juiste klant wordt gevonden op basis van klantID
 
+        nieuweKlantAangemaakt = true;
+        nieuweKlantID = klantDAO.nieuweKlant(VOORNAAM, ACHTERNAAM, TUSSENVOEGSEL, EMAIL, null, null);
+
+        tijdelijkeKlant = klantDAO.getKlantOpKlant(nieuweKlantID).next();
+
+        assertEquals(VOORNAAM, tijdelijkeKlant.getVoornaam());
+        assertEquals(ACHTERNAAM, tijdelijkeKlant.getAchternaam());
+        assertEquals(TUSSENVOEGSEL, tijdelijkeKlant.getTussenvoegsel());
+        assertEquals(EMAIL, tijdelijkeKlant.getEmail());
+
+        tijdelijkeKlant = null;
+        nieuweKlantID = -1;
     }
 
     @Test
     public void getKlantOpKlant1() throws Exception {
+        // Deze methode test of dat de juiste klant wordt gevonden op basis van voornaam
 
+        nieuweKlantAangemaakt = true;
+        klantDAO.nieuweKlant(VOORNAAM, ACHTERNAAM, TUSSENVOEGSEL, EMAIL, null, null);
+        klantDAO.nieuweKlant(VOORNAAM, ACHTERNAAM + "2", TUSSENVOEGSEL + "2", EMAIL + "2", null, null);
+
+        tijdelijkeKlant = klantDAO.getKlantOpKlant(VOORNAAM).next();
+        Klant tijdelijkeKlant2 = klantDAO.getKlantOpKlant(VOORNAAM).next();
+
+        assertEquals(VOORNAAM, tijdelijkeKlant.getVoornaam());
+        assertEquals(ACHTERNAAM, tijdelijkeKlant.getAchternaam());
+        assertEquals(TUSSENVOEGSEL, tijdelijkeKlant.getTussenvoegsel());
+        assertEquals(EMAIL, tijdelijkeKlant.getEmail());
+
+        assertEquals(VOORNAAM, tijdelijkeKlant2.getVoornaam());
+        assertEquals(ACHTERNAAM + "2", tijdelijkeKlant2.getAchternaam());
+        assertEquals(TUSSENVOEGSEL + "2", tijdelijkeKlant2.getTussenvoegsel());
+        assertEquals(EMAIL + "2", tijdelijkeKlant2.getEmail());
+
+        tijdelijkeKlant = null;
     }
 
     @Test
