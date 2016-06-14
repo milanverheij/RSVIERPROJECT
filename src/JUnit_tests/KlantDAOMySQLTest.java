@@ -4,14 +4,16 @@ import model.Adres;
 import model.Artikel;
 import model.Bestelling;
 import model.Klant;
-import mysql.AdresDAOMySQL;
-import mysql.BestellingDAOMySQL;
-import mysql.KlantDAOMySQL;
+import mysql.*;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.ListIterator;
 
 import static org.junit.Assert.*;
@@ -24,7 +26,9 @@ import static org.junit.Assert.*;
  * Het betreffen hoofdzakelijk basis CRUD-methoden.
  *
  * Bijzonderheden zijn dat de get-methoden ListIterators van LinkedLists teruggeven, het Klant-specifieke deel
- * is opgenomen in een specifieke methode om een ResultSet naar een ArrayList van Klanten te zetten.
+ * is opgenomen in een specifieke methode om een ResultSet naar een ArrayList van Klanten te zetten. De ResultSet
+ * naar ArrayList methode wordt impliciet getest in de meeste methoden omdat bijna elke methode hiervan afhankelijk
+ * is.
  *
  * Derhalve wordt er niet getest of de getmethoden op een juiste manier een ArrayList naar een Iterator zetten
  * omdat dit een standaard librarymethode is. ArrayList.listIterator. Als er een List-Iterator terugkomt is
@@ -37,8 +41,8 @@ public class KlantDAOMySQLTest {
     private long nieuweKlantID;
     private Klant tijdelijkeKlant;
     private boolean nieuweKlantAangemaakt = false;
-    private final String VOORNAAM = "TestKlantVoornaam4101AR1225"; // Uniek ID  TODO: Random generator kan nog
-    private final String ACHTERNAAM = "TestKlantAchternaam4101AR1225"; // Uniek ID TODO: Random generator kan nog
+    private final String VOORNAAM = "TestKlantVoornaam4101AR1225"; // Uniek ID  TODO: Random generator kan nog (nice to have)
+    private final String ACHTERNAAM = "TestKlantAchternaam4101AR1225"; // Uniek ID TODO: Random generator kan nog (nice to have)
     private final String TUSSENVOEGSEL = "TUSS";
     private final String EMAIL = "TestEmail@EmailLand.rsvier";
     private final String STRAATNAAM = "TestStraatnaam9548";
@@ -46,10 +50,14 @@ public class KlantDAOMySQLTest {
     private final String TOEVOEGING = "ABC";
     private final int HUISNUMMER = 9548;
     private final String WOONPLAATS = "TestWoonplaats9548";
+    private Connection connection;
+    private PreparedStatement statement;
+    private ResultSet rs;
 
     @Before
     public void setUp() throws Exception {
         klantDAO = new KlantDAOMySQL();
+        bestellingDAO = new BestellingDAOMySQL();
     }
 
     @After
@@ -57,6 +65,7 @@ public class KlantDAOMySQLTest {
         // Vangnet
         klantDAO.verwijderKlant(VOORNAAM, ACHTERNAAM);
         klantDAO.verwijderKlant(VOORNAAM, ACHTERNAAM + "2");
+        MySQLHelper.close(connection, statement, rs);
 
         AdresDAOMySQL.klantWordtGetest = false; // Mocht er iets fout zijn gegaan in de tests..
     }
@@ -169,7 +178,7 @@ public class KlantDAOMySQLTest {
 
         nieuweKlantAangemaakt = true;
         nieuweKlantID = klantDAO.nieuweKlant(VOORNAAM, ACHTERNAAM, TUSSENVOEGSEL, EMAIL,
-                null, null); // TODO: Geeft een fout bij lege Bestelling omdat er geen constructor aanwezig is in Bestelling
+                null, null);
 
         tijdelijkeKlant = klantDAO.getKlantOpKlant(nieuweKlantID).next(); // Methode geeft ListIterator terug.
 
@@ -185,11 +194,80 @@ public class KlantDAOMySQLTest {
     @Test
     public void nieuweKlantEnBestelling() throws Exception {
         // TODO: Overleg met Albert ivm boolean en testBestelObject
+        // De nieuwe klant-methode met voor, achternaam en Beslling gebruikt de nieuweKlant methode met alle
+        // klantgegevens en/of adres & bestelling. Derhalve wordt in deze test eigenlijk een juiste
+        // koppeling getest als de nieuweKlant methode met alle gegevens werkt.
+        //
+        // Als er geen Bestelgegevens worden meegegeven (null) wordt er standaard een lege
+        // Bestelling aangemaakt. Het aanmaken (of eigenlijk updaten o.b.v. klantID wordt afzonderlijk getest
+        //
+        // Deze methode test niet of dat de juiste gegegevens worden geschreven naar de Database. Het kan echter
+        // wel voorkomen dat als deze methode en fout geeft omdat er een fout is tijdens het schrijven naar de Database
+        // dat de test faalt.
+        //
+        // Het test verder enkel of dat de BestellingDAO met de juiste gegevens is aangesproken.
+        //
+        // Dit is het geval als het testAdres-object (static) in de BestellingDAO op de juiste gegevens staan.
+        // Er wordt in Bestelling gekeken of er toevallig getest wordt, als ja dan wordt het test adres tijdelijk
+        // opgeslagen in BestellingDAOMySQL.aangeroepenAdresInTest.
+
+        nieuweKlantAangemaakt = true;
+        BestellingDAOMySQL.bestellingWordGetest = true; // Testconditie in BestellingDAOMySQL goed zetten.
+        Artikel a1 = new Artikel(333, "Mecronomicon", 3.33);
+        Artikel a2 = new Artikel(321, "Woynich Manuscript", 3.21);
+        Artikel a3 = new Artikel(888, "Nunich Manual of Demonic Magic", 8.88);
+
+        nieuweKlantID = klantDAO.nieuweKlant(VOORNAAM, ACHTERNAAM, TUSSENVOEGSEL, EMAIL, null,
+                                new Bestelling(0, a1, a2, a3)); // ID wordt in de nieuweKlant methode op het juiste ID geze,
+
+        assertTrue(nieuweKlantID != 0); // Zeker van zijn dat er wel een goed ID wordt gegeven.
+        tijdelijkeKlant = klantDAO.getKlantOpKlant(nieuweKlantID).next(); // Methode geeft ListIterator terug.
+
+        assertEquals(nieuweKlantID, BestellingDAOMySQL.aangeroepenBestellingInTest.getKlant_id());
+        LinkedHashMap<Artikel, Integer> artikelLijst = BestellingDAOMySQL.aangeroepenBestellingInTest.getArtikelLijst();
+
+        // In de bestelling moeten de volgende artikelen 1 x aanwezig zijn
+        // Er mogen niet meer dan drie artikelen aanwezig zijn.
+        assertTrue(artikelLijst.size() == 3);
+        assertEquals(1, (long)artikelLijst.get(a1));
+        assertEquals(1, (long)artikelLijst.get(a2));
+        assertEquals(1, (long)artikelLijst.get(a3));
+
+        // Alle waarden weer naar default
+        BestellingDAOMySQL.bestellingWordGetest = false;
+        BestellingDAOMySQL.aangeroepenBestellingInTest = new Bestelling(1,
+                new Artikel(666, "Necronomicon", 6.66),
+                new Artikel(123, "Voynich Manuscript", 1.23),
+                new Artikel(999, "Munich Manual of Demonic Magic", 9.99));
+        tijdelijkeKlant = null;
+        nieuweKlantID = -1;
     }
 
     @Test
     public void getAlleKlanten() throws Exception {
-        // TODO: Bedenken wat een goede test is om alle klanten te testen. NepDATA?
+        // Deze test controleert of daadwerkelijk alle klanten worden opgevraagd en zijn gegeven.
+        // Er wordt een query uitgevoerd om te peilen hoeveel klanten er zijn waarna deze wordt vergeleken
+        // met de grootte van de lijst.
+
+        connection = MySQLConnectie.getConnection();
+        String query = "SELECT COUNT(*) FROM KLANT";
+        statement = connection.prepareStatement(query);
+        rs = statement.executeQuery();
+        int aantalKlantenInDB = 0;
+        int aantalKlantenInList = 0;
+
+        while (rs.next())
+            aantalKlantenInDB = rs.getInt(1);
+
+        ListIterator<Klant> klantenIterator = klantDAO.getAlleKlanten();
+        while (klantenIterator.hasNext()) {
+            klantenIterator.next();
+            aantalKlantenInList++;
+        }
+
+        assertEquals(aantalKlantenInDB, aantalKlantenInList);
+
+        MySQLHelper.close(connection, statement, rs);
     }
 
     @Test
@@ -364,7 +442,37 @@ public class KlantDAOMySQLTest {
 
     @Test
     public void getKlantOpBestelling() throws Exception {
-        // TODO: Wachten op Albert met Bestelling
+        // Deze methode checkt of dat de juiste klant worden opgehaald op basis van
+        // het opgegeven Bestel_ID
+
+        // Er wordt een nieuwe klant gemaakt met een bestelling waarna deze wordt verwijderd.
+        BestellingDAOMySQL.bestellingWordGetest = true;
+
+        // Nieuwe klant aanmaken en klantID achterhalen, wordt altijd in teardown weer verwijderd
+        nieuweKlantID = klantDAO.nieuweKlant(VOORNAAM, ACHTERNAAM, TUSSENVOEGSEL, EMAIL, null, null);
+
+        // Aan de hand van klantID een bestelling toevoegen aan de klant. Is getest in test hierboven.
+        long nieuweBestellingID = bestellingDAO.nieuweBestelling(nieuweKlantID,
+                new Artikel(333, "Mecronomicon", 3.33),
+                new Artikel(321, "Woynich Manuscript", 3.21),
+                new Artikel(888, "Nunich Manual of Demonic Magic", 8.88));
+
+        tijdelijkeKlant = klantDAO.getKlantOpBestelling(nieuweBestellingID).next();
+
+        assertEquals(VOORNAAM, tijdelijkeKlant.getVoornaam());
+        assertEquals(ACHTERNAAM, tijdelijkeKlant.getAchternaam());
+        assertEquals(TUSSENVOEGSEL, tijdelijkeKlant.getTussenvoegsel());
+        assertEquals(EMAIL, tijdelijkeKlant.getEmail());
+
+        // Alle waarden weer resetten naar default
+        tijdelijkeKlant = null;
+        BestellingDAOMySQL.bestellingWordGetest = false;
+        BestellingDAOMySQL.aangeroepenBestellingInTest = new Bestelling(1,
+                new Artikel(666, "Necronomicon", 6.66),
+                new Artikel(123, "Voynich Manuscript", 1.23),
+                new Artikel(999, "Munich Manual of Demonic Magic", 9.99));
+
+        nieuweKlantID = -1;
     }
 
     @Test
@@ -484,19 +592,17 @@ public class KlantDAOMySQLTest {
         // Nieuwe klant aanmaken en klantID achterhalen, wordt altijd in teardown weer verwijderd
         nieuweKlantID = klantDAO.nieuweKlant(VOORNAAM, ACHTERNAAM, TUSSENVOEGSEL, EMAIL, null, null);
 
-        System.out.println("Nieuwe klant ID " + nieuweKlantID);
-
         // Aan de hand van klantID een bestelling toevoegen aan de klant. Is getest in test hierboven.
         long nieuweBestellingID = bestellingDAO.nieuweBestelling(nieuweKlantID,
-                                new Artikel(666, "Necronomicon", 6.66),
-                                new Artikel(123, "Voynich Manuscript", 1.23),
-                                new Artikel(999, "Munich Manual of Demonic Magic", 9.99));
+                                new Artikel(333, "Mecronomicon", 3.33),
+                                new Artikel(321, "Woynich Manuscript", 3.21),
+                                new Artikel(888, "Nunich Manual of Demonic Magic", 8.88));
 
         // Klantverwijder methode aanroepen op basis van bestelling-ID
-        klantDAO.verwijderKlantOpBestellingId(nieuweBestellingID);
+        long verwijderdId = klantDAO.verwijderKlantOpBestellingId(nieuweBestellingID);
 
-        // Als het goed is zou de juiste klant gevoncen moeten zijn en het juiste klant_id doorgegeven
-        assertEquals(nieuweKlantID, BestellingDAOMySQL.aangeroepenBestellingInTest.getKlant_id());
+        // Als het goed is zou de juiste klant gevonden moeten zijn en het juiste klant_id doorgegeven
+        assertEquals(nieuweKlantID, verwijderdId);
 
         BestellingDAOMySQL.bestellingWordGetest = false;
         BestellingDAOMySQL.aangeroepenBestellingInTest = new Bestelling(1,
@@ -506,5 +612,4 @@ public class KlantDAOMySQLTest {
 
         nieuweKlantID = -1;
     }
-
 }
