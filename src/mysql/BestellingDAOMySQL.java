@@ -42,10 +42,10 @@ public class BestellingDAOMySQL extends AbstractDAOMySQL implements BestellingDA
 	public long nieuweBestelling(Bestelling bestelling) throws SQLException, RSVIERException{
 		if(bestellingWordGetest)
 			aangeroepenBestellingInTest = bestelling;
-
+		
 		Connection connection = MySQLConnectie.getConnection();
 		ResultSet rs = null;
-
+		
 		try{
 			statement = connection.prepareStatement("INSERT INTO `BESTELLING` "
 					+ "(artikel1_id, artikel1_naam, artikel1_prijs, "
@@ -82,7 +82,7 @@ public class BestellingDAOMySQL extends AbstractDAOMySQL implements BestellingDA
 				buildNieuwBestellingStatement(null, count);
 				count++;
 			}
-
+			
 			statement.executeUpdate();
 			rs = statement.getGeneratedKeys();
 			rs.next();
