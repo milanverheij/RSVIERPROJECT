@@ -16,7 +16,7 @@ import exceptions.RSVIERException;
 
 public class BestellingDAOMySQL extends AbstractDAOMySQL implements BestellingDAO{
 	public BestellingDAOMySQL(){}
-	boolean bestellingWordGetest = false; //Kijken of een JUnit test loopt
+	public static boolean bestellingWordGetest = false; //Kijken of een JUnit test loopt
 	public static Bestelling aangeroepenBestellingInTest =	//Standaardwaarden voor de JUnit test instellen 
 			new Bestelling(1, new Artikel(666, "Necronomicon", 6.66), new Artikel(123, "Voynich Manuscript", 1.23), new Artikel(999, "Munich Manual of Demonic Magic", 9.99));
 
@@ -40,56 +40,57 @@ public class BestellingDAOMySQL extends AbstractDAOMySQL implements BestellingDA
 	}
 	@Override
 	public long nieuweBestelling(Bestelling bestelling) throws SQLException, RSVIERException{
-		if(bestellingWordGetest){
+		if(bestellingWordGetest)
 			aangeroepenBestellingInTest = bestelling;
-		}else{
-			Connection connection = MySQLConnectie.getConnection();
-			ResultSet rs = null;
-			try {
-				statement = connection.prepareStatement("INSERT INTO `BESTELLING` "
-						+ "(artikel1_id, artikel1_naam, artikel1_prijs, "
-						+ "artikel2_id, artikel2_naam, artikel2_prijs, "
-						+ "artikel3_id, artikel3_naam, artikel3_prijs, "
-						+ "klant_id)"
-						+ "VALUES "
-						+ "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?);", PreparedStatement.RETURN_GENERATED_KEYS);
+		
+		Connection connection = MySQLConnectie.getConnection();
+		ResultSet rs = null;
+		
+		try{
+			statement = connection.prepareStatement("INSERT INTO `BESTELLING` "
+					+ "(artikel1_id, artikel1_naam, artikel1_prijs, "
+					+ "artikel2_id, artikel2_naam, artikel2_prijs, "
+					+ "artikel3_id, artikel3_naam, artikel3_prijs, "
+					+ "klant_id)"
+					+ "VALUES "
+					+ "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?);", PreparedStatement.RETURN_GENERATED_KEYS);
 
-				statement.setLong(10, bestelling.getKlant_id());
+			statement.setLong(10, bestelling.getKlant_id());
 
-				//Bijhouden hoeveel artikelen er bijgevoegd zijn
-				int count = 1;
+			//Bijhouden hoeveel artikelen er bijgevoegd zijn
+			int count = 1;
 
-				LinkedHashMap<Artikel, Integer> artikelen = bestelling.getArtikelLijst();
+			LinkedHashMap<Artikel, Integer> artikelen = bestelling.getArtikelLijst();
 
-				//De losse artikelen in een iterable vorm krijgen
-				Set<Artikel> artikelSet = artikelen.keySet();
+			//De losse artikelen in een iterable vorm krijgen
+			Set<Artikel> artikelSet = artikelen.keySet();
 
-				//Voor ieder artikel de PreparedStatement invullen
-				for(Artikel artikel : artikelSet){
+			//Voor ieder artikel de PreparedStatement invullen
+			for(Artikel artikel : artikelSet){
 
-					//Als er een artikel 2x of vaker besteld is moet deze iedere keer toegevoegd worden
-					//Dus een for-loop aan de hand van de Integer waarde
-					for(int x = 0; x < artikelen.get(artikel); x++){
-						buildNieuwBestellingStatement(artikel, count);
-						count++;
-					}
-				}
-
-				//Als er nog geen 3 artikelen toegevoegd zijn, de rest van de PreparedStatement
-				//afvullen met null-waarden
-				while(count < 4){
-					buildNieuwBestellingStatement(null, count);
+				//Als er een artikel 2x of vaker besteld is moet deze iedere keer toegevoegd worden
+				//Dus een for-loop aan de hand van de Integer waarde
+				for(int x = 0; x < artikelen.get(artikel); x++){
+					buildNieuwBestellingStatement(artikel, count);
 					count++;
 				}
-				statement.executeUpdate();
-				rs = statement.getGeneratedKeys();
-				rs.next();
-				return rs.getLong(1);
-			}finally{
-				MySQLHelper.close(connection, statement, rs);	//Connection en statement niet meer nodig dus sluiten
 			}
+
+			//Als er nog geen 3 artikelen toegevoegd zijn, de rest van de PreparedStatement
+			//afvullen met null-waarden
+			while(count < 4){
+				buildNieuwBestellingStatement(null, count);
+				count++;
+			}
+			
+			statement.executeUpdate();
+			rs = statement.getGeneratedKeys();
+			rs.next();
+			return rs.getLong(1);
+		}finally{
+			MySQLHelper.close(connection, statement, rs);	//Connection en statement niet meer nodig dus sluiten
 		}
-		return 0;
+
 	}
 
 	//Read
@@ -210,7 +211,7 @@ public class BestellingDAOMySQL extends AbstractDAOMySQL implements BestellingDA
 	//Delete
 	@Override
 	//Verwijder alle bestellingen van een klant
-	public void verwijderAlleBestellingenKlant(long klantId) throws RSVIERException {
+	public long verwijderAlleBestellingenKlant(long klantId) throws RSVIERException {
 		Connection connection = MySQLConnectie.getConnection();
 		try {
 			statement = connection.prepareStatement("DELETE FROM `BESTELLING` WHERE klant_id = ?;");
@@ -220,8 +221,11 @@ public class BestellingDAOMySQL extends AbstractDAOMySQL implements BestellingDA
 			e.printStackTrace();
 		}finally{
 			MySQLHelper.close(connection, statement);	//Connection en statement niet meer nodig dus sluiten
+			return klantId;
 		}
+
 	}
+
 	@Override
 	//Verwijder 1 bestelling uit een tabel
 	public void verwijderEnkeleBestelling(long bestellingId) throws RSVIERException {

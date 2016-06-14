@@ -25,7 +25,7 @@ public interface BestellingDAO {
 	public void updateBestelling(Bestelling bestelling) throws SQLException, RSVIERException;
 	
 	//Delete
-	public void verwijderAlleBestellingenKlant(long klantId) throws RSVIERException;
+	public long verwijderAlleBestellingenKlant(long klantId) throws RSVIERException;
 	public void verwijderEnkeleBestelling(long bestellingId) throws RSVIERException;
 
 }
