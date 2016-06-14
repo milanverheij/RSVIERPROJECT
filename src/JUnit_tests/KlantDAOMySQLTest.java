@@ -1,8 +1,11 @@
 package JUnit_tests;
 
 import model.Adres;
+import model.Artikel;
+import model.Bestelling;
 import model.Klant;
 import mysql.AdresDAOMySQL;
+import mysql.BestellingDAOMySQL;
 import mysql.KlantDAOMySQL;
 import org.junit.After;
 import org.junit.Before;
@@ -30,11 +33,12 @@ import static org.junit.Assert.*;
  */
 public class KlantDAOMySQLTest {
     private KlantDAOMySQL klantDAO;
+    private BestellingDAOMySQL bestellingDAO;
     private long nieuweKlantID;
     private Klant tijdelijkeKlant;
     private boolean nieuweKlantAangemaakt = false;
-    private final String VOORNAAM = "TestKlantVoornaam4101AR1225"; // Uniek ID  TODO: Random generator
-    private final String ACHTERNAAM = "TestKlantAchternaam4101AR1225"; // Uniek ID TODO: Random generator
+    private final String VOORNAAM = "TestKlantVoornaam4101AR1225"; // Uniek ID  TODO: Random generator kan nog
+    private final String ACHTERNAAM = "TestKlantAchternaam4101AR1225"; // Uniek ID TODO: Random generator kan nog
     private final String TUSSENVOEGSEL = "TUSS";
     private final String EMAIL = "TestEmail@EmailLand.rsvier";
     private final String STRAATNAAM = "TestStraatnaam9548";
@@ -151,7 +155,7 @@ public class KlantDAOMySQLTest {
         assertEquals(VOORNAAM, tijdelijkeKlant.getVoornaam());
         assertEquals(ACHTERNAAM, tijdelijkeKlant.getAchternaam());
 
-        tijdelijkeKlant = null;
+        tijdelijkeKlant = null; // TODO: OVeral fixen met wat het wel meot zijn
         nieuweKlantID = -1;
     }
 
@@ -185,10 +189,9 @@ public class KlantDAOMySQLTest {
 
     @Test
     public void getAlleKlanten() throws Exception {
-
+        // TODO: Bedenken wat een goede test is om alle klanten te testen. NepDATA?
     }
 
-    // TODO: Dit is eigenlijk precies hetzelfde als het aanmaken van een klant?
     @Test
     public void getKlantOpKlant() throws Exception {
         // Deze methode test of dat de juiste klant wordt gevonden op basis van klantID
@@ -470,8 +473,38 @@ public class KlantDAOMySQLTest {
 
     @Test
     public void verwijderKlantOpBestellingId() throws Exception {
-        // TODO: Vragen aan Albert of hij standaard als je een bestelling aanmaakt het BestelID retourneert.
-        //TODO: Test of juiste klantID wordt meegegeven aan BestellingVerwijderen
+        // In deze test wordt niet getest of dat de bestelling daadwerkelijk verwijderd is. Er wordt gelinkt
+        // naar de verwijderKlantOpID methode welke hiervoor al is getest. Er wordt wel getest of de juiste
+        // klant naar de BestellingDAO is gestuurd.
+        //
+        // Er wordt een nieuwe klant gemaakt met een bestelling waarna deze wordt verwijderd.
+
+        BestellingDAOMySQL.bestellingWordGetest = true;
+
+        // Nieuwe klant aanmaken en klantID achterhalen, wordt altijd in teardown weer verwijderd
+        nieuweKlantID = klantDAO.nieuweKlant(VOORNAAM, ACHTERNAAM, TUSSENVOEGSEL, EMAIL, null, null);
+
+        System.out.println("Nieuwe klant ID " + nieuweKlantID);
+
+        // Aan de hand van klantID een bestelling toevoegen aan de klant. Is getest in test hierboven.
+        long nieuweBestellingID = bestellingDAO.nieuweBestelling(nieuweKlantID,
+                                new Artikel(666, "Necronomicon", 6.66),
+                                new Artikel(123, "Voynich Manuscript", 1.23),
+                                new Artikel(999, "Munich Manual of Demonic Magic", 9.99));
+
+        // Klantverwijder methode aanroepen op basis van bestelling-ID
+        klantDAO.verwijderKlantOpBestellingId(nieuweBestellingID);
+
+        // Als het goed is zou de juiste klant gevoncen moeten zijn en het juiste klant_id doorgegeven
+        assertEquals(nieuweKlantID, BestellingDAOMySQL.aangeroepenBestellingInTest.getKlant_id());
+
+        BestellingDAOMySQL.bestellingWordGetest = false;
+        BestellingDAOMySQL.aangeroepenBestellingInTest = new Bestelling(1,
+                new Artikel(666, "Necronomicon", 6.66),
+                new Artikel(123, "Voynich Manuscript", 1.23),
+                new Artikel(999, "Munich Manual of Demonic Magic", 9.99));
+
+        nieuweKlantID = -1;
     }
 
 }
