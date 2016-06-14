@@ -221,8 +221,8 @@ public class BestellingDAOMySQL extends AbstractDAOMySQL implements BestellingDA
 			e.printStackTrace();
 		}finally{
 			MySQLHelper.close(connection, statement);	//Connection en statement niet meer nodig dus sluiten
-			return klantId;
 		}
+		return klantId;
 
 	}
 

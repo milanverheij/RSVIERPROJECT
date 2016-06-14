@@ -25,8 +25,7 @@ public class Bestelling {
 		voegArtikelToe(a2);
 		voegArtikelToe(a3);
 	}
-	
-	
+
 	public void setBestelling_id(long bestelling_id) {
 		this.bestelling_id = bestelling_id;
 	}
