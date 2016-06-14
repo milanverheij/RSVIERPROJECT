@@ -72,7 +72,7 @@ public class BestellingDAOMySQLTest {
 
 		id1 = dao.nieuweBestelling(bestelling1);
 		id2 = dao.nieuweBestelling(bestelling2);
-		id3 = dao.nieuweBestelling(bestelling3);
+		id3 = dao.nieuweBestelling(bestelling3);		
 	}
 
 	@After
