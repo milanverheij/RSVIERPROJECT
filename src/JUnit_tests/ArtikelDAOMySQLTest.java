@@ -1,17 +1,13 @@
 package JUnit_tests;
 
 import static org.junit.Assert.*;
-
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map.Entry;
-
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
-
 import model.Artikel;
 import model.Bestelling;
 import mysql.ArtikelDAOMySQL;
@@ -19,11 +15,10 @@ import mysql.BestellingDAOMySQL;
 
 public class ArtikelDAOMySQLTest {
 
-	//ArtikelDAOMySQL is de klasse die getest wordt
+	//De te testen klasse
 	ArtikelDAOMySQL tester = new ArtikelDAOMySQL();
 
-	//BestellingDAOMySQL is nodig om een bestelling aan te maken waar ArtikelDAOMySQL
-	//mee kan werken.
+	//BestellingDAOMySQL is nodig om Artikel te kunnen testen
 	BestellingDAOMySQL besteller = new BestellingDAOMySQL();
 	Bestelling bestelling = new Bestelling();
 
@@ -35,15 +30,17 @@ public class ArtikelDAOMySQLTest {
 	Artikel artikel2 = new Artikel(2, "Leeuw", 5000);
 	Artikel artikel3 = new Artikel(3, "Walvis", 30000);
 	Artikel testArtikel = new Artikel(4, "Test", 1000);
-
+	
 	LinkedHashMap<Artikel, Integer> artikelLijstMap = new LinkedHashMap<>();
-
-	Iterator<Artikel> aIterator;
 	Iterator<Entry<Artikel, Integer>> mIterator;
 	Entry<Artikel, Integer> entry;
+	
 	ArrayList<Artikel> artikelLijst = new ArrayList<>();
+	Iterator<Artikel> aIterator;
+		
+	
 
-
+	// Maak een bestelling aan om te testen
 	@Before
 	public void setUp() throws Exception {
 		bestelling.setKlant_id(klant_id);
@@ -53,7 +50,8 @@ public class ArtikelDAOMySQLTest {
 		bestelling.setArtikelLijst(artikelLijstMap);
 		bestelling_id = besteller.nieuweBestelling(bestelling);
 	}
-
+	
+	// Verwijder de bestelling na de test
 	@After
 	public void tearDown() throws Exception{
 		besteller.verwijderEnkeleBestelling(bestelling_id);
@@ -71,8 +69,7 @@ public class ArtikelDAOMySQLTest {
 	}
 
 
-	@Test //Test om te controleren dat het artikel dat geretouneerd wordt ook daad
-	//werkelijk het artikel is dat opgevraagd wordt.
+	@Test 
 	public void testGetArtikelOpBestelling() throws Exception{
 		Artikel a = tester.getArtikelOpBestelling(bestelling_id, 1 /*artikelNummer*/);
 
@@ -106,9 +103,7 @@ public class ArtikelDAOMySQLTest {
 		assertEquals(artikel3.getArtikel_naam(), artikelLijst.get(2).getArtikel_naam());
 		assertTrue(artikel3.getArtikel_prijs() == artikelLijst.get(2).getArtikel_prijs());
 	}
-	// Test of alle artikelen geretouneerd worden.Beetje uitgebreid, zou wellicht ook kunnen testen of 
-	// alleen artikel1, 2 en 3 aanwezig zijn middels contains(artikel) methode van ArrayList, Maar deze 
-	// test controleerd of artikel1, 3 en 3 aanwezig zijn in de database, of hun waardes en aantal klopt
+	
 	@Test 
 	public void testGetAlleArtikelen() throws Exception{
 		mIterator = tester.getAlleArtikelen();
@@ -149,17 +144,7 @@ public class ArtikelDAOMySQLTest {
 
 		assertTrue(artikelCount == 3);
 	}
-	//	@Ignore
-	//	@Test //TODO
-	//	public void testUpdateArtikelOpBestelling() throws Exception{
-	//		tester.updateArtikelOpBestelling(bestelling_id, 1, testArtikel);
-	//		Artikel a = tester.getArtikelOpBestelling(bestelling_id, 1);
-	//
-	//		assertEquals(testArtikel.getArtikel_id(), a.getArtikel_id());
-	//		assertEquals(testArtikel.getArtikel_naam(), a.getArtikel_naam());
-	//		assertTrue(testArtikel.getArtikel_prijs() == a.getArtikel_prijs());
-	//	}
-
+	
 	@Test 
 	public void testUpdateArtikelOpBestelling() throws Exception{
 		// Test de eerste overloaded methode

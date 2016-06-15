@@ -43,8 +43,8 @@ public class Artikel implements Comparable{
 		this.artikel_prijs = artikel_prijs;
 	}
 	
-	//Voor het vergelijken van artikelen
-	//Ik ga er van uit dat een artikel uniek is als de naam en prijs combinatie niet eerder voorkomt
+	// Het vergelijken van artikelen gebeurt op basis van artikel_naam & artikel_id.
+	// artikel_prijs wordt niet langer meegenomen in de vergelijking.
 	@Override
 	public int hashCode(){ 
 		return artikel_naam.hashCode();

@@ -6,39 +6,41 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.Map.Entry;
 
 import exceptions.RSVIERException;
 import model.Artikel;
 
-/* Author @Douwe Jongeneel on 07-06-16
+/* Author @Douwe Jongeneel
  *
  * Deze klasse regelt een verbinding met de database zodat artikelen aan een bestelling kunnen worden toegevoegd,
  * uitgelezen, geupdate en verwijdert. Er is tevens een methode die alle artikelen uit de database teruggeeft.
  * Er van uitgaande dat elke bestelling uit max 3 artikelen bestaat maar dat deze artikelen per bestelling kunnen
  * verschillen.
  *
- * TODO1 - ik heb onderstaande methodes nog niet uitvoerig getest, dus ik weet nog niet of alles correct werkt.
- * TODO2 - artikel_id is nog een int, moet dit ook een long worden? in database was het een varchar geloof ik.
+ * TODO1 - artikel_id is nog een int, moet dit ook een long worden? in database was het een varchar geloof ik.
  */
 public class ArtikelDAOMySQL extends AbstractDAOMySQL implements interfaces.ArtikelDAO{
 	private Artikel artikel;
 	private Connection connection;
 	private LinkedHashMap<Long, Integer> artikelCountMap = new LinkedHashMap<>();
 
-	//Get connection - TODO - moet nog aangepast worden feedback gerbrich meerdere connecties
 	public ArtikelDAOMySQL() {
 	}
 
 	//Create
 
-	@Override //voeg een artikel toe aan een bestelling zolang er nog geen drie artikelen zijn
+	// Onderstaande methode voegt een artikel toe aan een bestelling zolang er nog geen drie artikelen 
+	// in de bestelling aanwezig zijn.
+	
+	@Override 
 	public void nieuwArtikelOpBestelling(long bestelling_id, Artikel aNieuw) throws RSVIERException {
 		connection = MySQLConnectie.getConnection();
 		boolean kanArtikelToevoegen = true;
 
 		try {
+			// Hier wordt gecontroleerd hoeveel artikelen zich in de bestelling bevinden, zolang er
+			// nog geen drie artikelen zijn kan het nieuwe artikel worden toegevoegd.
 			if (!artikelCountMap.containsKey(bestelling_id)) {
 				artikelCountMap.put(bestelling_id, 1);
 			}
@@ -50,7 +52,8 @@ public class ArtikelDAOMySQL extends AbstractDAOMySQL implements interfaces.Arti
 				artikelCountMap.put(bestelling_id, artikelCountMap.get(bestelling_id) + 1);
 			}
 			if (kanArtikelToevoegen) {
-
+				// Het nieuwe artikel wordt toegevoegd aan artikel1, 2 of 3 op basis van het aantal artikelen dat zich
+				// in de bestelling bevind, wat gecontroleerd wordt middels de Integer value uit artikelCountMap.
 				updateArtikelOpBestelling(bestelling_id,artikelCountMap.get(bestelling_id), aNieuw);
 			}
 		}
@@ -64,12 +67,14 @@ public class ArtikelDAOMySQL extends AbstractDAOMySQL implements interfaces.Arti
 	}
 
 	//Read
-	@Override //Vraag een artikel van een bestelling op
+	
+	// Onderstaande methode vraagt een artikel op van de bestelling op basis van het artikelNummer(artikel1, artikel2 of artikel3).
+	@Override
 	public Artikel getArtikelOpBestelling(long bestelling_id, int artikelNummer) throws RSVIERException {
 		connection = MySQLConnectie.getConnection();
 		try {
 			if (artikelNummer <= 0 & artikelNummer > 3) {
-				System.out.println("artikelNummer is incorrect, kies 1, 2 of 3.");
+				throw new RSVIERException("artikelNummer is incorrect, kies 1, 2 of 3.");
 			}
 			statement = connection.prepareStatement("SELECT artikel" + artikelNummer + "_id, "
 					+ "artikel" + artikelNummer + "_naam, artikel" + artikelNummer + "_prijs "
@@ -79,22 +84,22 @@ public class ArtikelDAOMySQL extends AbstractDAOMySQL implements interfaces.Arti
 			rset.next();
 			artikel = new Artikel(Integer.parseInt(rset.getString(1)), rset.getString(2), rset.getDouble(3));
 		}
+		catch (RSVIERException e) {
+		}
 		catch (SQLException e) {
-			System.out.println("SQLexception tijdens opvragen artikel" + artikelNummer);
-			e.printStackTrace();
+			throw new RSVIERException("SQLexception tijdens opvragen artikel" + artikelNummer);
 		}
 		finally {
 			MySQLHelper.close(connection, statement);
 		}
 		return artikel;
 	}
-	/*
-	 * Methode leest alle artikelen uit een bestelling en geeft ze terug in een Iterator<Artikel>.
-	 */
+	
+	// Onderstaande methode retourneert alle artikelen van de bestelling in een Iterator
 	@Override
 	public Iterator<Artikel> getAlleArtikelenOpBestelling(long bestelling_id) throws RSVIERException {
 		connection = MySQLConnectie.getConnection();
-		//Sla alle artikelen van de bestelling op in een LinkedHashSet
+		//Sla alle artikelen van de bestelling op in een ArrayList
 		ArrayList<Artikel> artikelLijst = new ArrayList<>();
 
 		try {
@@ -124,15 +129,14 @@ public class ArtikelDAOMySQL extends AbstractDAOMySQL implements interfaces.Arti
 		}
 		return null;
 	}
-	/*
-	 * Deze methode stopt alle unieke artikelen in een LinkedHashMap, houd hun aantal bij en geeft deze terug
-	 * in een Iterator<Entry<Artikel, Integer>>.
-	 */
+	
+	// Onderstaande methode retouneerd alle unieke artikelen + hoevaak ze besteld zijn in een Iterator
 	@Override
 	public Iterator<Entry<Artikel, Integer>> getAlleArtikelen() throws RSVIERException {
 		connection = MySQLConnectie.getConnection();
-		//Sla alle unieke artikelen binnen de tabel Bestelling op in een map
+		// Sla alle unieke artikelen binnen de tabel BESTELLING op in een map
 		LinkedHashMap<Artikel, Integer> map = new LinkedHashMap<>();
+		// Alle unieke atikelen worden in een iterator geretouneerd
 		Iterator<Entry<Artikel,Integer>> iterator = null;
 
 		try {
@@ -144,7 +148,7 @@ public class ArtikelDAOMySQL extends AbstractDAOMySQL implements interfaces.Arti
 			
 			while (rset.next()) { //Doorloop rset en voeg alle unieke artikelen toe en update hun aantal
 				for(int x = 1; x <=7 ; x+=3) {
-					if (rset.getString(x) != null) { //Bestelling bevat artikel
+					if (rset.getString(x) != null) { //Zolang de bestelling artikelen bevat voeg ze toe aan de map
 						artikel = new Artikel(Integer.parseInt(rset.getString(x)), rset.getString(x+1), rset.getDouble(x+2));
 						voegArtikelToeAanMap(map, artikel);
 					}
@@ -153,17 +157,17 @@ public class ArtikelDAOMySQL extends AbstractDAOMySQL implements interfaces.Arti
 			return iterator = map.entrySet().iterator();
 		}
 		catch (SQLException e) {
-			System.out.println("SQLexception tijdens getAlleArtikelen()");
-			e.printStackTrace();
+			throw new RSVIERException("SQLexception tijdens getAlleArtikelen()");
 		}
 		finally {
 			MySQLHelper.close(connection, statement);
 		}
-		return null;
 	}
 
 
 	//Update
+	
+	// Onderstaande methode vervangt het artikel dat zich op het doorgegeven artikel(1, 2, 3) nummer bevind met het nieuwe artikel aNieuw
 	@Override
 	public void updateArtikelOpBestelling(long bestelling_id, int artikelNummer, Artikel aNieuw) throws RSVIERException {
 		connection = MySQLConnectie.getConnection();
@@ -190,7 +194,9 @@ public class ArtikelDAOMySQL extends AbstractDAOMySQL implements interfaces.Arti
 			MySQLHelper.close(connection, statement);
 		}
 	}
-	@Override //Methode om een artikel van een bestelling aan te passen.
+	
+	// Onderstaande methode vervangt Artikel aOud met Artikel aNieuw op bestelling(bestelling_id).
+	@Override
 	public void updateArtikelOpBestelling(long bestelling_id, Artikel aOud, Artikel aNieuw) throws RSVIERException {
 		connection = MySQLConnectie.getConnection();
 		int artikelNummer = 0;
@@ -211,7 +217,7 @@ public class ArtikelDAOMySQL extends AbstractDAOMySQL implements interfaces.Arti
 				throw new RSVIERException("Kan artikel(" + aOud.toString() + ") niet vervangen "
 						+ "omdat het zich niet op bestelling" + bestelling_id + " bevind!");
 			}
-			
+			// Update de gegevens op locatie aOud met aNieuw
 			statement = connection.prepareStatement("UPDATE BESTELLING SET "
 					+ "artikel" + artikelNummer + "_id = ?,"
 					+ "artikel" + artikelNummer + "_naam = ?,"
@@ -234,8 +240,10 @@ public class ArtikelDAOMySQL extends AbstractDAOMySQL implements interfaces.Arti
 			MySQLHelper.close(connection, statement);
 		}
 	}
-
-	@Override //Pas alle artikelen in een keer aan door alle artikelen mee te geven
+	
+	
+	// Update alle artikelen van bestelling(bestelling_id) met drie nieuwe artikelen.
+	@Override 
 	public void updateAlleArtikelenOpBestelling(long bestelling_id, Artikel a1, Artikel a2, Artikel a3)
 			throws RSVIERException {
 		connection = MySQLConnectie.getConnection();
@@ -269,29 +277,27 @@ public class ArtikelDAOMySQL extends AbstractDAOMySQL implements interfaces.Arti
 		}
 	}
 
-	//Delete
-	/*
-	 * Deze methode zet de gegevens van het artikel met artikelnummer in bestelling met bestelling_id
-	 * allemaal op -1, -1 geeft dan ook aan dat het artikel onrealistisch is, oftewel niet bestaat.
-	 * Het is niet mogelijk om een artikel te verwijderen atm zonder de gehele bestelling te verwijderen
-	 * maar op deze manier hebben we dit probleem omzeild.
-	 */
+	// Delete
+	
+	// Onderstaande methode verwijdert de artikel gegevens van aOud van de bestelling door de waardes 
+	// in de database allemaal op 0 te zetten. 
 	@Override
 	public void verwijderArtikelVanBestelling(long bestelling_id, Artikel aOud) throws RSVIERException {
-		//Maak een artikel dat alle waardes op -1 zet
+		//Maak een artikel dat alle waardes op 0 zet
 		Artikel artikelWisser = new Artikel(0, "0", 0);
 
-		//Onderstaande methode maakt een connectie, vangt exception en sluit de connectie + statement.
+		// Onderstaande methode update de gegevens van aOud met aNieuw
 		updateArtikelOpBestelling(bestelling_id, aOud, artikelWisser);
 	}
 
-	// Deze methode zet de waardes van alle artikelen van bestelling met bestelling_id op -1.
+	// Onderstaande methode verwijdert alle artikel gegevens van de bestelling door de waardes in de
+	// database op 0 te zetten.
 	@Override
 	public void verwijderAlleArtikelenVanBestelling(long bestelling_id) throws RSVIERException {
-		//artikel met waardes -1
+		//artikel met waardes 0
 		Artikel artikelWisser = new Artikel(0, "0", 0) ;
 
-		//De aangeroepen methode maakt verbinding, vangt exceptie en sluit verbinding + statement
+		//Onderstaande methode update alle artikel gegevens naar 0
 		updateAlleArtikelenOpBestelling(bestelling_id, artikelWisser, artikelWisser, artikelWisser);
 	}
 

@@ -21,7 +21,6 @@ public interface ArtikelDAO {
 	public Artikel getArtikelOpBestelling(long bestelling_id, int artikelNummer) throws RSVIERException;
 	public Iterator<Artikel> getAlleArtikelenOpBestelling(long bestelling_id) throws RSVIERException;
 	public Iterator<Entry<Artikel, Integer>> getAlleArtikelen() throws RSVIERException;
-	//returned een map met alle unieke artikelen + aantal
 
 	//Update
 	public void updateArtikelOpBestelling(long bestelling_id, int artikelNummer, Artikel aNieuw) throws RSVIERException;
