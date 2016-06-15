@@ -47,12 +47,12 @@ public class Artikel implements Comparable{
 	//Ik ga er van uit dat een artikel uniek is als de naam en prijs combinatie niet eerder voorkomt
 	@Override
 	public int hashCode(){ 
-		return artikel_naam.hashCode() + (int)(artikel_prijs * 100);
+		return artikel_naam.hashCode();
 	}
 
 	@Override
 	public boolean equals(Object o) {
-		return (artikel_naam.equals(((Artikel)o).getArtikel_naam()) && artikel_prijs == ((Artikel)o).getArtikel_prijs());
+		return (artikel_naam.equals(((Artikel)o).getArtikel_naam()) && artikel_id == ((Artikel)o).getArtikel_id());
 	}
 
 	@Override
