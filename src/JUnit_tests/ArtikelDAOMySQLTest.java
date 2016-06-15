@@ -89,8 +89,6 @@ public class ArtikelDAOMySQLTest {
 			artikelLijst.add(a);
 		}
 
-		System.out.println(artikelLijst);
-
 		assertEquals(artikel1.getArtikel_id(), artikelLijst.get(0).getArtikel_id());	
 		assertEquals(artikel1.getArtikel_naam(), artikelLijst.get(0).getArtikel_naam());
 		assertTrue(artikel1.getArtikel_prijs() == artikelLijst.get(0).getArtikel_prijs());
