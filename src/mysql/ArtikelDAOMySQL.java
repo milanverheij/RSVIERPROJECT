@@ -3,123 +3,99 @@ package mysql;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.Map.Entry;
 
 import exceptions.RSVIERException;
 import model.Artikel;
 
-/* Author @Douwe Jongeneel on 07-06-16
+/* Author @Douwe Jongeneel
  *
  * Deze klasse regelt een verbinding met de database zodat artikelen aan een bestelling kunnen worden toegevoegd,
  * uitgelezen, geupdate en verwijdert. Er is tevens een methode die alle artikelen uit de database teruggeeft in 
- * een Iterator<Entry<Artikel,Integer>> vorm. Er van uitgaande dat elke bestelling uit max 3 artikelen bestaat 
- * maar dat deze artikelen per bestelling kunnen verschillen.
+ * een Iterator. Er van uitgaande dat elke bestelling uit max 3 artikelen bestaat maar dat deze artikelen per 
+ * bestelling kunnen verschillen.
+ *
+ * TODO1 - artikel_id is nog een int, moet dit ook een long worden? in database was het een varchar geloof ik.
  */
 public class ArtikelDAOMySQL extends AbstractDAOMySQL implements interfaces.ArtikelDAO{
 	private Artikel artikel;
 	private Connection connection;
+	private ResultSet rset = null;
 	//ArtikelCountMap zorgt ervoor dat er per bestelling maar drie artikelen kunnen zijn
-	private LinkedHashMap<Long, Integer> ArtikelCountMap = new LinkedHashMap<>();
+	private LinkedHashMap<Long, Integer> artikelCountMap = new LinkedHashMap<>();
 
-	//Default no-args Constructor
 	public ArtikelDAOMySQL() {
 	}
 
 	//Create
-	/*
-	 * Deze methode voegt een artikel toe aan een bestelling, Krijg alleen de volgende error
-	 * ->java.sql.SQLException: Field 'klant_id' doesn't have a default value<-
-	 * Kan het oplossten door een update te doen inplaats van een nieuwe creeren.
-	 * Maar wou kijken of het ook op deze manier kon.
-	 */
-	@Override //voeg een artikel toe aan een bestelling zolang er nog geen drie artikelen zijn
-	public void nieuwArtikelOpBestelling(long bestelling_id, Artikel a) throws RSVIERException {
-		connection = MySQLConnectie.getConnection();
+
+	// Onderstaande methode voegt een artikel toe aan een bestelling zolang er nog geen drie artikelen 
+	// in de bestelling aanwezig zijn.
+	@Override 
+	public void nieuwArtikelOpBestelling(long bestelling_id, Artikel aNieuw) throws RSVIERException {
 		boolean kanArtikelToevoegen = true;
 
 		try {
-			//Hier wordt gekeken hoeveel artikelen de bestelling al heeft. Het zorgt ervoor dat 
-			//een artikel wordt toegevoegd aan een bestelling zolang er nog geen 3 artikelen zijn.
-			if (!ArtikelCountMap.containsKey(bestelling_id)) {
-				ArtikelCountMap.put(bestelling_id, 1);
+			// Hier wordt gecontroleerd hoeveel artikelen zich in de bestelling bevinden, zolang er
+			// nog geen drie artikelen zijn kan het nieuwe artikel worden toegevoegd.
+			if (!artikelCountMap.containsKey(bestelling_id)) {
+				artikelCountMap.put(bestelling_id, 1);
 			}
-			else if (ArtikelCountMap.get(bestelling_id) >= 3) {
-				System.out.println("Kan geen artikel toevoegen, maximaal 3 artikelen!");
+			else if (artikelCountMap.get(bestelling_id) >= 3) {
 				kanArtikelToevoegen = false;
+				throw new RSVIERException("Kan geen artikel toevoegen, maximaal 3 artikelen!");
 			}
-			else if (ArtikelCountMap.containsKey(bestelling_id)) {
-				ArtikelCountMap.put(bestelling_id, ArtikelCountMap.get(bestelling_id) + 1);
+			else if (artikelCountMap.containsKey(bestelling_id)) {
+				artikelCountMap.put(bestelling_id, artikelCountMap.get(bestelling_id) + 1);
 			}
-			if (kanArtikelToevoegen) {//Zolang er nog geen drie artikelen zijn, voeg artikel toe
-				
-				//In het statement wordt bijgehouden of artikel 1, 3 of 3 wordt toegevoegd
-				statement = connection.prepareStatement("INSERT INTO BESTELLING ("
-						+ "bestelling_id, "
-						+ "artikel" + ArtikelCountMap.get(bestelling_id) + "_id, "
-						+ "artikel" + ArtikelCountMap.get(bestelling_id)  + "_naam, "
-						+ "artikel" + ArtikelCountMap.get(bestelling_id)  + "_prijs) "
-						+ "VALUES (?, ?, ?, ?) "
-						+ "ON DUPLICATE KEY UPDATE "
-						+ "artikel" + ArtikelCountMap.get(bestelling_id) + "_id = ?, "
-						+ "artikel" + ArtikelCountMap.get(bestelling_id)  + "_naam = ?, "
-						+ "artikel" + ArtikelCountMap.get(bestelling_id)  + "_prijs = ?;");
-
-				statement.setInt(1, (int) bestelling_id);
-				statement.setString(2, "" + a.getArtikel_id());
-				statement.setString(3, a.getArtikel_naam());
-				statement.setDouble(4, a.getArtikel_prijs());
-				statement.setString(5, "" + a.getArtikel_id());
-				statement.setString(6, a.getArtikel_naam());
-				statement.setDouble(7, a.getArtikel_prijs());
-
-				statement.executeUpdate();
+			if (kanArtikelToevoegen) {
+				// Het nieuwe artikel wordt toegevoegd aan artikel1, 2 of 3 op basis van het aantal artikelen dat zich
+				// in de bestelling bevind, wat gecontroleerd wordt middels de Integer value uit artikelCountMap.
+				updateArtikelOpBestelling(bestelling_id,artikelCountMap.get(bestelling_id), aNieuw);
 			}
 		}
-		catch (SQLException e) {
-			throw new RSVIERException("SQL exception tijdens aanmaken artikel" + ArtikelCountMap.get(bestelling_id)
-			+ " voor bestelling " + bestelling_id);
+		catch (RSVIERException e) {
 		}
-		finally {
-			MySQLHelper.close(connection, statement);
-		}
-
 	}
 
 	//Read
-	@Override //Geeft een artikel van een bestelling terug als Artikel object
+	
+	// Onderstaande methode vraagt een artikel op van de bestelling op basis van het artikelNummer(artikel1, artikel2 of artikel3).
+	@Override
 	public Artikel getArtikelOpBestelling(long bestelling_id, int artikelNummer) throws RSVIERException {
 		connection = MySQLConnectie.getConnection();
 		try {
 			if (artikelNummer <= 0 & artikelNummer > 3) {
-				System.out.println("artikelNummer is incorrect, kies 1, 2 of 3.");
+				throw new RSVIERException("artikelNummer is incorrect, kies 1, 2 of 3.");
 			}
 			statement = connection.prepareStatement("SELECT artikel" + artikelNummer + "_id, "
 					+ "artikel" + artikelNummer + "_naam, artikel" + artikelNummer + "_prijs "
 					+ "FROM BESTELLING "
 					+ "WHERE bestelling_id = " + bestelling_id + ";");
-			ResultSet rset = statement.executeQuery();
+			rset = statement.executeQuery();
 			rset.next();
 			artikel = new Artikel(Integer.parseInt(rset.getString(1)), rset.getString(2), rset.getDouble(3));
+		}
+		catch (RSVIERException e) {
 		}
 		catch (SQLException e) {
 			throw new RSVIERException("SQLexception tijdens opvragen artikel" + artikelNummer);
 		}
 		finally {
-			MySQLHelper.close(connection, statement);
+			MySQLHelper.close(connection, statement, rset);
 		}
 		return artikel;
 	}
 	
-	//Methode leest alle artikelen uit een bestelling en geeft ze terug in een Iterator<Artikel>.
-	
+	// Onderstaande methode retourneert alle artikelen van de bestelling in een Iterator
 	@Override
 	public Iterator<Artikel> getAlleArtikelenOpBestelling(long bestelling_id) throws RSVIERException {
 		connection = MySQLConnectie.getConnection();
-		//Sla alle artikelen van de bestelling op in een LinkedHashSet
-		LinkedHashSet<Artikel> artikelLijst = new LinkedHashSet<>();
+		//Sla alle artikelen van de bestelling op in een ArrayList
+		ArrayList<Artikel> artikelLijst = new ArrayList<>();
 
 		try {
 			statement = connection.prepareStatement("SELECT artikel1_id, artikel1_naam, artikel1_prijs, "
@@ -127,88 +103,64 @@ public class ArtikelDAOMySQL extends AbstractDAOMySQL implements interfaces.Arti
 					+ "artikel3_id, artikel3_naam, artikel3_prijs "
 					+ "FROM BESTELLING "
 					+ "WHERE bestelling_id = " + bestelling_id + ";");
-			ResultSet rset = statement.executeQuery();
-			rset.next();// move pointer to first record/row
+			rset = statement.executeQuery();
 
-			//Lees een artikel wanneer de bestelling het artikel bevat, !rset.wasNull() zorgt ervoor dat geen null waardes gelezen worden
-			if (rset.getRow() == 1 & !rset.wasNull()) { //Bestelling bevat artikel1
-				artikel = new Artikel(Integer.parseInt(rset.getString(1)), rset.getString(2), rset.getDouble(3));
-				artikelLijst.add(artikel);
+			rset.next(); //Doorloop rset en voeg alle unieke artikelen toe en update hun aantal
+			for(int x = 1; x <=7 ; x+=3) {
+				if (rset.getString(x) != null) { //Bestelling bevat artikel
+					artikel = new Artikel(Integer.parseInt(rset.getString(x)), rset.getString(x+1), rset.getDouble(x+2));
+					artikelLijst.add(artikel);
+				}
 			}
-			if (rset.getRow() == 4 & !rset.wasNull()) { //Bestelling bevat artikel2
-				artikel = new Artikel(Integer.parseInt(rset.getString(4)), rset.getString(5), rset.getDouble(6));
-				artikelLijst.add(artikel);
-			}
-			if (rset.getRow() == 7 & !rset.wasNull()) { //Bestelling bevat artikel3
-				artikel = new Artikel(Integer.parseInt(rset.getString(7)), rset.getString(8), rset.getDouble(9));
-				artikelLijst.add(artikel);
-			}
+			return artikelLijst.iterator();
 		}
 		catch (SQLException e) {
 			throw new RSVIERException("SQLexception tijdens getAlleArtikelen()");
 		}
 		finally {
-			MySQLHelper.close(connection, statement);
+			MySQLHelper.close(connection, statement, rset);
 		}
-		return artikelLijst.iterator();
 	}
-	/*
-	 * Deze methode stopt alle unieke artikelen in een LinkedHashMap en geeft deze terug
-	 * in een Iterator<Entry<Artikel, Integer>> waar alle unieke artikelen inzitten en 
-	 * hoevaak het artikel besteld is.
-	 * 
-	 * TODO - de methode werkt, alleen krijg ik nog niet alle artikelen terug, maar goed
-	 * genoeg voor nu.
-	 */
+	
+	// Onderstaande methode retouneerd alle unieke artikelen + hoevaak ze besteld zijn in een Iterator
 	@Override
 	public Iterator<Entry<Artikel, Integer>> getAlleArtikelen() throws RSVIERException {
 		connection = MySQLConnectie.getConnection();
-		//Sla alle unieke artikelen binnen de tabel Bestelling op in een map
+		// Sla alle unieke artikelen binnen de tabel BESTELLING op in een map
 		LinkedHashMap<Artikel, Integer> map = new LinkedHashMap<>();
-		LinkedHashSet<Entry<Artikel, Integer>> artikelMapEntries = new LinkedHashSet<>();
+		// Alle unieke atikelen worden in een iterator geretouneerd
+		Iterator<Entry<Artikel,Integer>> iterator = null;
 
 		try {
 			statement = connection.prepareStatement("SELECT artikel1_id, artikel1_naam, artikel1_prijs, "
 					+ "artikel2_id, artikel2_naam, artikel2_prijs, "
 					+ "artikel3_id, artikel3_naam, artikel3_prijs "
 					+ "FROM BESTELLING ;");
-			ResultSet rset = statement.executeQuery();
-
+			rset = statement.executeQuery();
+			
 			while (rset.next()) { //Doorloop rset en voeg alle unieke artikelen toe en update hun aantal
-				if (rset.getRow() == 1 & !rset.wasNull()) { //Bestelling bevat artikel1
-					artikel = new Artikel(Integer.parseInt(rset.getString(1)), rset.getString(2), rset.getDouble(3));
-					voegArtikelToeAanMap(map, artikel);
+				for(int x = 1; x <=7 ; x+=3) {
+					if (rset.getString(x) != null) { //Zolang de bestelling artikelen bevat voeg ze toe aan de map
+						artikel = new Artikel(Integer.parseInt(rset.getString(x)), rset.getString(x+1), rset.getDouble(x+2));
+						voegArtikelToeAanMap(map, artikel);
+					}
 				}
-				if (rset.getRow() == 4 & !rset.wasNull()) { //Bestelling bevat artikel2
-					artikel = new Artikel(Integer.parseInt(rset.getString(4)), rset.getString(5), rset.getDouble(6));
-					voegArtikelToeAanMap(map, artikel);
-				}
-				if (rset.getRow() == 7 & !rset.wasNull()) { //Bestelling bevat artikel3
-					artikel = new Artikel(Integer.parseInt(rset.getString(7)), rset.getString(8), rset.getDouble(9));
-					voegArtikelToeAanMap(map, artikel);
-				}
-				rset.next();
 			}
-			// De map wordt omgezet in LinkedHashSet<Entry<Artikel, Iteger>>
-			artikelMapEntries.addAll(map.entrySet());
-		}
-		catch (NumberFormatException e) {
-			e.printStackTrace();
+			return iterator = map.entrySet().iterator();
 		}
 		catch (SQLException e) {
 			throw new RSVIERException("SQLexception tijdens getAlleArtikelen()");
 		}
 		finally {
-			MySQLHelper.close(connection, statement);
+			MySQLHelper.close(connection, statement, rset);
 		}
-		// Hier wordt een Iterator<Entry<Artikel, Integer>> geretouneerd.
-		return artikelMapEntries.iterator();
 	}
 
-
 	//Update
-	@Override //pas een artikel van een bestelling aan door het nummer van het artikel mee te geven.
-	public void updateArtikelOpBestelling(long bestelling_id, int artikelNummer, Artikel a1) throws RSVIERException {
+	
+	// Onderstaande methode vervangt het artikel dat zich op het doorgegeven artikel(1, 2, 3) nummer bevind met het nieuwe artikel aNieuw
+	@Override
+	public void updateArtikelOpBestelling(long bestelling_id, int artikelNummer, Artikel aNieuw) throws RSVIERException {
 		connection = MySQLConnectie.getConnection();
 		try {
 			statement = connection.prepareStatement("UPDATE BESTELLING SET "
@@ -217,9 +169,9 @@ public class ArtikelDAOMySQL extends AbstractDAOMySQL implements interfaces.Arti
 					+ "artikel" + artikelNummer + "_prijs = ? "
 					+ "WHERE bestelling_id = " + bestelling_id + ";");
 
-			statement.setString(1, "" + a1.getArtikel_id());
-			statement.setString(2, a1.getArtikel_naam());
-			statement.setDouble(3, a1.getArtikel_prijs());
+			statement.setString(1, "" + aNieuw.getArtikel_id());
+			statement.setString(2, aNieuw.getArtikel_naam());
+			statement.setDouble(3, aNieuw.getArtikel_prijs());
 
 			statement.executeUpdate();
 
@@ -231,8 +183,56 @@ public class ArtikelDAOMySQL extends AbstractDAOMySQL implements interfaces.Arti
 			MySQLHelper.close(connection, statement);
 		}
 	}
+	
+	// Onderstaande methode vervangt Artikel aOud met Artikel aNieuw op bestelling(bestelling_id).
+	@Override
+	public void updateArtikelOpBestelling(long bestelling_id, Artikel aOud, Artikel aNieuw) throws RSVIERException {
+		connection = MySQLConnectie.getConnection();
+		int artikelNummer = 0;
+		
+		try {
+			// Kijk of het artikel dat geupdate dient te worden artikel1, 2 of 3 is in de DataBase.
+			statement = connection.prepareStatement("SELECT artikel1_id, artikel2_id, artikel3_id "
+					+ "FROM BESTELLING WHERE bestelling_id = " + bestelling_id + ";");
+			ResultSet rset = statement.executeQuery();
+			rset.next();
+			for(int i = 1; i <= rset.getMetaData().getColumnCount(); i++) {
+				if (rset.getInt(/*vanKolom*/i) == aOud.getArtikel_id()) {
+					artikelNummer = i;
+				}
+			}
+			// Wanneer de bestelling het oude artikel niet bevat throw Exception
+			if (artikelNummer == 0) {
+				throw new RSVIERException("Kan artikel(" + aOud.toString() + ") niet vervangen "
+						+ "omdat het zich niet op bestelling" + bestelling_id + " bevind!");
+			}
+			// Update de gegevens op locatie aOud met aNieuw
+			statement = connection.prepareStatement("UPDATE BESTELLING SET "
+					+ "artikel" + artikelNummer + "_id = ?,"
+					+ "artikel" + artikelNummer + "_naam = ?,"
+					+ "artikel" + artikelNummer + "_prijs = ? "
+					+ "WHERE bestelling_id = " + bestelling_id + ";");
 
-	@Override //Pas alle artikelen in een keer aan door alle artikelen mee te geven
+			statement.setString(1, "" + aNieuw.getArtikel_id());
+			statement.setString(2, aNieuw.getArtikel_naam());
+			statement.setDouble(3, aNieuw.getArtikel_prijs());
+
+			statement.executeUpdate();
+
+		}
+		catch (RSVIERException e) {
+		}
+		catch (SQLException e) {
+			throw new RSVIERException("SQLexception update artikel " + artikelNummer + " ging verkeerd");
+		}
+		finally {
+			MySQLHelper.close(connection, statement);
+		}
+	}
+	
+	
+	// Update alle artikelen van bestelling(bestelling_id) met drie nieuwe artikelen.
+	@Override 
 	public void updateAlleArtikelenOpBestelling(long bestelling_id, Artikel a1, Artikel a2, Artikel a3)
 			throws RSVIERException {
 		connection = MySQLConnectie.getConnection();
@@ -264,30 +264,87 @@ public class ArtikelDAOMySQL extends AbstractDAOMySQL implements interfaces.Arti
 			MySQLHelper.close(connection, statement);
 		}
 	}
+	
+	// Onderstaande methode update alle gegevens van het artikel dat meegegeven wordt in de ghele DataBase
+	public void updateArtikelen(Artikel aNieuw) throws RSVIERException {
+		connection = MySQLConnectie.getConnection();
+		
+		try {
+			connection.setAutoCommit(false);
+			statement = connection.prepareStatement("UPDATE BESTELLING SET "
+					+ "artikel1_id = ?,"
+					+ "artikel1_naam = ?,"
+					+ "artikel1_prijs = ? "
+					+ "WHERE artikel1_id = ?;");
+			
+			
 
-	//Delete
-	/*
-	 * Deze methode zet de gegevens op -1 van het artikel met artikelnummer in bestelling met bestelling_id.
-	 * -1 geeft aan dat het artikel onrealistisch is, oftewel niet bestaat.
-	 * Het is niet mogelijk om een artikel te verwijderen zonder de gehele bestelling te verwijderen
-	 * maar op deze manier kunnen we wel een artikel in een bestelling resetten/verwijderen.
-	 */
+			statement.setLong(1, aNieuw.getArtikel_id());
+			statement.setString(2, aNieuw.getArtikel_naam());
+			statement.setDouble(3, aNieuw.getArtikel_prijs());
+			statement.setLong(4, aNieuw.getArtikel_id());
+			statement.executeUpdate();
+			
+			statement = connection.prepareStatement("UPDATE BESTELLING SET "
+					+ "artikel2_id = ?,"
+					+ "artikel2_naam = ?,"
+					+ "artikel2_prijs = ? "
+					+ "WHERE artikel2_id = ?;");
+			
+			
+
+			statement.setLong(1, aNieuw.getArtikel_id());
+			statement.setString(2, aNieuw.getArtikel_naam());
+			statement.setDouble(3, aNieuw.getArtikel_prijs());
+			statement.setString(4, aNieuw.getArtikel_naam());
+			statement.executeUpdate();
+			
+			statement = connection.prepareStatement("UPDATE BESTELLING SET "
+					+ "artikel3_id = ?,"
+					+ "artikel3_naam = ?,"
+					+ "artikel3_prijs = ? "
+					+ "WHERE artikel3_id = ?;");
+
+			statement.setLong(1, aNieuw.getArtikel_id());
+			statement.setString(2, aNieuw.getArtikel_naam());
+			statement.setDouble(3, aNieuw.getArtikel_prijs());
+			statement.setString(4, aNieuw.getArtikel_naam());
+			statement.executeUpdate();
+
+			connection.commit();
+
+		}
+		catch (SQLException e) {
+			throw new RSVIERException("SQLexception update artikel " + aNieuw.getArtikel_naam() + " ging verkeerd" + "\n" + e.getMessage());
+		}
+		finally {
+			MySQLHelper.close(connection, statement);
+		}
+	}
+	
+	
+	
+	// Delete
+	
+	// Onderstaande methode verwijdert de artikel gegevens van aOud van de bestelling door de waardes 
+	// in de database allemaal op 0 te zetten. 
 	@Override
-	public void verwijderArtikelVanBestelling(long bestelling_id, int artikelNummer) throws RSVIERException {
-		//Maak een artikel dat alle waardes op -1 zet
-		Artikel artikelWisser = new Artikel(-1, "-1", -1);
+	public void verwijderArtikelVanBestelling(long bestelling_id, Artikel aOud) throws RSVIERException {
+		//Maak een artikel dat alle waardes op 0 zet
+		Artikel artikelWisser = new Artikel(0, "0", 0);
 
-		//Onderstaande methode maakt een connectie, vangt exception en sluit de connectie + statement.
-		updateArtikelOpBestelling(bestelling_id, artikelNummer, artikelWisser);
+		// Onderstaande methode update de gegevens van aOud met aNieuw
+		updateArtikelOpBestelling(bestelling_id, aOud, artikelWisser);
 	}
 
-	// Deze methode zet de waardes van alle artikelen op -1 van bestelling met bestelling_id.
+	// Onderstaande methode verwijdert alle artikel gegevens van de bestelling door de waardes in de
+	// database op 0 te zetten.
 	@Override
 	public void verwijderAlleArtikelenVanBestelling(long bestelling_id) throws RSVIERException {
-		//artikel met waardes -1
-		Artikel artikelWisser = new Artikel(-1, "-1", -1) ;
+		//artikel met waardes 0
+		Artikel artikelWisser = new Artikel(0, "0", 0) ;
 
-		//De aangeroepen methode maakt verbinding, vangt exceptie en sluit verbinding + statement
+		//Onderstaande methode update alle artikel gegevens naar 0
 		updateAlleArtikelenOpBestelling(bestelling_id, artikelWisser, artikelWisser, artikelWisser);
 	}
 

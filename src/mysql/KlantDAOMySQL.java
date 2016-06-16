@@ -25,6 +25,7 @@ import java.util.ListIterator;
  */
 
 public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
+    // Veel gebruikte en gedeelde variabelen
     String query = "";
     ArrayList<Klant> klantenLijst;
     BestellingDAOMySQL bestellingDAO;
@@ -44,10 +45,12 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
      * @throws RSVIERException Foutmelding bij SQLException, info wordt meegegeven.
      */
     @Override
-    public void nieuweKlant(String voornaam,
+    public long nieuweKlant(String voornaam,
                             String achternaam,
                             Adres adresgegevens) throws RSVIERException {
-        nieuweKlant(voornaam, achternaam, "", "", adresgegevens, null);
+        long nieuwID = nieuweKlant(voornaam, achternaam, "", "", adresgegevens, null);
+
+        return nieuwID;
     }
 
     /**
@@ -58,9 +61,11 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
      * @param achternaam De achternaam van de klant (max 51 karakters).
      */
     @Override
-    public void nieuweKlant(String voornaam,
+    public long nieuweKlant(String voornaam,
                             String achternaam) throws RSVIERException {
-        nieuweKlant(voornaam, achternaam, new Adres("", "", "", 0, ""));
+        long nieuwID = nieuweKlant(voornaam, achternaam, null);
+
+        return nieuwID;
     }
 
     /**
@@ -78,7 +83,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
      */
 
     @Override
-    public void nieuweKlant(String voornaam,
+    public long nieuweKlant(String voornaam,
                             String achternaam,
                             String tussenvoegsel,
                             String email,
@@ -118,8 +123,9 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
                 bestelGegevens.setKlant_id(nieuwId);
                 bestellingDAO.nieuweBestelling(bestelGegevens);
             }
-            System.out.println("\n\tKlantDAOMySQL: KLANT: " + voornaam + " SUCCESVOL GEMAAKT");
+//            System.out.println("\n\tKlantDAOMySQL: KLANT: " + voornaam + " SUCCESVOL GEMAAKT");
 
+            return nieuwId;
         } catch (SQLException ex) {
             throw new RSVIERException("KlantDAOMySQL: SQL FOUT TIJDENS AANMAKEN KLANT");
         } finally {
@@ -452,11 +458,13 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
      * @throws RSVIERException Foutmelding bij SQLException, info wordt meegegeven.
      */
     @Override
-    public void verwijderKlant(long klantId) throws RSVIERException {
+    public long verwijderKlant(long klantId) throws RSVIERException {
         connection = MySQLConnectie.getConnection();
+        long verwijderdID = -1;
+
         try {
             bestellingDAO = new BestellingDAOMySQL();
-            bestellingDAO.verwijderAlleBestellingenKlant(klantId);
+            verwijderdID = bestellingDAO.verwijderAlleBestellingenKlant(klantId);
 
             query = "DELETE FROM " +
                     "KLANT " +
@@ -470,6 +478,41 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
             throw new RSVIERException("KlantDAOMySQL: SQL FOUT TIJDENS VERWIJDEREN KLANT OP ID");
         } finally {
             MySQLHelper.close(connection, statement);
+            return verwijderdID;
+        }
+    }
+
+
+    @Override
+    public void verwijderKlant(String voornaam, String achternaam) throws RSVIERException {
+        /**
+         * Methode om een klant te verwijderen op basis van alleen voor- en achternaam;
+         *
+         * @param voornaam Voornaam van de te verwijderen
+         * @param achternaam Achternaam van de te verwijderen klant
+         * @throws RSVIERException Foutmelding bij SQLException, info wordt meegegeven.
+         */
+
+        connection = MySQLConnectie.getConnection();
+        try {
+            query = "SELECT klant_id FROM " +
+                    "KLANT " +
+                    "WHERE " +
+                    "voornaam LIKE ? AND " +
+                    "achternaam LIKE ?;";
+            statement = connection.prepareStatement(query);
+            statement.setString(1, voornaam);
+            statement.setString(2, achternaam);
+            resultSet = statement.executeQuery();
+
+            while (resultSet.next()) {
+                verwijderKlant(resultSet.getInt(1));
+            }
+
+        } catch (SQLException ex) {
+            throw new RSVIERException("KlantDAOMySQL: SQL FOUT TIJDENS VERWIJDEREN KLANT OP VOORNAAM & ACHTERNAAM");
+        } finally {
+            MySQLHelper.close(connection, statement, resultSet);
         }
     }
 
@@ -520,15 +563,22 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
      * @throws RSVIERException Foutmelding bij SQLException, info wordt meegegeven.
      */
     @Override
-    public void verwijderKlantOpBestellingId(long bestellingId) throws RSVIERException {
-        ListIterator<Klant> klantenIterator = getKlantOpBestelling(bestellingId);
+    public long verwijderKlantOpBestellingId(long bestellingId) throws RSVIERException {
 
+        // Klant wordt opgehaald uit de database om op basis van BestelID het klantID te vinden.
+        ListIterator<Klant> klantenIterator = getKlantOpBestelling(bestellingId);
+        long verwijderdId = -1;
+
+        // De klantenlijst wordt doorlopen en de klant wordt verwijderd.
         if (klantenIterator != null) {
             while (klantenIterator.hasNext()) {
                 Klant tijdelijkeKlant = klantenIterator.next();
-                verwijderKlant(tijdelijkeKlant.getKlant_id());
+                verwijderdId = verwijderKlant(tijdelijkeKlant.getKlant_id());
             }
         }
+
+        // Het verwijderde klantID wordt geretourneerd (o.a. gebruikt om te testen)
+        return verwijderdId;
     }
 
     // =================================================================================================================
@@ -571,7 +621,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
         }
     }
 
-    // TODO: Tijdelijk om naar console te printen, aangezien later naar GUI gaat
+    // TODO: Tijdelijk om naar console te printen, aangezien later naar GUI gaat deze methode er weer uit
     public void printKlantenInConsole(ListIterator<Klant> klantenIterator) {
 
         while (klantenIterator.hasNext()) {
