@@ -7,7 +7,7 @@ package model;
  * in een LinkedHasMap kunnen worden opgeslagen in de database.
  */
 
-public class Artikel implements Comparable{
+public class Artikel implements Comparable<Artikel>{
 	//Data field
 	private int artikel_id;
 	private String artikel_naam;
@@ -43,16 +43,16 @@ public class Artikel implements Comparable{
 		this.artikel_prijs = artikel_prijs;
 	}
 	
-	//Voor het vergelijken van artikelen
-	//Ik ga er van uit dat een artikel uniek is als de naam en prijs combinatie niet eerder voorkomt
+	// Het vergelijken van artikelen gebeurt op basis van artikel_naam & artikel_id.
+	// artikel_prijs wordt niet langer meegenomen in de vergelijking.
 	@Override
 	public int hashCode(){ 
-		return artikel_naam.hashCode() + (int)(artikel_prijs * 100);
+		return artikel_naam.hashCode();
 	}
 
 	@Override
 	public boolean equals(Object o) {
-		return (artikel_naam.equals(((Artikel)o).getArtikel_naam()) && artikel_prijs == ((Artikel)o).getArtikel_prijs());
+		return (artikel_naam.equals(((Artikel)o).getArtikel_naam()) && artikel_id == ((Artikel)o).getArtikel_id());
 	}
 
 	@Override
@@ -61,11 +61,11 @@ public class Artikel implements Comparable{
 	}
 
 	@Override
-	public int compareTo(Object o) {
-		if (this.artikel_id == ((Artikel)o).getArtikel_id()) {
+	public int compareTo(Artikel o) {
+		if (this.artikel_id == o.getArtikel_id()) {
 			return 0;
 		}
-		else if (this.artikel_id > ((Artikel)o).getArtikel_id()) {
+		else if (this.artikel_id > o.getArtikel_id()) {
 			return 1;
 		}
 		else {

@@ -29,7 +29,7 @@ public interface KlantDAO {
      * @param adresgegevens De adresgegevens van de klant in een Adres object (Adres).
      * @throws RSVIERException Foutmelding bij SQLException, info wordt meegegeven.
      */
-    void nieuweKlant(String voornaam,
+    long nieuweKlant(String voornaam,
                      String achternaam,
                      Adres adresgegevens) throws RSVIERException;
 
@@ -41,7 +41,7 @@ public interface KlantDAO {
      * @param achternaam De achternaam van de klant (max 51 karakters).
      * @throws RSVIERException Foutmelding bij SQLException, info wordt meegegeven.
      */
-    void nieuweKlant(String voornaam,
+    long nieuweKlant(String voornaam,
                      String achternaam) throws RSVIERException;
 
     /**
@@ -57,7 +57,7 @@ public interface KlantDAO {
      * @param bestelGegevens Bestelgegevens van de klant in een Bestel object (zie Bestelling).
      * @throws RSVIERException Foutmelding bij SQLException, info wordt meegegeven.
      */
-    void nieuweKlant(String voornaam,
+    long nieuweKlant(String voornaam,
                     String achternaam,
                     String tussenvoegsel,
                     String email,
@@ -194,7 +194,17 @@ public interface KlantDAO {
      * @param klantId Klant_id van de te verwijderen klant.
      * @throws RSVIERException Foutmelding bij SQLException, info wordt meegegeven.
      */
-    void verwijderKlant(long klantId) throws RSVIERException;
+    long verwijderKlant(long klantId) throws RSVIERException;
+
+    /**
+     * Methode om een klant te verwijderen op basis van alleen voor- en achternaam;
+     *
+     * @param voornaam Voornaam van de te verwijderen
+     * @param achternaam Achternaam van de te verwijderen klant
+     * @throws RSVIERException Foutmelding bij SQLException, info wordt meegegeven.
+     */
+    void verwijderKlant(String voornaam,
+                        String achternaam) throws RSVIERException;
 
     /**
      * Methode om een klant te verwijderen op basis van naamgegevens. Alle bestellingen van de klant worden
@@ -215,7 +225,7 @@ public interface KlantDAO {
      * @param bestellingId Bestel-ID van de te verwijderen klant.
      * @throws RSVIERException Foutmelding bij SQLException, info wordt meegegeven.
      */
-    void verwijderKlantOpBestellingId(long bestellingId) throws RSVIERException;
+    long verwijderKlantOpBestellingId(long bestellingId) throws RSVIERException;
 
     // TODO: Tijdelijk om naar console te printen, aangezien later naar GUI gaat
     public void printKlantenInConsole(ListIterator<Klant> klantenIterator);

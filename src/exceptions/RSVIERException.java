@@ -7,6 +7,7 @@ package exceptions;
  * naar toe te kunnen gooien. Worden in de GUI opgevangen en verwerkt.
  *
  */
+@SuppressWarnings("serial")
 public class RSVIERException extends Exception {
 
     /** Standaard constructor om message mee te geven */

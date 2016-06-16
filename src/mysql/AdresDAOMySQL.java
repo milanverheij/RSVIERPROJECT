@@ -19,19 +19,29 @@ public class AdresDAOMySQL extends AbstractDAOMySQL implements AdresDAO {
     String query = "";
     Connection connection;
 
+    // public om test toegang te laten hebben, heeft verder geen impact op functionaliteit derhalve geen
+    // veiligheidsrisico. Standaard wordt een sowieso fout adres meegegeven. Enkel als deze gewijzigd wordt
+    // door middel van de klantWordtGetet 'schakelaar' kan deze het juiste adres of null aannemen.
+    public static boolean klantWordtGetest = false;
+    public static Adres aangeroepenAdresInTest = new Adres("XXXXXX", "XXXX", "XX", 0000, "XXXX"); // Geeft altijd FOUT
+
     /**
      * @param adresgegevens De opgegeven adresgegevens van de klant
      * @throws RSVIERException Foutmelding bij SQLException, info wordt meegegeven.
      */
     @Override
     public void updateAdres(long klant_id, Adres adresgegevens) throws RSVIERException {
-        connection = MySQLConnectie.getConnection();
+        connection = MySQLConnectieLeverancier.getConnection();
 
         // Als er null wordt meegegeven als Adres wordt er een standaard leeg-adres geschrevne.
         if (adresgegevens == null) {
             adresgegevens = new Adres();
         }
 
+        if (klantWordtGetest)
+            aangeroepenAdresInTest = adresgegevens;
+
+        // TODO: Een check op juiste invoer van gegevens.
         try {
             query = "UPDATE KLANT " +
                     "SET " +

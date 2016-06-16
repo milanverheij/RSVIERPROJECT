@@ -1,6 +1,5 @@
-//import interfaces.AdresDAO;
-//import interfaces.ArtikelDAO;
-import exceptions.RSVIERException;
+package factories;
+
 import interfaces.AdresDAO;
 import interfaces.ArtikelDAO;
 import interfaces.BestellingDAO;
