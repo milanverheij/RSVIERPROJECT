@@ -14,15 +14,17 @@ import model.Artikel;
 /* Author @Douwe Jongeneel
  *
  * Deze klasse regelt een verbinding met de database zodat artikelen aan een bestelling kunnen worden toegevoegd,
- * uitgelezen, geupdate en verwijdert. Er is tevens een methode die alle artikelen uit de database teruggeeft.
- * Er van uitgaande dat elke bestelling uit max 3 artikelen bestaat maar dat deze artikelen per bestelling kunnen
- * verschillen.
+ * uitgelezen, geupdate en verwijdert. Er is tevens een methode die alle artikelen uit de database teruggeeft in 
+ * een Iterator. Er van uitgaande dat elke bestelling uit max 3 artikelen bestaat maar dat deze artikelen per 
+ * bestelling kunnen verschillen.
  *
  * TODO1 - artikel_id is nog een int, moet dit ook een long worden? in database was het een varchar geloof ik.
  */
 public class ArtikelDAOMySQL extends AbstractDAOMySQL implements interfaces.ArtikelDAO{
 	private Artikel artikel;
 	private Connection connection;
+	private ResultSet rset = null;
+	//ArtikelCountMap zorgt ervoor dat er per bestelling maar drie artikelen kunnen zijn
 	private LinkedHashMap<Long, Integer> artikelCountMap = new LinkedHashMap<>();
 
 	public ArtikelDAOMySQL() {
@@ -32,10 +34,8 @@ public class ArtikelDAOMySQL extends AbstractDAOMySQL implements interfaces.Arti
 
 	// Onderstaande methode voegt een artikel toe aan een bestelling zolang er nog geen drie artikelen 
 	// in de bestelling aanwezig zijn.
-	
 	@Override 
 	public void nieuwArtikelOpBestelling(long bestelling_id, Artikel aNieuw) throws RSVIERException {
-		connection = MySQLConnectie.getConnection();
 		boolean kanArtikelToevoegen = true;
 
 		try {
@@ -45,8 +45,8 @@ public class ArtikelDAOMySQL extends AbstractDAOMySQL implements interfaces.Arti
 				artikelCountMap.put(bestelling_id, 1);
 			}
 			else if (artikelCountMap.get(bestelling_id) >= 3) {
-				System.out.println("Kan geen artikel toevoegen, maximaal 3 artikelen!");
 				kanArtikelToevoegen = false;
+				throw new RSVIERException("Kan geen artikel toevoegen, maximaal 3 artikelen!");
 			}
 			else if (artikelCountMap.containsKey(bestelling_id)) {
 				artikelCountMap.put(bestelling_id, artikelCountMap.get(bestelling_id) + 1);
@@ -57,13 +57,8 @@ public class ArtikelDAOMySQL extends AbstractDAOMySQL implements interfaces.Arti
 				updateArtikelOpBestelling(bestelling_id,artikelCountMap.get(bestelling_id), aNieuw);
 			}
 		}
-		catch(RSVIERException e) {
-			e.printStackTrace();
+		catch (RSVIERException e) {
 		}
-		finally {
-			MySQLHelper.close(connection, statement);
-		}
-
 	}
 
 	//Read
@@ -80,7 +75,7 @@ public class ArtikelDAOMySQL extends AbstractDAOMySQL implements interfaces.Arti
 					+ "artikel" + artikelNummer + "_naam, artikel" + artikelNummer + "_prijs "
 					+ "FROM BESTELLING "
 					+ "WHERE bestelling_id = " + bestelling_id + ";");
-			ResultSet rset = statement.executeQuery();
+			rset = statement.executeQuery();
 			rset.next();
 			artikel = new Artikel(Integer.parseInt(rset.getString(1)), rset.getString(2), rset.getDouble(3));
 		}
@@ -90,7 +85,7 @@ public class ArtikelDAOMySQL extends AbstractDAOMySQL implements interfaces.Arti
 			throw new RSVIERException("SQLexception tijdens opvragen artikel" + artikelNummer);
 		}
 		finally {
-			MySQLHelper.close(connection, statement);
+			MySQLHelper.close(connection, statement, rset);
 		}
 		return artikel;
 	}
@@ -108,7 +103,7 @@ public class ArtikelDAOMySQL extends AbstractDAOMySQL implements interfaces.Arti
 					+ "artikel3_id, artikel3_naam, artikel3_prijs "
 					+ "FROM BESTELLING "
 					+ "WHERE bestelling_id = " + bestelling_id + ";");
-			ResultSet rset = statement.executeQuery();
+			rset = statement.executeQuery();
 
 			rset.next(); //Doorloop rset en voeg alle unieke artikelen toe en update hun aantal
 			for(int x = 1; x <=7 ; x+=3) {
@@ -119,15 +114,12 @@ public class ArtikelDAOMySQL extends AbstractDAOMySQL implements interfaces.Arti
 			}
 			return artikelLijst.iterator();
 		}
-
 		catch (SQLException e) {
-			System.out.println("SQLexception tijdens getAlleArtikelen()");
-			e.printStackTrace();
+			throw new RSVIERException("SQLexception tijdens getAlleArtikelen()");
 		}
 		finally {
-			MySQLHelper.close(connection, statement);
+			MySQLHelper.close(connection, statement, rset);
 		}
-		return null;
 	}
 	
 	// Onderstaande methode retouneerd alle unieke artikelen + hoevaak ze besteld zijn in een Iterator
@@ -144,7 +136,7 @@ public class ArtikelDAOMySQL extends AbstractDAOMySQL implements interfaces.Arti
 					+ "artikel2_id, artikel2_naam, artikel2_prijs, "
 					+ "artikel3_id, artikel3_naam, artikel3_prijs "
 					+ "FROM BESTELLING ;");
-			ResultSet rset = statement.executeQuery();
+			rset = statement.executeQuery();
 			
 			while (rset.next()) { //Doorloop rset en voeg alle unieke artikelen toe en update hun aantal
 				for(int x = 1; x <=7 ; x+=3) {
@@ -160,10 +152,9 @@ public class ArtikelDAOMySQL extends AbstractDAOMySQL implements interfaces.Arti
 			throw new RSVIERException("SQLexception tijdens getAlleArtikelen()");
 		}
 		finally {
-			MySQLHelper.close(connection, statement);
+			MySQLHelper.close(connection, statement, rset);
 		}
 	}
-
 
 	//Update
 	
@@ -171,7 +162,6 @@ public class ArtikelDAOMySQL extends AbstractDAOMySQL implements interfaces.Arti
 	@Override
 	public void updateArtikelOpBestelling(long bestelling_id, int artikelNummer, Artikel aNieuw) throws RSVIERException {
 		connection = MySQLConnectie.getConnection();
-		
 		try {
 			statement = connection.prepareStatement("UPDATE BESTELLING SET "
 					+ "artikel" + artikelNummer + "_id = ?,"
@@ -187,8 +177,7 @@ public class ArtikelDAOMySQL extends AbstractDAOMySQL implements interfaces.Arti
 
 		}
 		catch (SQLException e) {
-			System.out.println("SQLexception update artikel " + artikelNummer + " ging verkeerd");
-			e.printStackTrace();
+			throw new RSVIERException("SQLexception update artikel " + artikelNummer + " ging verkeerd");
 		}
 		finally {
 			MySQLHelper.close(connection, statement);
@@ -212,7 +201,7 @@ public class ArtikelDAOMySQL extends AbstractDAOMySQL implements interfaces.Arti
 					artikelNummer = i;
 				}
 			}
-			// Wanneer de bestelling het oude artikel niet bevat t
+			// Wanneer de bestelling het oude artikel niet bevat throw Exception
 			if (artikelNummer == 0) {
 				throw new RSVIERException("Kan artikel(" + aOud.toString() + ") niet vervangen "
 						+ "omdat het zich niet op bestelling" + bestelling_id + " bevind!");
@@ -268,15 +257,73 @@ public class ArtikelDAOMySQL extends AbstractDAOMySQL implements interfaces.Arti
 
 		}
 		catch (SQLException e) {
-			System.out.println("SQLexception update artikelen van bestelling met"
+			throw new RSVIERException("SQLexception update artikelen van bestelling met"
 					+ bestelling_id + " ging verkeerd");
-			e.printStackTrace();
 		}
 		finally {
 			MySQLHelper.close(connection, statement);
 		}
 	}
+	
+	// Onderstaande methode update alle gegevens van het artikel dat meegegeven wordt in de ghele DataBase
+	public void updateArtikelen(Artikel aNieuw) throws RSVIERException {
+		connection = MySQLConnectie.getConnection();
+		
+		try {
+			connection.setAutoCommit(false);
+			statement = connection.prepareStatement("UPDATE BESTELLING SET "
+					+ "artikel1_id = ?,"
+					+ "artikel1_naam = ?,"
+					+ "artikel1_prijs = ? "
+					+ "WHERE artikel1_id = ?;");
+			
+			
 
+			statement.setLong(1, aNieuw.getArtikel_id());
+			statement.setString(2, aNieuw.getArtikel_naam());
+			statement.setDouble(3, aNieuw.getArtikel_prijs());
+			statement.setLong(4, aNieuw.getArtikel_id());
+			statement.executeUpdate();
+			
+			statement = connection.prepareStatement("UPDATE BESTELLING SET "
+					+ "artikel2_id = ?,"
+					+ "artikel2_naam = ?,"
+					+ "artikel2_prijs = ? "
+					+ "WHERE artikel2_id = ?;");
+			
+			
+
+			statement.setLong(1, aNieuw.getArtikel_id());
+			statement.setString(2, aNieuw.getArtikel_naam());
+			statement.setDouble(3, aNieuw.getArtikel_prijs());
+			statement.setString(4, aNieuw.getArtikel_naam());
+			statement.executeUpdate();
+			
+			statement = connection.prepareStatement("UPDATE BESTELLING SET "
+					+ "artikel3_id = ?,"
+					+ "artikel3_naam = ?,"
+					+ "artikel3_prijs = ? "
+					+ "WHERE artikel3_id = ?;");
+
+			statement.setLong(1, aNieuw.getArtikel_id());
+			statement.setString(2, aNieuw.getArtikel_naam());
+			statement.setDouble(3, aNieuw.getArtikel_prijs());
+			statement.setString(4, aNieuw.getArtikel_naam());
+			statement.executeUpdate();
+
+			connection.commit();
+
+		}
+		catch (SQLException e) {
+			throw new RSVIERException("SQLexception update artikel " + aNieuw.getArtikel_naam() + " ging verkeerd" + "\n" + e.getMessage());
+		}
+		finally {
+			MySQLHelper.close(connection, statement);
+		}
+	}
+	
+	
+	
 	// Delete
 	
 	// Onderstaande methode verwijdert de artikel gegevens van aOud van de bestelling door de waardes 
