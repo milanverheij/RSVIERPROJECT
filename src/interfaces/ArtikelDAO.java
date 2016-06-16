@@ -26,7 +26,8 @@ public interface ArtikelDAO {
 	public void updateArtikelOpBestelling(long bestelling_id, int artikelNummer, Artikel aNieuw) throws RSVIERException;
 	public void updateArtikelOpBestelling(long bestelling_id, Artikel aOud, Artikel aNieuw) throws RSVIERException;
 	public void updateAlleArtikelenOpBestelling(long bestelling_id, Artikel a1, Artikel a2, Artikel a3) throws RSVIERException;
-
+	public void updateArtikelen(Artikel aNieuw) throws RSVIERException;
+	
 	//Delete
 	public void verwijderArtikelVanBestelling(long bestelling_id, Artikel a) throws RSVIERException;
 	public void verwijderAlleArtikelenVanBestelling(long bestelling_id) throws RSVIERException;

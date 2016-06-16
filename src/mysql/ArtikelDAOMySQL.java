@@ -264,7 +264,66 @@ public class ArtikelDAOMySQL extends AbstractDAOMySQL implements interfaces.Arti
 			MySQLHelper.close(connection, statement);
 		}
 	}
+	
+	// Onderstaande methode update alle gegevens van het artikel dat meegegeven wordt in de ghele DataBase
+	public void updateArtikelen(Artikel aNieuw) throws RSVIERException {
+		connection = MySQLConnectie.getConnection();
+		
+		try {
+			connection.setAutoCommit(false);
+			statement = connection.prepareStatement("UPDATE BESTELLING SET "
+					+ "artikel1_id = ?,"
+					+ "artikel1_naam = ?,"
+					+ "artikel1_prijs = ? "
+					+ "WHERE artikel1_id = ?;");
+			
+			
 
+			statement.setLong(1, aNieuw.getArtikel_id());
+			statement.setString(2, aNieuw.getArtikel_naam());
+			statement.setDouble(3, aNieuw.getArtikel_prijs());
+			statement.setLong(4, aNieuw.getArtikel_id());
+			statement.executeUpdate();
+			
+			statement = connection.prepareStatement("UPDATE BESTELLING SET "
+					+ "artikel2_id = ?,"
+					+ "artikel2_naam = ?,"
+					+ "artikel2_prijs = ? "
+					+ "WHERE artikel2_id = ?;");
+			
+			
+
+			statement.setLong(1, aNieuw.getArtikel_id());
+			statement.setString(2, aNieuw.getArtikel_naam());
+			statement.setDouble(3, aNieuw.getArtikel_prijs());
+			statement.setString(4, aNieuw.getArtikel_naam());
+			statement.executeUpdate();
+			
+			statement = connection.prepareStatement("UPDATE BESTELLING SET "
+					+ "artikel3_id = ?,"
+					+ "artikel3_naam = ?,"
+					+ "artikel3_prijs = ? "
+					+ "WHERE artikel3_id = ?;");
+
+			statement.setLong(1, aNieuw.getArtikel_id());
+			statement.setString(2, aNieuw.getArtikel_naam());
+			statement.setDouble(3, aNieuw.getArtikel_prijs());
+			statement.setString(4, aNieuw.getArtikel_naam());
+			statement.executeUpdate();
+
+			connection.commit();
+
+		}
+		catch (SQLException e) {
+			throw new RSVIERException("SQLexception update artikel " + aNieuw.getArtikel_naam() + " ging verkeerd" + "\n" + e.getMessage());
+		}
+		finally {
+			MySQLHelper.close(connection, statement);
+		}
+	}
+	
+	
+	
 	// Delete
 	
 	// Onderstaande methode verwijdert de artikel gegevens van aOud van de bestelling door de waardes 
