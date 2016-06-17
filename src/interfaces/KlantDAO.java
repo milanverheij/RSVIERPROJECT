@@ -228,5 +228,5 @@ public interface KlantDAO {
     long verwijderKlantOpBestellingId(long bestellingId) throws RSVIERException;
 
     // TODO: Tijdelijk om naar console te printen, aangezien later naar GUI gaat
-    public void printKlantenInConsole(ListIterator<Klant> klantenIterator);
+    public void printKlantenInConsole(ListIterator<Klant> klantenIterator) throws RSVIERException;
 }

@@ -26,7 +26,7 @@ CREATE TABLE IF NOT EXISTS `RSVIERPROJECTDEEL2`.`KLANT` (
   `achternaam` VARCHAR(51) NOT NULL COMMENT 'Not null, bij iedere klant minstens een achternaam.',
   `tussenvoegsel` VARCHAR(10) NULL,
   `email` VARCHAR(80) NULL,
-  `datumAanmaak` DATETIME NOT NULL,
+  `datumAanmaak` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `klantActief` TINYINT(1) NOT NULL DEFAULT 1,
   PRIMARY KEY (`klant_id`))
 ENGINE = InnoDB;
@@ -42,8 +42,8 @@ DROP TABLE IF EXISTS `RSVIERPROJECTDEEL2`.`BESTELLING` ;
 CREATE TABLE IF NOT EXISTS `RSVIERPROJECTDEEL2`.`BESTELLING` (
   `bestelling_id` INT NOT NULL AUTO_INCREMENT COMMENT 'Unique want geen dubbele bestelnummers.\n\nAutoincrement zodat geen nummers worden overgeslagen.\n\nPrimary omdat bestel-ID het belangrijkste in in bestelling.',
   `klant_id` INT NOT NULL COMMENT 'Not-null. Er moet altijd een klant gekoppeld zijn.\n\nForeign key met klant.',
-  `datumAanmaak` DATETIME NOT NULL,
-  `bestellingActief` TINYINT(1) NOT NULL,
+  `datumAanmaak` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `bestellingActief` TINYINT(1) NOT NULL DEFAULT 1,
   PRIMARY KEY (`bestelling_id`),
   CONSTRAINT `klant_id`
     FOREIGN KEY (`klant_id`)
@@ -69,7 +69,7 @@ CREATE TABLE IF NOT EXISTS `RSVIERPROJECTDEEL2`.`ADRES` (
   `toevoeging` VARCHAR(45) NULL,
   `huisnummer` VARCHAR(4) NOT NULL,
   `woonplaats` VARCHAR(45) NULL,
-  `datumAanmaak` DATETIME NOT NULL,
+  `datumAanmaak` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`adres_id`))
 ENGINE = InnoDB;
 
@@ -106,6 +106,7 @@ DROP TABLE IF EXISTS `RSVIERPROJECTDEEL2`.`PRIJS` ;
 CREATE TABLE IF NOT EXISTS `RSVIERPROJECTDEEL2`.`PRIJS` (
   `prijs_id` INT NOT NULL,
   `prijs` DECIMAL(10,2) NULL,
+  `datumAanmaake` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`prijs_id`))
 ENGINE = InnoDB;
 
@@ -120,7 +121,7 @@ CREATE TABLE IF NOT EXISTS `RSVIERPROJECTDEEL2`.`ARTIKEL` (
   `omschrijving` VARCHAR(45) NOT NULL,
   `prijs` VARCHAR(10) NOT NULL,
   `prijsId` INT NOT NULL,
-  `datumAanmaak` DATETIME NOT NULL,
+  `datumAanmaak` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `verwachteLevertijd` VARCHAR(10) NULL,
   `inAssortisement` TINYINT(1) NOT NULL,
   PRIMARY KEY (`artikel_id`),

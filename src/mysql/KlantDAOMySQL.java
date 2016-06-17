@@ -8,6 +8,7 @@ import model.Bestelling;
 import model.Klant;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -30,7 +31,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
     ArrayList<Klant> klantenLijst;
     BestellingDAOMySQL bestellingDAO;
     AdresDAOMySQL adresDAO;
-    Connection connection;
+    Connection connection; //TODO weghalen
 
     // =
     /** CREATE METHODS */
@@ -90,16 +91,19 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
                             Adres adresgegevens,
                             Bestelling bestelGegevens) throws RSVIERException {
 
-        ResultSet generatedKeys = null;
-        connection = MySQLConnectieLeverancier.getConnection();
-        try {
-            query = "INSERT INTO KLANT " +
-                    "(voornaam, achternaam, tussenvoegsel, email) " +
-                    "VALUES " +
-                    "(?,        ?,          ?,              ?);";
+        ResultSet generatedKeys;
+        query = "INSERT INTO KLANT " +
+                "(voornaam, achternaam, tussenvoegsel, email) " +
+                "VALUES " +
+                "(?,        ?,          ?,              ?);";
+
+        try (
+                Connection connection = MySQLConnectieLeverancier.getConnection();
+                PreparedStatement statement = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
+        )
+        {
 
             // Voer query uit en haal de gegenereerde sleutels op bij deze query
-            statement = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
             statement.setString(1, voornaam);
             statement.setString(2, achternaam);
             statement.setString(3, tussenvoegsel);
@@ -111,13 +115,14 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
             generatedKeys = statement.getGeneratedKeys();
             if (generatedKeys.next()) { nieuwId = generatedKeys.getInt(1); }
 
-            // Als er adresgegeven worden meegegeven wordt er een adres geupdatetet op basis van nieuwe klantId
+            // Als er adresgegeven worden meegegeven wordt er een adres aangemaakt op basis van het nieuwe klantId
             if (adresgegevens != null) {
                 adresDAO = new AdresDAOMySQL();
-                adresDAO.updateAdres(nieuwId, adresgegevens);
+                adresDAO.nieuwAdres(nieuwId, adresgegevens);
             }
 
             // Als er bestegegevens zijn meegegeven worden deze bijgevoegd
+            // TODO: Bestelling werkt nog na aanpassingen?
             if (bestelGegevens != null) {
                 bestellingDAO = new BestellingDAOMySQL();
                 bestelGegevens.setKlant_id(nieuwId);
@@ -128,8 +133,6 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
             return nieuwId;
         } catch (SQLException ex) {
             throw new RSVIERException("KlantDAOMySQL: SQL FOUT TIJDENS AANMAKEN KLANT");
-        } finally {
-            MySQLHelper.close(connection, statement, generatedKeys);
         }
     }
 
@@ -146,20 +149,18 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
     @Override
     public ListIterator<Klant> getAlleKlanten() throws RSVIERException {
         resultSet = null;
-        connection = MySQLConnectieLeverancier.getConnection();
-        try {
-            query = "SELECT * FROM KLANT";
-            statement = connection.prepareStatement(query);
-            resultSet = statement.executeQuery();
+        String query = "SELECT * FROM KLANT";
+        try (
+                Connection connection = MySQLConnectieLeverancier.getConnection();
+                PreparedStatement statement = connection.prepareStatement(query);
 
+        ) {
+            resultSet = statement.executeQuery();
             klantenLijst = voegResultSetInLijst(resultSet);
             return klantenLijst.listIterator();
 
         } catch (SQLException ex) {
             throw new RSVIERException("KlantDAOMySQL: SQL FOUT TIJDEN OPHALEN KLANTEN");
-        }
-        finally {
-            MySQLHelper.close(connection, statement, resultSet);
         }
     }
 
@@ -173,12 +174,13 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
      */
     @Override
     public ListIterator<Klant> getKlantOpKlant(long klantId) throws RSVIERException {
-        connection = MySQLConnectieLeverancier.getConnection();
-        try {
-            query = "SELECT * FROM " +
-                    "KLANT WHERE " +
-                    "klant_id = ?;";
-            statement = connection.prepareStatement(query);
+        String query = "SELECT * FROM " +
+                "KLANT WHERE " +
+                "klant_id = ?;";
+        try (
+                Connection connection = MySQLConnectieLeverancier.getConnection();
+                PreparedStatement statement = connection.prepareStatement(query);
+        ) {
             statement.setLong(1, klantId);
             resultSet = statement.executeQuery();
             klantenLijst = voegResultSetInLijst(resultSet);
@@ -186,8 +188,6 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
 
         } catch (SQLException ex) {
             throw new RSVIERException("KlantDAOMySQL: SQL FOUT TIJDENS OPZOEKEN KLANT OP KLANTID");
-        } finally {
-            MySQLHelper.close(connection, statement, resultSet);
         }
     }
 
@@ -201,12 +201,13 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
      */
     @Override
     public ListIterator<Klant> getKlantOpKlant(String voornaam) throws RSVIERException {
-        connection = MySQLConnectieLeverancier.getConnection();
-        try {
-            query = "SELECT * FROM " +
-                    "KLANT WHERE " +
-                    "voornaam LIKE ?;";
-            statement = connection.prepareStatement(query);
+        String query = "SELECT * FROM " +
+                "KLANT WHERE " +
+                "voornaam LIKE ?;";
+        try (
+                Connection connection = MySQLConnectieLeverancier.getConnection();
+                PreparedStatement statement = connection.prepareStatement(query);
+        ) {
             statement.setString(1, voornaam);
             resultSet = statement.executeQuery();
             klantenLijst = voegResultSetInLijst(resultSet);
@@ -214,8 +215,6 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
 
         } catch (SQLException ex) {
             throw new RSVIERException("KlantDAOMySQL: SQL FOUT TIJDENS OPZOEKEN KLANT OP VOORNAAM");
-        } finally {
-            MySQLHelper.close(connection, statement, resultSet);
         }
     }
 
@@ -231,12 +230,13 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
     @Override
     public ListIterator<Klant> getKlantOpKlant(String voornaam,
                                                String achternaam) throws RSVIERException {
-        connection = MySQLConnectieLeverancier.getConnection();
-        try {
-            query = "SELECT * FROM " +
-                    "KLANT WHERE " +
-                    "voornaam LIKE ? AND achternaam LIKE ?;";
-            statement = connection.prepareStatement(query);
+        String query = "SELECT * FROM " +
+                "KLANT WHERE " +
+                "voornaam LIKE ? AND achternaam LIKE ?;";
+        try (
+                Connection connection = MySQLConnectieLeverancier.getConnection();
+                PreparedStatement statement = connection.prepareStatement(query);
+        ) {
             statement.setString(1, voornaam);
             statement.setString(2, achternaam);
             resultSet = statement.executeQuery();
@@ -245,8 +245,6 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
 
         } catch (SQLException ex) {
             throw new RSVIERException("KlantDAOMySQL: SQL FOUT TIJDENS OPZOEKEN KLANT OP VOOR & ACHTERNAAM");
-        } finally {
-            MySQLHelper.close(connection, statement, resultSet);
         }
     }
 
@@ -459,7 +457,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
      */
 
     @SuppressWarnings("finally")
-	@Override
+    @Override
     public long verwijderKlant(long klantId) throws RSVIERException {
         connection = MySQLConnectieLeverancier.getConnection();
 
@@ -611,11 +609,8 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
                 tijdelijkeKlant.setAchternaam(resultSet.getString(3));
                 tijdelijkeKlant.setTussenvoegsel(resultSet.getString(4));
                 tijdelijkeKlant.setEmail(resultSet.getString(5));
-                tijdelijkeKlant.getAdresGegevens().setStraatnaam(resultSet.getString(6));
-                tijdelijkeKlant.getAdresGegevens().setPostcode(resultSet.getString(7));
-                tijdelijkeKlant.getAdresGegevens().setToevoeging(resultSet.getString(8));
-                tijdelijkeKlant.getAdresGegevens().setHuisnummer(resultSet.getInt(9));
-                tijdelijkeKlant.getAdresGegevens().setWoonplaats(resultSet.getString(10));
+                tijdelijkeKlant.setDatumAanmaak(resultSet.getString(6));
+                tijdelijkeKlant.setKlantActief(resultSet.getString(7));
                 klantenLijst.add(klantenTeller, tijdelijkeKlant);
                 klantenTeller++; }
 
@@ -626,22 +621,34 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
     }
 
     // TODO: Tijdelijk om naar console te printen, aangezien later naar GUI gaat deze methode er weer uit
-    public void printKlantenInConsole(ListIterator<Klant> klantenIterator) {
+    public void printKlantenInConsole(ListIterator<Klant> klantenIterator) throws RSVIERException {
 
         while (klantenIterator.hasNext()) {
             Klant tijdelijkeKlant = klantenIterator.next();
-            Adres tijdelijkAdres = tijdelijkeKlant.getAdresGegevens();
             System.out.println("\n\t----------------------------------------------------");
             System.out.print("\n\tKLANTID:           " + tijdelijkeKlant.getKlant_id());
             System.out.print("\n\tVoornaam:          " + tijdelijkeKlant.getVoornaam());
             System.out.print("\n\tAchternaam:        " + tijdelijkeKlant.getAchternaam());
             System.out.print("\n\tTussenvoegsel:     " + tijdelijkeKlant.getTussenvoegsel());
             System.out.print("\n\tE-Mail:            " + tijdelijkeKlant.getEmail());
+            System.out.print("\n\tDatum Aangemaakt:  " + tijdelijkeKlant.getDatumAanmaak());
+            System.out.print("\n\tActief:            " + (tijdelijkeKlant.getKlantActief().charAt(0) == 0 ? "Nee" : "Ja"));
+
+
+            adresDAO = new AdresDAOMySQL();
+            tijdelijkeKlant.setAdresGegevens(adresDAO.getAdres(tijdelijkeKlant.getKlant_id()));
+            Adres tijdelijkAdres = tijdelijkeKlant.getAdresGegevens();
+
+            System.out.print("\n\t                   ");
+            System.out.print("\n\tADRESID:           " + tijdelijkAdres.getAdres_id());
             System.out.print("\n\tStraatnaam:        " + tijdelijkAdres.getStraatnaam());
             System.out.print("\n\tPostcode:          " + tijdelijkAdres.getPostcode());
             System.out.print("\n\tToevoeging:        " + tijdelijkAdres.getToevoeging());
             System.out.print("\n\tHuisnummer:        " + tijdelijkAdres.getHuisnummer());
             System.out.print("\n\tWoonplaats:        " + tijdelijkAdres.getWoonplaats());
+            System.out.print("\n\tDatum Aangemaakt:  " + tijdelijkAdres.getDatumAanmaak());
+
+
         }
         System.out.println("\n\n");
     }

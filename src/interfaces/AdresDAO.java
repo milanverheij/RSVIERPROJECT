@@ -16,5 +16,7 @@ public interface AdresDAO {
      * @param adresgegevens De adresgegevens om te updaten in Adres object formaat
      * @throws RSVIERException Foutmelding bij SQL exception.
      */
-    void updateAdres(long klant_id, Adres adresgegevens) throws RSVIERException ;
+    void updateAdres(long klant_id, Adres adresgegevens) throws RSVIERException;
+    long nieuwAdres(long klant_id, Adres adresgegevens) throws RSVIERException;
+    Adres getAdres(long klant_id) throws RSVIERException;
 }

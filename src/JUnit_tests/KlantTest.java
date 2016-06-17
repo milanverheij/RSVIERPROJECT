@@ -21,6 +21,7 @@ public class KlantTest {
     private final String ACHTERNAAM = "TESTACHTERNAAM";
     private final String EMAIL = "TESTMAIL@TESTDOMEIN.NL";
     private final Adres ADRES = new Adres();
+
     private String nieuweWaarde = "";
     private Klant testKlant;
 

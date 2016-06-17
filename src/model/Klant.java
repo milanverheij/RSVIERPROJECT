@@ -1,5 +1,7 @@
 package model;
 
+import java.util.Date;
+
 /**
  * Created by Milan_Verheij on 06-06-16.
  *
@@ -15,6 +17,8 @@ public class Klant {
     private String achternaam;
     private String tussenvoegsel;
     private String email;
+    private String datumAanmaak;
+    private String klantActief;
     private Adres adresGegevens;
 
     // Standaard public constructor met alle paramaters
@@ -74,7 +78,21 @@ public class Klant {
     public Adres getAdresGegevens() {
         return adresGegevens;
     }
-
+    public String getDatumAanmaak() {
+        return datumAanmaak;
+    }
+    public void setDatumAanmaak(String datumAanmaak) {
+        this.datumAanmaak = datumAanmaak;
+    }
+    public String getKlantActief() {
+        return klantActief;
+    }
+    public void setKlantActief(String klantActief) {
+        this.klantActief = klantActief;
+    }
+    public void setAdresGegevens(Adres adresGegevens) {
+        this.adresGegevens = adresGegevens;
+    } // TODO : NODIG?
     // Overrided methoden van Object etc.
 
     @Override
