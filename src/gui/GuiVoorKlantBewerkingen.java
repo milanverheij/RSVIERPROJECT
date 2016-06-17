@@ -42,7 +42,7 @@ public class GuiVoorKlantBewerkingen extends Application{
 		maakButtonsEnVoegAanGridToe(grid, klantStage);
 
 		klantStage.setScene(new Scene(grid));
-		klantStage.getIcons().add(new Image("\\images\\icon.jpg"));
+		klantStage.getIcons().add(new Image("/images/icon.jpg"));
 		klantStage.setTitle("Nieuwe klant voor Harrie's Tweedehands Beessies");
 		klantStage.show();
 

@@ -56,7 +56,6 @@ public class StartGui extends Application{
 		stage.setScene(scene);
 		stage.show();
 		haalFocusVanTextField();
-
 	}
 
 	private void haalFocusVanTextField(){
@@ -80,12 +79,12 @@ public class StartGui extends Application{
 	}
 	
 	private ImageView getAchtergrond(){
-		Image image = new Image("\\images\\achtergrond.jpg", 300, 300, false, false);
+		Image image = new Image("/images/achtergrond.jpg", 300, 300, false, false);
 		return new ImageView(image);
 	}
 	
 	private void setStageProperties(){
-		stage.getIcons().add(new Image("\\images\\icon.jpg"));
+		stage.getIcons().add(new Image("/images/icon.jpg"));
 		stage.setTitle("Harrie's Tweedehands Beessies");
 	}
 	
@@ -113,5 +112,4 @@ public class StartGui extends Application{
 			issues.setText("Incorrecte inloggegevens");
 		}
 	}
-
 }

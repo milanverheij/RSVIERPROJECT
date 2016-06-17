@@ -26,7 +26,7 @@ public class ErrorBox extends Application{
 	
 	@Override
 	public void start(Stage errorStage) throws Exception {
-		Image alertImage = new Image("\\images\\alert.png", 30, 30, true, true);
+		Image alertImage = new Image("/images/alert.png", 30, 30, true, true);
 		ImageView alertImageView = new ImageView(alertImage);
 		
 		VBox vBox = new VBox();
@@ -48,7 +48,7 @@ public class ErrorBox extends Application{
 		vBox.getChildren().add(okeButton);
 		
 		errorStage.setTitle("Dat doettie anders nooit...");
-		errorStage.getIcons().add(new Image("\\images\\icon.jpg"));
+		errorStage.getIcons().add(new Image("/images/icon.jpg"));
 		errorStage.setScene(new Scene(vBox, 400, 150));
 		errorStage.show();
 	}

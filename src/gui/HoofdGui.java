@@ -1,10 +1,12 @@
 package gui;
 import exceptions.RSVIERException;
+
 import factories.DAOFactory;
 import interfaces.AdresDAO;
 import interfaces.ArtikelDAO;
 import interfaces.BestellingDAO;
 import interfaces.KlantDAO;
+
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
@@ -17,6 +19,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+
 import model.Artikel;
 import model.GuiPojo;
 import mysql.GuiMySQLBewerkingen;
@@ -66,6 +69,10 @@ public class HoofdGui extends Application{
 	Button nieuweKlantButton;
 	Button updateKlantButton;
 
+	public static void main(String[] args){
+		launch();
+	}
+	
 	@Override
 	public void start(Stage stage) throws Exception {
 		maakListViewsAan();
@@ -95,7 +102,7 @@ public class HoofdGui extends Application{
 		Scene scene = new Scene(verticalBox);
 		stage.setScene(scene);
 		stage.setTitle("Exotische Dieren Emporium");
-		stage.getIcons().add(new Image("\\images\\icon.jpg"));
+		stage.getIcons().add(new Image("/images/icon.jpg"));
 		stage.setTitle("Harrie's Tweedehands Beessies");
 		stage.show();
 	}
@@ -249,7 +256,7 @@ public class HoofdGui extends Application{
 		bestellingListView.getItems().clear();
 		artikelListView.getItems().clear();
 		klantListView.getItems().clear();
-		GuiMySQLBewerkingen.leegKlantBestellingArtikel();
+		guiMySQL.leegKlantBestellingArtikel();
 	}
 
 	//Leegt alle TextFields in de HoofdGui

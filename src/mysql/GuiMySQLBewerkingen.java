@@ -26,7 +26,7 @@ public class GuiMySQLBewerkingen {
 
 
 
-	public static void leegKlantBestellingArtikel(){
+	public void leegKlantBestellingArtikel(){
 		GuiPojo.bestelling = new Bestelling();
 		GuiPojo.artikel = new Artikel();
 		GuiPojo.klant = new Klant();
@@ -78,6 +78,7 @@ public class GuiMySQLBewerkingen {
 	public void zoekBestelling(String bron, ListView<Long> bestellingListView, String klantIdField, String bestellingIdField){
 		try { 
 			Iterator<Bestelling> it = bron.equals("klantId") ? bestelDAO.getBestellingOpKlantGegevens(Long.parseLong(klantIdField)) : bestelDAO.getBestellingOpBestelling(Long.parseLong(bestellingIdField));
+			bestellingListView.getItems().clear();
 			populateBestellingListView(bestellingListView, it);
 		}catch(NumberFormatException | RSVIERException | NullPointerException e){		}
 	}
@@ -129,6 +130,8 @@ public class GuiMySQLBewerkingen {
 		if(selectedItem != null){
 			long itemId = Long.parseLong(selectedItem.split(":")[0]);
 			GuiPojo.klant = GuiPojo.klantenLijst.get(itemId);
+			GuiPojo.bestellingLijst.clear();
+			GuiPojo.bestelling = new Bestelling();
 		}
 	}
 
