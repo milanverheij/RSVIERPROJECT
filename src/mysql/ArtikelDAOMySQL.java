@@ -272,43 +272,33 @@ public class ArtikelDAOMySQL extends AbstractDAOMySQL implements interfaces.Arti
 		try {
 			connection.setAutoCommit(false);
 			statement = connection.prepareStatement("UPDATE BESTELLING SET "
-					+ "artikel1_id = ?,"
 					+ "artikel1_naam = ?,"
 					+ "artikel1_prijs = ? "
 					+ "WHERE artikel1_id = ?;");
-			
-			
 
-			statement.setLong(1, aNieuw.getArtikel_id());
-			statement.setString(2, aNieuw.getArtikel_naam());
-			statement.setDouble(3, aNieuw.getArtikel_prijs());
-			statement.setLong(4, aNieuw.getArtikel_id());
+			statement.setString(1, aNieuw.getArtikel_naam());
+			statement.setDouble(2, aNieuw.getArtikel_prijs());
+			statement.setLong(3, aNieuw.getArtikel_id());
 			statement.executeUpdate();
 			
 			statement = connection.prepareStatement("UPDATE BESTELLING SET "
-					+ "artikel2_id = ?,"
 					+ "artikel2_naam = ?,"
 					+ "artikel2_prijs = ? "
 					+ "WHERE artikel2_id = ?;");
-			
-			
 
-			statement.setLong(1, aNieuw.getArtikel_id());
-			statement.setString(2, aNieuw.getArtikel_naam());
-			statement.setDouble(3, aNieuw.getArtikel_prijs());
-			statement.setString(4, aNieuw.getArtikel_naam());
+			statement.setString(1, aNieuw.getArtikel_naam());
+			statement.setDouble(2, aNieuw.getArtikel_prijs());
+			statement.setLong(3, aNieuw.getArtikel_id());
 			statement.executeUpdate();
 			
 			statement = connection.prepareStatement("UPDATE BESTELLING SET "
-					+ "artikel3_id = ?,"
 					+ "artikel3_naam = ?,"
 					+ "artikel3_prijs = ? "
 					+ "WHERE artikel3_id = ?;");
 
-			statement.setLong(1, aNieuw.getArtikel_id());
-			statement.setString(2, aNieuw.getArtikel_naam());
-			statement.setDouble(3, aNieuw.getArtikel_prijs());
-			statement.setString(4, aNieuw.getArtikel_naam());
+			statement.setString(1, aNieuw.getArtikel_naam());
+			statement.setDouble(2, aNieuw.getArtikel_prijs());
+			statement.setLong(3, aNieuw.getArtikel_id());
 			statement.executeUpdate();
 
 			connection.commit();

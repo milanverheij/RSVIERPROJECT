@@ -24,7 +24,7 @@ public class ArtikelDAOMySQLTest {
 	Bestelling bestelling1 = new Bestelling();
 	Bestelling bestelling2 = new Bestelling();
 	Bestelling bestelling3 = new Bestelling();
-	
+
 	//Data 
 	long klant_id = 1;
 	long bestelling_id;
@@ -36,14 +36,14 @@ public class ArtikelDAOMySQLTest {
 	Artikel a2 = new Artikel();
 	Artikel a3 = new Artikel();
 	Artikel testArtikel = new Artikel(4, "Test", 1000);
-	
+
 	LinkedHashMap<Artikel, Integer> artikelLijstMap = new LinkedHashMap<>();
 	Iterator<Entry<Artikel, Integer>> mIterator;
 	Entry<Artikel, Integer> entry;
-	
+
 	ArrayList<Artikel> artikelLijst = new ArrayList<>();
 	Iterator<Artikel> aIterator;
-	
+
 	// Maak een bestelling aan om te testen
 	@Before
 	public void setUp() throws Exception {
@@ -54,7 +54,7 @@ public class ArtikelDAOMySQLTest {
 		bestelling.setArtikelLijst(artikelLijstMap);
 		bestelling_id = bestellingDao.nieuweBestelling(bestelling);
 	}
-	
+
 	// Verwijder de bestelling na de test
 	@After
 	public void tearDown() throws Exception{
@@ -105,7 +105,7 @@ public class ArtikelDAOMySQLTest {
 		assertEquals(a3.getArtikel_naam(), artikelLijst.get(2).getArtikel_naam());
 		assertTrue(a3.getArtikel_prijs() == artikelLijst.get(2).getArtikel_prijs());
 	}
-	
+
 	@Test 
 	public void testGetAlleArtikelen() throws Exception{
 		mIterator = artikelDao.getAlleArtikelen();
@@ -146,7 +146,7 @@ public class ArtikelDAOMySQLTest {
 
 		assertTrue(artikelCount == 3);
 	}
-	
+
 	@Test 
 	public void testUpdateArtikelOpBestelling() throws Exception{
 		// Test de eerste overloaded methode
@@ -154,14 +154,14 @@ public class ArtikelDAOMySQLTest {
 		artikelDao.updateArtikelOpBestelling(bestelling_id, artikelNummer, testArtikel);
 		Artikel a = artikelDao.getArtikelOpBestelling(bestelling_id, artikelNummer);
 		assertUpdateArtikelOpBestelling(testArtikel, a);
-		
+
 		// Test de tweede overloaded methode
 		artikelNummer = 1;
 		artikelDao.updateArtikelOpBestelling(bestelling_id, a1, testArtikel);
 		a = artikelDao.getArtikelOpBestelling(bestelling_id, artikelNummer);
 		assertUpdateArtikelOpBestelling(testArtikel, a);
 
-		
+
 	}
 
 	@Test
@@ -180,12 +180,12 @@ public class ArtikelDAOMySQLTest {
 		}
 	}
 	// Albert
-	
+
 	@Test
 	public void testHetAanpassenVanAlleArtikelenInDeDataBase() throws Exception{
 		// @Before van alberts TestToevoeging in een methode gezet
 		setUpTestHetAanpassenVanAlleArtikelenInDeDataBase();
-		
+
 		//Update artikel 1
 		a1.setArtikel_naam("nieuwe naam 1");
 		a1.setArtikel_prijs(11.11);
@@ -217,7 +217,7 @@ public class ArtikelDAOMySQLTest {
 		assertTrue(artikel.getArtikel_id() == 2);
 		assertTrue(artikel.getArtikel_prijs() == 22.22);
 		assertEquals(artikel.getArtikel_naam(), "nieuwe naam 2");
-	
+
 
 		artikel = artikelIterator.next();
 		assertTrue(artikel.getArtikel_id() == 3);
@@ -259,11 +259,11 @@ public class ArtikelDAOMySQLTest {
 		assertTrue(artikel.getArtikel_id() == 3);
 		assertEquals(artikel.getArtikel_naam(), "nieuwe naam 3");
 		assertTrue(artikel.getArtikel_prijs() == 33.33);
-		
+
 		// @After Alberts testToevoeging in een methode gezet
 		breakDownTestHetAanpassenVanAlleArtikelenInDeDataBase();
 	}
-	
+
 
 	@Test
 	public void testVerwijderArtikelVanBestelling() throws Exception{
@@ -290,7 +290,7 @@ public class ArtikelDAOMySQLTest {
 			assertTrue(0 == artikelLijst.get(i).getArtikel_prijs());
 		}
 	}
-	
+
 	// Utility methods
 	public void assertUpdateArtikelOpBestelling(Artikel testArtikel, Artikel a) {
 		assertTrue(testArtikel.equals(a));
@@ -298,7 +298,7 @@ public class ArtikelDAOMySQLTest {
 		assertEquals(testArtikel.getArtikel_naam(), a.getArtikel_naam());
 		assertTrue(testArtikel.getArtikel_prijs() == a.getArtikel_prijs());
 	}
-	
+
 	// Methodes behorende bij testHetAanpassenVanAlleArtikelenInDeDataBase();
 	public void setUpTestHetAanpassenVanAlleArtikelenInDeDataBase() throws Exception{
 		a1.setArtikel_id(1);
@@ -339,13 +339,13 @@ public class ArtikelDAOMySQLTest {
 		id2 = bestellingDao.nieuweBestelling(bestelling2);
 		id3 = bestellingDao.nieuweBestelling(bestelling3);
 	}
-	 
+
 	public void breakDownTestHetAanpassenVanAlleArtikelenInDeDataBase() throws Exception{
 		bestellingDao.verwijderEnkeleBestelling(id1);
 		bestellingDao.verwijderEnkeleBestelling(id2);
 		bestellingDao.verwijderEnkeleBestelling(id3);
 	}
-	
+
 	private Iterator<Artikel> getIteratorMetDubbelen(Bestelling teTesten){
 		Iterator<Artikel> set = teTesten.getArtikelLijst().keySet().iterator();
 		ArrayList<Artikel> artikelArray = new ArrayList<Artikel>();
