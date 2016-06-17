@@ -32,7 +32,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
     AdresDAOMySQL adresDAO;
     Connection connection;
 
-    // =================================================================================================================
+    // =
     /** CREATE METHODS */
 
     /**
@@ -134,7 +134,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
     }
 
 
-    // =================================================================================================================
+    // =
     /** READ METHODS */
 
     /**
@@ -378,7 +378,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
         return null;
     }
 
-    // =================================================================================================================
+    // =
 
     /** UPDATE METHODS */
 
@@ -446,7 +446,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
         adresDAO.updateAdres(KlantId, adresgegevens);
     }
 
-    // =================================================================================================================
+    // =
 
     /** DELETE METHODS */
 
@@ -457,10 +457,12 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
      * @param klantId Klant_id van de te verwijderen klant.
      * @throws RSVIERException Foutmelding bij SQLException, info wordt meegegeven.
      */
+
     @SuppressWarnings("finally")
 	@Override
     public long verwijderKlant(long klantId) throws RSVIERException {
         connection = MySQLConnectieLeverancier.getConnection();
+
         long verwijderdID = -1;
 
         try {
@@ -483,7 +485,6 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
         }
     }
 
-
     @Override
     public void verwijderKlant(String voornaam, String achternaam) throws RSVIERException {
         /**
@@ -494,7 +495,9 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
          * @throws RSVIERException Foutmelding bij SQLException, info wordt meegegeven.
          */
 
+
         connection = MySQLConnectieLeverancier.getConnection();
+
         try {
             query = "SELECT klant_id FROM " +
                     "KLANT " +
@@ -582,7 +585,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
         return verwijderdId;
     }
 
-    // =================================================================================================================
+    // =
 
     /** ANDERE METHODS */
 
