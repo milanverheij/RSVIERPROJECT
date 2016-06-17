@@ -1,3 +1,4 @@
+
 package JUnit_tests;
 
 import model.Adres;
@@ -249,7 +250,7 @@ public class KlantDAOMySQLTest {
         // Er wordt een query uitgevoerd om te peilen hoeveel klanten er zijn waarna deze wordt vergeleken
         // met de grootte van de lijst.
 
-        connection = MySQLConnectie.getConnection();
+        connection = MySQLConnectieLeverancier.getConnection();
         String query = "SELECT COUNT(*) FROM KLANT";
         statement = connection.prepareStatement(query);
         rs = statement.executeQuery();
