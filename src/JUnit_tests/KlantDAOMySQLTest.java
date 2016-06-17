@@ -1,3 +1,4 @@
+
 package JUnit_tests;
 
 import model.Adres;
@@ -40,8 +41,7 @@ public class KlantDAOMySQLTest {
     private BestellingDAOMySQL bestellingDAO;
     private long nieuweKlantID;
     private Klant tijdelijkeKlant;
-    @SuppressWarnings("unused")
-	private boolean nieuweKlantAangemaakt = false;
+    private boolean nieuweKlantAangemaakt = false;
     private final String VOORNAAM = "TestKlantVoornaam4101AR1225"; // Uniek ID  TODO: Random generator kan nog (nice to have)
     private final String ACHTERNAAM = "TestKlantAchternaam4101AR1225"; // Uniek ID TODO: Random generator kan nog (nice to have)
     private final String TUSSENVOEGSEL = "TUSS";
