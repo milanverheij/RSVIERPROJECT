@@ -20,10 +20,10 @@ import java.sql.SQLException;
  *
  */
 
-public class MySQLConnectie {
+public class MySQLConnectieLeverancier {
     // Instant van deze klasse. De enige instance die er zal zijn.
     @SuppressWarnings("unused")
-    private static MySQLConnectie instance = new MySQLConnectie();
+    private static MySQLConnectieLeverancier instance = new MySQLConnectieLeverancier();
     private static Connection connection;
     private static final String URL = "jdbc:mysql://milanverheij.nl/RSVIERPROJECT";
     private static final String USER = "rsvierproject";
@@ -37,7 +37,7 @@ public class MySQLConnectie {
      *
      *  Geen parameters
      */
-    private MySQLConnectie() {
+    private MySQLConnectieLeverancier() {
         try {
             // Laden van de mysql Driver en log in console als dit gelukt is
             Class.forName(DRIVER_CLASS);
@@ -79,6 +79,6 @@ public class MySQLConnectie {
      * @param logModus Logmodus uit (0) of logModus aan (1).
      */
     public static void setLogModus(int logModus) {
-        MySQLConnectie.logModus = logModus;
+        MySQLConnectieLeverancier.logModus = logModus;
     }
 }

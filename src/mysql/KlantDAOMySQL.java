@@ -32,7 +32,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
     AdresDAOMySQL adresDAO;
     Connection connection;
 
-    // =================================================================================================================
+    // =
     /** CREATE METHODS */
 
     /**
@@ -91,7 +91,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
                             Bestelling bestelGegevens) throws RSVIERException {
 
         ResultSet generatedKeys = null;
-        connection = MySQLConnectie.getConnection();
+        connection = MySQLConnectieLeverancier.getConnection();
         try {
             query = "INSERT INTO KLANT " +
                     "(voornaam, achternaam, tussenvoegsel, email) " +
@@ -134,7 +134,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
     }
 
 
-    // =================================================================================================================
+    // =
     /** READ METHODS */
 
     /**
@@ -146,7 +146,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
     @Override
     public ListIterator<Klant> getAlleKlanten() throws RSVIERException {
         resultSet = null;
-        connection = MySQLConnectie.getConnection();
+        connection = MySQLConnectieLeverancier.getConnection();
         try {
             query = "SELECT * FROM KLANT";
             statement = connection.prepareStatement(query);
@@ -173,7 +173,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
      */
     @Override
     public ListIterator<Klant> getKlantOpKlant(long klantId) throws RSVIERException {
-        connection = MySQLConnectie.getConnection();
+        connection = MySQLConnectieLeverancier.getConnection();
         try {
             query = "SELECT * FROM " +
                     "KLANT WHERE " +
@@ -201,7 +201,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
      */
     @Override
     public ListIterator<Klant> getKlantOpKlant(String voornaam) throws RSVIERException {
-        connection = MySQLConnectie.getConnection();
+        connection = MySQLConnectieLeverancier.getConnection();
         try {
             query = "SELECT * FROM " +
                     "KLANT WHERE " +
@@ -231,7 +231,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
     @Override
     public ListIterator<Klant> getKlantOpKlant(String voornaam,
                                                String achternaam) throws RSVIERException {
-        connection = MySQLConnectie.getConnection();
+        connection = MySQLConnectieLeverancier.getConnection();
         try {
             query = "SELECT * FROM " +
                     "KLANT WHERE " +
@@ -260,7 +260,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
      */
     @Override
     public ListIterator<Klant> getKlantOpAdres(Adres adresgegevens) throws RSVIERException {
-        connection = MySQLConnectie.getConnection();
+        connection = MySQLConnectieLeverancier.getConnection();
         try {
             query = "SELECT * FROM " +
                     "KLANT WHERE " +
@@ -298,7 +298,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
      */
     @Override
     public ListIterator<Klant> getKlantOpAdres(String straatnaam) throws RSVIERException {
-        connection = MySQLConnectie.getConnection();
+        connection = MySQLConnectieLeverancier.getConnection();
         try {
             query = "SELECT * FROM " +
                     "KLANT WHERE " +
@@ -328,7 +328,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
     @Override
     public ListIterator<Klant> getKlantOpAdres(String postcode,
                                                int huisnummer) throws RSVIERException {
-        connection = MySQLConnectie.getConnection();
+        connection = MySQLConnectieLeverancier.getConnection();
         try {
             query = "SELECT * FROM " +
                     "KLANT WHERE " +
@@ -358,7 +358,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
      */
     @Override
     public ListIterator<Klant> getKlantOpBestelling(long bestellingId) throws RSVIERException {
-        connection = MySQLConnectie.getConnection();
+        connection = MySQLConnectieLeverancier.getConnection();
         try {
             query = "SELECT klant_id FROM " +
                     "BESTELLING WHERE " +
@@ -378,7 +378,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
         return null;
     }
 
-    // =================================================================================================================
+    // =
 
     /** UPDATE METHODS */
 
@@ -398,7 +398,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
                             String achternaam,
                             String tussenvoegsel,
                             String email) throws RSVIERException {
-        connection = MySQLConnectie.getConnection();
+        connection = MySQLConnectieLeverancier.getConnection();
         try {
             query = "UPDATE KLANT " +
                     "SET " +
@@ -446,7 +446,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
         adresDAO.updateAdres(KlantId, adresgegevens);
     }
 
-    // =================================================================================================================
+    // =
 
     /** DELETE METHODS */
 
@@ -457,9 +457,12 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
      * @param klantId Klant_id van de te verwijderen klant.
      * @throws RSVIERException Foutmelding bij SQLException, info wordt meegegeven.
      */
-    @Override
+
+    @SuppressWarnings("finally")
+	@Override
     public long verwijderKlant(long klantId) throws RSVIERException {
-        connection = MySQLConnectie.getConnection();
+        connection = MySQLConnectieLeverancier.getConnection();
+
         long verwijderdID = -1;
 
         try {
@@ -482,7 +485,6 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
         }
     }
 
-
     @Override
     public void verwijderKlant(String voornaam, String achternaam) throws RSVIERException {
         /**
@@ -493,7 +495,9 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
          * @throws RSVIERException Foutmelding bij SQLException, info wordt meegegeven.
          */
 
-        connection = MySQLConnectie.getConnection();
+
+        connection = MySQLConnectieLeverancier.getConnection();
+
         try {
             query = "SELECT klant_id FROM " +
                     "KLANT " +
@@ -529,7 +533,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
     public void verwijderKlant(String voornaam,
                                String achternaam,
                                String tussenvoegsel) throws RSVIERException {
-        connection = MySQLConnectie.getConnection();
+        connection = MySQLConnectieLeverancier.getConnection();
         try {
             query = "SELECT klant_id FROM " +
                     "KLANT " +
@@ -581,7 +585,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
         return verwijderdId;
     }
 
-    // =================================================================================================================
+    // =
 
     /** ANDERE METHODS */
 

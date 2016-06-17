@@ -43,7 +43,7 @@ public class BestellingDAOMySQL extends AbstractDAOMySQL implements BestellingDA
 		if(bestellingWordGetest)
 			aangeroepenBestellingInTest = bestelling;
 		
-		Connection connection = MySQLConnectie.getConnection();
+		Connection connection = MySQLConnectieLeverancier.getConnection();
 		ResultSet rs = null;
 		
 		try{
@@ -96,7 +96,7 @@ public class BestellingDAOMySQL extends AbstractDAOMySQL implements BestellingDA
 	//Read
 	@Override
 	public Iterator<Bestelling> getBestellingOpKlantGegevens(long klantId) throws RSVIERException {
-		Connection connection = MySQLConnectie.getConnection();
+		Connection connection = MySQLConnectieLeverancier.getConnection();
 		//Alle bestellingen voor de klant
 		LinkedHashSet<Bestelling> bestellijst = new LinkedHashSet<Bestelling>();
 		//De artikelen binnen een bestelling
@@ -127,7 +127,7 @@ public class BestellingDAOMySQL extends AbstractDAOMySQL implements BestellingDA
 	}
 	@Override
 	public Iterator<Bestelling> getBestellingOpBestelling(long bestellingId) throws RSVIERException {
-		Connection connection = MySQLConnectie.getConnection();
+		Connection connection = MySQLConnectieLeverancier.getConnection();
 		ResultSet rs = null;
 		try {
 			statement = connection.prepareStatement("SELECT * FROM `BESTELLING` WHERE bestelling_id =  ? ;");
@@ -168,7 +168,7 @@ public class BestellingDAOMySQL extends AbstractDAOMySQL implements BestellingDA
 	}
 	@Override
 	public void updateBestelling(Bestelling bestelling) throws SQLException, RSVIERException{
-		Connection connection = MySQLConnectie.getConnection();
+		Connection connection = MySQLConnectieLeverancier.getConnection();
 		try {
 			statement = connection.prepareStatement("UPDATE `BESTELLING` "
 					+ "SET artikel1_id = ?, artikel1_naam = ?, artikel1_prijs = ?, "
@@ -212,7 +212,7 @@ public class BestellingDAOMySQL extends AbstractDAOMySQL implements BestellingDA
 	@Override
 	//Verwijder alle bestellingen van een klant
 	public long verwijderAlleBestellingenKlant(long klantId) throws RSVIERException {
-		Connection connection = MySQLConnectie.getConnection();
+		Connection connection = MySQLConnectieLeverancier.getConnection();
 		try {
 			statement = connection.prepareStatement("DELETE FROM `BESTELLING` WHERE klant_id = ?;");
 			statement.setLong(1, klantId);
@@ -229,7 +229,7 @@ public class BestellingDAOMySQL extends AbstractDAOMySQL implements BestellingDA
 	@Override
 	//Verwijder 1 bestelling uit een tabel
 	public void verwijderEnkeleBestelling(long bestellingId) throws RSVIERException {
-		Connection connection = MySQLConnectie.getConnection();
+		Connection connection = MySQLConnectieLeverancier.getConnection();
 		try {
 			statement = connection.prepareStatement("DELETE FROM `BESTELLING` WHERE bestelling_id = ?;");
 			statement.setLong(1, bestellingId);
