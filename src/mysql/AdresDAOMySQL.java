@@ -25,8 +25,12 @@ public class AdresDAOMySQL extends AbstractDAOMySQL implements AdresDAO {
     private ArrayList<Adres> adresLijst;
 
     /**
-     * @param adresgegevens De opgegeven adresgegevens van de klant
-     * @throws RSVIERException Foutmelding bij SQLException, info wordt meegegeven.
+     * Update een adres bij een klant op basis van een Adres-object en adres_id.
+     *
+     * @param adres_id Het adres_id om up te daten.
+     * @param adresgegevens De adresgegevens om te updaten in Adres object formaat
+     * @throws RSVIERException Als er een fout is wordt deze doorgestuurd naar de RSVIERException met de message van
+     * de exception.
      */
     @Override
     public void updateAdres(long adres_id, Adres adresgegevens) throws RSVIERException {
@@ -67,6 +71,14 @@ public class AdresDAOMySQL extends AbstractDAOMySQL implements AdresDAO {
         }
     }
 
+    /**
+     * Koppelt een bestaand adres aan een klant.
+     *
+     * @param klant_id Het klant_id waaraan een adres gekoppeld dient te worden
+     * @param adres_id Het adres_id van het te koppelen adres.
+     * @throws RSVIERException Als er een fout is wordt deze doorgestuurd naar de RSVIERException met de message van
+     * de exception.
+     */
     @Override
     public void koppelAdresAanKlant(long klant_id, long adres_id) throws RSVIERException {
         String query = "INSERT INTO " +
@@ -93,6 +105,15 @@ public class AdresDAOMySQL extends AbstractDAOMySQL implements AdresDAO {
         }
     }
 
+    /**
+     * Maakt een nieuw adres aan en koppelt deze aan de klant.
+     *
+     * @param klant_id Klant_id behorende bij het adres.
+     * @param adresgegevens De adresgegevens die nieuw in de database dienen te worden opgenomen.
+     * @return Het adres_id van het nieuw aangemaakte adres.
+     * @throws RSVIERException Als er een fout is wordt deze doorgestuurd naar de RSVIERException met de message van
+     * de exception.
+     */
     @Override
     public long nieuwAdres(long klant_id, Adres adresgegevens) throws RSVIERException {
         ResultSet generatedKeys = null;
@@ -142,6 +163,17 @@ public class AdresDAOMySQL extends AbstractDAOMySQL implements AdresDAO {
         }
     }
 
+    /**
+     * Geeft op basis van de unieke gegevens van een adres (conform de equalsmethode in Adres)
+     * het corresponderende adres_id terug.
+     *
+     * @param postcode Postcode om op te zoeken.
+     * @param huisnummer Huisnummer om op te zoeken.
+     * @param toevoeging Toevoeging van adres om op te zoeken.
+     * @return Het adres_id behorend bij dit adres.
+     * @throws RSVIERException Als er een fout is wordt deze doorgestuurd naar de RSVIERException met de message van
+     * de exception.
+     */
     @Override
     public long getAdresID(String postcode, int huisnummer, String toevoeging) throws RSVIERException {
         ResultSet rs = null;
@@ -175,6 +207,14 @@ public class AdresDAOMySQL extends AbstractDAOMySQL implements AdresDAO {
         }
     }
 
+    /**
+     * Geeft de adressen terug van een bepaalde klant.
+     *
+     * @param klant_id Klant_id van de klant waarvan de adressen opgezocht dienen te worden.
+     * @return Een ListIterator van de ArrayList met daarin Klant objecten.
+     * @throws RSVIERException Als er een fout is wordt deze doorgestuurd naar de RSVIERException met de message van
+     * de exception.
+     */
     @Override
     public ListIterator<Adres> getAdresOpKlantID(long klant_id) throws RSVIERException {
         ResultSet rs = null;
@@ -221,6 +261,14 @@ public class AdresDAOMySQL extends AbstractDAOMySQL implements AdresDAO {
         }
     }
 
+    /**
+     * Stelt de status is van een adres (0 = inactief, 1 = actief)
+     *
+     * @param adres_id Het adres_id van het adres dat geschakeld dient te worden.
+     * @param status De nieuwe gewenste status van het adres.
+     * @throws RSVIERException Als er een fout is wordt deze doorgestuurd naar de RSVIERException met de message van
+     * de exception.
+     */
     @Override
     public void schakelStatusAdres(long adres_id, int status) throws RSVIERException {
         String query =
@@ -232,8 +280,7 @@ public class AdresDAOMySQL extends AbstractDAOMySQL implements AdresDAO {
 
         try (
                 Connection connection = MySQLConnectieLeverancier.getConnection();
-                PreparedStatement statement = connection.prepareStatement(query);
-
+                PreparedStatement statement = connection.prepareStatement(query)
         ) {
             statement.setInt(1, status);
             statement.setLong(2, adres_id);

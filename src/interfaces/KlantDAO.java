@@ -18,8 +18,6 @@ import java.util.ListIterator;
  */
 
 public interface KlantDAO {
-
-
     /** CREATE METHODS */
 
     /**
