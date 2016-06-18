@@ -43,6 +43,7 @@ public class Klant {
 
     // Als er een klant aangemaakt wordt, wordt er een Adres-object aan gekoppeld
     public Klant() {
+        klant_id = -1;
         adresGegevens = null;
     }
 

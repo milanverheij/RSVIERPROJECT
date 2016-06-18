@@ -26,71 +26,22 @@ import java.util.ListIterator;
  */
 
 public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
-    // Veel gebruikte en gedeelde variabelen
+
+    // GLOBALE VARIABELEN
     String query = "";
     ArrayList<Klant> klantenLijst;
     BestellingDAOMySQL bestellingDAO;
     AdresDAOMySQL adresDAO;
-    Connection connection; //TODO weghalen
 
-    // =
     /** CREATE METHODS */
 
-    //TODO: JavaDOC
-    @Override
-    public long nieuweKlant(Klant nieuweKlant) throws RSVIERException {
-        if (nieuweKlant != null) {
-            long nieuwId =  nieuweKlant(nieuweKlant.getVoornaam(),
-                    nieuweKlant.getAchternaam(),
-                    nieuweKlant.getTussenvoegsel(),
-                    nieuweKlant.getEmail(),
-                    0, //TODO: ondersteuning voor meegeven bestaand adres?
-                    nieuweKlant.getAdresGegevens(),
-                    nieuweKlant.getBestellingGegevens());
-            return nieuwId;
-        }
-        else {
-            throw new RSVIERException("KlantDAOMySQL: KAN GEEN KLANT AANMAKEN MET NULL OBJECT");
-        }
-    }
-
     /**
-     * Maakt een nieuwe klant aan in de database met voornaam, achternaam en adresgegevens.
-     * Er wordt in de database automatisch een uniek ID gegenereerd welke automatisch verhoogd wordt.
-     *
-     * @param voornaam De voornaam van de klant (max 50 karakters).
-     * @param achternaam De achternaam van de klant (max 51 karakters).
-     * @param adresgegevens De adresgegevens van de klant in een Adres object (Adres).
-     * @throws RSVIERException Foutmelding bij SQLException, info wordt meegegeven.
-     */
-    @Override
-    public long nieuweKlant(String voornaam,
-                            String achternaam,
-                            Adres adresgegevens) throws RSVIERException {
-        long nieuwID = nieuweKlant(voornaam, achternaam, "", "", 0, adresgegevens, null);
-
-        return nieuwID;
-    }
-
-    /**
-     * Maakt een nieuwe klant aan in de database met voor- en achternaam.
-     * Er wordt in de database automatisch een uniek ID gegenereerd welke automatisch verhoogd wordt.
-     *
-     * @param voornaam De voornaam van de klant (max 50 karakters).
-     * @param achternaam De achternaam van de klant (max 51 karakters).
-     */
-    @Override
-    public long nieuweKlant(String voornaam,
-                            String achternaam) throws RSVIERException {
-        long nieuwID = nieuweKlant(voornaam, achternaam, null);
-
-        return nieuwID;
-    }
-
-    /**
+     * [HOOFD NIEUWEKLANTMETHODE]
      * Maakt een nieuwe klant aan in de database met alle naamgegevens.
      * Als er adres en/of bestelgegevens aanwezig zijn worden deze tevens ook toegevoegd.
      * Er wordt in de database automatisch een uniek ID gegenereerd welke automatisch verhoogd wordt.
+     * Het is mogelijk door middel van een adres_id mee te geven geen nieuw adres aan te maken maar
+     * deze te koppelen aan de klant.
      *
      * @param voornaam De voornaam van de klant (max 50 karakters).
      * @param achternaam De achternaam van de klant (max 51 karakters).
@@ -115,13 +66,10 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
                 "(voornaam, achternaam, tussenvoegsel, email) " +
                 "VALUES " +
                 "(?,        ?,          ?,              ?);";
-
         try (
                 Connection connection = MySQLConnectieLeverancier.getConnection();
                 PreparedStatement statement = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
-        )
-        {
-
+        ) {
             // Voer query uit en haal de gegenereerde sleutels op bij deze query
             statement.setString(1, voornaam);
             statement.setString(2, achternaam);
@@ -136,15 +84,23 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
 
             // Als er een adres_id wordt meegegeven betekent dit dat er een bestaand adres gekoppeled wordt
             // aan een nieuwe klant
-            if (adres_id != 0 && adresgegevens == null) {
+            if (adres_id > 0 && adresgegevens == null) {
                 adresDAO = new AdresDAOMySQL();
                 adresDAO.koppelAdresAanKlant(nieuwId, adres_id);
             }
 
             // Als er adresgegeven worden meegegeven wordt er een adres aangemaakt op basis van het nieuwe klantId
-            if (adresgegevens != null && adres_id == 0) {
+            else if (adresgegevens != null && adres_id == 0) {
                 adresDAO = new AdresDAOMySQL();
                 adresDAO.nieuwAdres(nieuwId, adresgegevens);
+            }
+
+            // Als er adresgegeven worden meegegeven en een adres_id wordt er zowel een nieuw adres aangemaakt
+            // en tevens het bestaande adres gekoppeld.
+            else if (adresgegevens != null && adres_id > 0) {
+                adresDAO = new AdresDAOMySQL();
+                adresDAO.nieuwAdres(nieuwId, adresgegevens);
+                adresDAO.koppelAdresAanKlant(nieuwId, adres_id);
             }
 
             // Als er bestegegevens zijn meegegeven worden deze bijgevoegd
@@ -154,9 +110,9 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
                 bestelGegevens.setKlant_id(nieuwId);
                 bestellingDAO.nieuweBestelling(bestelGegevens);
             }
-//            System.out.println("\n\tKlantDAOMySQL: KLANT: " + voornaam + " SUCCESVOL GEMAAKT");
 
             return nieuwId;
+
         } catch (SQLException ex) {
             if (ex.getMessage().contains("Duplicate entry"))
                 throw new RSVIERException("KlantDAOMySQL: DEZE KLANT BESTAAT AL IN DE DATABASE MET ID: " +
@@ -168,8 +124,67 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
         }
     }
 
+    /**
+     * Deze methode kan een Klant-object ontvangen en maakt op basis daarvan een nieuwe
+     * klant aan in de database. Adres-object en bestelling-object mogen null zijn.
+     * Zie verder de overloaded nieuweKlant methods.
+     *
+     * Als een bestaand adres gekoppeld dient te worden kan er een adres_id worden meegegeven.
+     * Er wordt dan geen nieuw adres meer aangemaakt.
+     *
+     * @param nieuweKlant Klantobject van de klant die gemaakt dient te worden.
+     * @param adres_id Er kan een adres_id worden meegegeven om een bestaand adres te koppelen.
+     * @return klant_id van de nieuwe klant.
+     * @throws RSVIERException
+     */
+    @Override
+    public long nieuweKlant(Klant nieuweKlant, long adres_id) throws RSVIERException {
 
-    // =
+        // Als er geen klant wordt meegegeven wordt een fout gegooid.
+        if (nieuweKlant != null) {
+            long nieuwId =  nieuweKlant(nieuweKlant.getVoornaam(), nieuweKlant.getAchternaam(),
+                    nieuweKlant.getTussenvoegsel(), nieuweKlant.getEmail(), adres_id,
+                    nieuweKlant.getAdresGegevens(), nieuweKlant.getBestellingGegevens());
+            return nieuwId;
+        }
+        else {
+            throw new RSVIERException("KlantDAOMySQL: KAN GEEN KLANT AANMAKEN MET NULL OBJECT");
+        }
+    }
+
+    /**
+     * Maakt een nieuwe klant aan in de database met voornaam, achternaam en adresgegevens.
+     * Er wordt in de database automatisch een uniek ID gegenereerd welke automatisch verhoogd wordt.
+     *
+     * @param voornaam De voornaam van de klant (max 50 karakters).
+     * @param achternaam De achternaam van de klant (max 51 karakters).
+     * @param adresgegevens De adresgegevens van de klant in een Adres object (Adres).
+     * @throws RSVIERException Foutmelding bij SQLException, info wordt meegegeven.
+     */
+    @Override
+    public long nieuweKlant(String voornaam,
+                            String achternaam,
+                            Adres adresgegevens) throws RSVIERException {
+        long nieuwID = nieuweKlant(voornaam, achternaam, "", "", 0, adresgegevens, null);
+        return nieuwID;
+    }
+
+    /**
+     * Maakt een nieuwe klant aan in de database met voor- en achternaam.
+     * Er wordt in de database automatisch een uniek ID gegenereerd welke automatisch verhoogd wordt.
+     * Aangezien geen adres wordt meegegeven wordt een null waarde gestuurd naar de HOOFDMETHODE van
+     * nieuweKlant.
+     *
+     * @param voornaam De voornaam van de klant (max 50 karakters).
+     * @param achternaam De achternaam van de klant (max 51 karakters).
+     */
+    @Override
+    public long nieuweKlant(String voornaam,
+                            String achternaam) throws RSVIERException {
+        long nieuwID = nieuweKlant(voornaam, achternaam, null);
+        return nieuwID;
+    }
+
     /** READ METHODS */
 
     /**
@@ -241,6 +256,49 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
     }
 
     /**
+     * HOOFD READ METHODE.
+     *
+     * In deze methode kan een klant-object ontvangen en op basis van de ingevulde velden de klant(en)
+     * opzoeken.
+     *
+     * @param klant De klantgegevens in een Klant-Object dat opgezocht dient te worden.
+     * @return een ListIterator wordt teruggegeven van de ArrayList met daarin Klant-objecten.
+     * @throws RSVIERException
+     */
+    @Override
+    public ListIterator<Klant> getKlantOpKlant(Klant klant) throws RSVIERException {
+        if (klant != null && klant.getKlant_id() != -1 ) {
+            String query = "SELECT * FROM " +
+                    "KLANT WHERE " +
+                    "klant_id LIKE ? AND " +
+                    "voornaam LIKE ? AND " +
+                    "achternaam LIKE ? AND " +
+                    "tussenvoegsel LIKE ? " +
+                    "AND email LIKE ?";
+
+            try (
+                    Connection connection = MySQLConnectieLeverancier.getConnection();
+                    PreparedStatement statement = connection.prepareStatement(query);
+            ) {
+                statement.setString(1, klant.getKlant_id() == 0 ? "%" : String.valueOf(klant.getKlant_id()) );
+                statement.setString(2, klant.getVoornaam().equals("") |  klant.getVoornaam() == null ? "%" : klant.getVoornaam());
+                statement.setString(3, klant.getAchternaam().equals("") ? "%" : klant.getAchternaam());
+                statement.setString(4, klant.getTussenvoegsel().equals("") ? "%" : klant.getTussenvoegsel());
+                statement.setString(5, klant.getEmail().equals("") ? "%" : klant.getEmail());
+                resultSet = statement.executeQuery();
+                klantenLijst = voegResultSetInLijst(resultSet);
+                return klantenLijst.listIterator();
+            } catch (SQLException ex) {
+                throw new RSVIERException("KlantDAOMySQL: SQL FOUT TIJDENS OPZOEKEN KLANT " + ex.getMessage());
+            } finally {
+                MySQLHelper.close(resultSet);
+            }
+        } else {
+            throw new RSVIERException("KlantDAOMySQL: ER DIENT EEN GEVULD KLANTOBJECT MEEGEGEVEN TE WORDEN OM EEN KLANT TE ZOEKEN");
+        }
+    }
+
+    /**
      * Deze methode haalt op basis van klantId klanten (als het goed is 1) op uit de database en geeft dit
      * terug in en ListIterator van de ArrayList.
      *
@@ -250,23 +308,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
      */
     @Override
     public ListIterator<Klant> getKlantOpKlant(long klantId) throws RSVIERException {
-        String query = "SELECT * FROM " +
-                "KLANT WHERE " +
-                "klant_id = ?;";
-        try (
-                Connection connection = MySQLConnectieLeverancier.getConnection();
-                PreparedStatement statement = connection.prepareStatement(query);
-        ) {
-            statement.setLong(1, klantId);
-            resultSet = statement.executeQuery();
-            klantenLijst = voegResultSetInLijst(resultSet);
-            return klantenLijst.listIterator();
-
-        } catch (SQLException ex) {
-            throw new RSVIERException("KlantDAOMySQL: SQL FOUT TIJDENS OPZOEKEN KLANT OP KLANTID");
-        } finally {
-            MySQLHelper.close(resultSet);
-        }
+        return getKlantOpKlant(new Klant(klantId, "", "", "", "", null));
     }
 
     /**
@@ -279,23 +321,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
      */
     @Override
     public ListIterator<Klant> getKlantOpKlant(String voornaam) throws RSVIERException {
-        String query = "SELECT * FROM " +
-                "KLANT WHERE " +
-                "voornaam LIKE ?;";
-        try (
-                Connection connection = MySQLConnectieLeverancier.getConnection();
-                PreparedStatement statement = connection.prepareStatement(query);
-        ) {
-            statement.setString(1, voornaam);
-            resultSet = statement.executeQuery();
-            klantenLijst = voegResultSetInLijst(resultSet);
-            return klantenLijst.listIterator();
-
-        } catch (SQLException ex) {
-            throw new RSVIERException("KlantDAOMySQL: SQL FOUT TIJDENS OPZOEKEN KLANT OP VOORNAAM");
-        } finally {
-            MySQLHelper.close(resultSet);
-        }
+       return getKlantOpKlant(new Klant(0, voornaam, "", "", "", null));
     }
 
     /**
@@ -310,27 +336,12 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
     @Override
     public ListIterator<Klant> getKlantOpKlant(String voornaam,
                                                String achternaam) throws RSVIERException {
-        String query = "SELECT * FROM " +
-                "KLANT WHERE " +
-                "voornaam LIKE ? AND achternaam LIKE ?;";
-        try (
-                Connection connection = MySQLConnectieLeverancier.getConnection();
-                PreparedStatement statement = connection.prepareStatement(query);
-        ) {
-            statement.setString(1, voornaam);
-            statement.setString(2, achternaam);
-            resultSet = statement.executeQuery();
-            klantenLijst = voegResultSetInLijst(resultSet);
-            return klantenLijst.listIterator();
-
-        } catch (SQLException ex) {
-            throw new RSVIERException("KlantDAOMySQL: SQL FOUT TIJDENS OPZOEKEN KLANT OP VOOR & ACHTERNAAM");
-        } finally {
-            MySQLHelper.close(resultSet);
-        }
+        return getKlantOpKlant(new Klant(0, voornaam, achternaam, "", "", null));
     }
 
     /**
+     * HOOFD-READMETHODE VAN getKlantOpAdres
+     *
      * Deze methode haalt op basis van adresgegevens klanten op uit de database en geeft dit
      * terug in en ListIterator van de ArrayList.
      *
@@ -340,7 +351,6 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
      */
     @Override
     public ListIterator<Klant> getKlantOpAdres(Adres adresgegevens) throws RSVIERException {
-        // TODO: CHECKEN OF ER NIET 1 METHOD MOGELIJK IS
         String query = "SELECT KLANT.* " +
                 "FROM " +
                 "KLANT_HEEFT_ADRES, ADRES, KLANT " +
@@ -359,11 +369,11 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
                 Connection connection = MySQLConnectieLeverancier.getConnection();
                 PreparedStatement statement = connection.prepareStatement(query);
         ) {
-            statement.setString(1, adresgegevens.getStraatnaam());
-            statement.setString(2, adresgegevens.getPostcode());
-            statement.setString(3, adresgegevens.getToevoeging());
-            statement.setInt(4, adresgegevens.getHuisnummer());
-            statement.setString(5, adresgegevens.getWoonplaats());
+            statement.setString(1, adresgegevens.getStraatnaam().equals("") ? "%" : adresgegevens.getStraatnaam());
+            statement.setString(2, adresgegevens.getPostcode().equals("") ? "%" : adresgegevens.getPostcode());
+            statement.setString(3, adresgegevens.getToevoeging().equals("") ? "%" : adresgegevens.getToevoeging());
+            statement.setString(4, adresgegevens.getHuisnummer() == 0 ? "%" : String.valueOf(adresgegevens.getHuisnummer()));
+            statement.setString(5, adresgegevens.getWoonplaats().equals("") ? "%" : adresgegevens.getWoonplaats());
             resultSet = statement.executeQuery();
             klantenLijst = voegResultSetInLijst(resultSet);
             return klantenLijst.listIterator();
@@ -386,32 +396,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
 
     @Override
     public ListIterator<Klant> getKlantOpAdres(String straatnaam) throws RSVIERException {
-        String query =
-                "SELECT KLANT.* " +
-                        "FROM " +
-                        "KLANT_HEEFT_ADRES, ADRES, KLANT " +
-                        "WHERE " +
-                        "ADRES.straatnaam = ? " +
-                        "AND " +
-                        "KLANT_HEEFT_ADRES.adres_id_adres = ADRES.ADRES_id AND " +
-                        "KLANT_HEEFT_ADRES.klant_id_klant = KLANT.KLANT_ID " +
-                        "GROUP BY klant_id " +
-                        "ORDER BY klant_id;";
-
-        try (
-                Connection connection = MySQLConnectieLeverancier.getConnection();
-                PreparedStatement statement = connection.prepareStatement(query);
-        ) {
-            statement.setString(1, straatnaam);
-            resultSet = statement.executeQuery();
-            klantenLijst = voegResultSetInLijst(resultSet);
-            return klantenLijst.listIterator();
-
-        } catch (SQLException ex) {
-            throw new RSVIERException("KlantDAOMySQL: SQL FOUT TIJDENS OPZOEKEN KLANT OP STRAATNAAM");
-        } finally {
-            MySQLHelper.close(resultSet);
-        }
+        return getKlantOpAdres(new Adres(straatnaam, "", "", 0, ""));
     }
 
     /**
@@ -426,35 +411,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
     @Override
     public ListIterator<Klant> getKlantOpAdres(String postcode,
                                                int huisnummer) throws RSVIERException {
-        String query =
-                "SELECT KLANT.* " +
-                        "FROM " +
-                        "KLANT_HEEFT_ADRES, ADRES, KLANT " +
-                        "WHERE " +
-                        "ADRES.postcode = ? AND " +
-                        "ADRES.huisnummer = ? " +
-                        "AND " +
-                        "KLANT_HEEFT_ADRES.adres_id_adres = ADRES.ADRES_id AND " +
-                        "KLANT_HEEFT_ADRES.klant_id_klant = KLANT.KLANT_ID " +
-                        "GROUP BY klant_id " +
-                        "ORDER BY klant_id;";
-
-        try (
-                Connection connection = MySQLConnectieLeverancier.getConnection();
-
-                PreparedStatement statement = connection.prepareStatement(query);
-        ) {
-            statement.setString(1, postcode);
-            statement.setInt(2, huisnummer);
-            resultSet = statement.executeQuery();
-            klantenLijst = voegResultSetInLijst(resultSet);
-            return klantenLijst.listIterator();
-
-        } catch (SQLException ex) {
-            throw new RSVIERException("KlantDAOMySQL: SQL FOUT TIJDENS OPZOEKEN KLANT OP POSTCODE EN HUISNUMMER");
-        } finally {
-            MySQLHelper.close(resultSet);
-        }
+        return getKlantOpAdres(new Adres("", postcode, "", huisnummer, ""));
     }
 
     /**
@@ -467,22 +424,25 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
      */
     @Override
     public ListIterator<Klant> getKlantOpBestelling(long bestellingId) throws RSVIERException {
-        connection = MySQLConnectieLeverancier.getConnection();
-        try {
-            query = "SELECT klant_id FROM " +
-                    "BESTELLING WHERE " +
-                    "bestelling_id = ? " +
-                    "LIMIT 1;";
-            statement = connection.prepareStatement(query);
+
+        String query = "SELECT klant_id FROM " +
+                "BESTELLING WHERE " +
+                "bestelling_id = ? " +
+                "LIMIT 1;";
+        try (
+                Connection connection = MySQLConnectieLeverancier.getConnection();
+                PreparedStatement statement = connection.prepareStatement(query);
+        ) {
             statement.setLong(1, bestellingId);
             resultSet = statement.executeQuery();
             while (resultSet.next()) {
                 return getKlantOpKlant((long)resultSet.getInt(1));
             }
         } catch (SQLException ex) {
-            throw new RSVIERException("KlantDAOMySQL: SQL FOUT TIJDENS OPZOEKEN KLANT OP BESTELLINGID");
+            throw new RSVIERException("KlantDAOMySQL: SQL FOUT TIJDENS OPZOEKEN KLANT OP BESTELLINGID: " +
+                    ex.getMessage());
         } finally {
-            MySQLHelper.close(connection, statement, resultSet);
+            MySQLHelper.close(resultSet);
         }
         return null;
     }
@@ -553,13 +513,11 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
         adresDAO.updateAdres(adres_id, adresgegevens);
     }
 
-    // =
-
     /** DELETE METHODS */
 
     /**
      * Methode om een klant te verwijderen op basis van ID. Alle bestellingen van de klant worden
-     * tevens ook verwijderd.
+     * tevens ook op non-actief gezet.
      *
      * @param klantId Klant_id van de te verwijderen klant.
      * @throws RSVIERException Foutmelding bij SQLException, info wordt meegegeven.
@@ -587,7 +545,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
             statement.setLong(2, klantId);
             statement.execute();
 
-            return  verwijderdID;
+            return verwijderdID;
         } catch (SQLException ex) {
             throw new RSVIERException("KlantDAOMySQL: SQL FOUT TIJDENS KLANT OP ID INACTIEF ZETTEN" + ex.getMessage());
         }
@@ -596,43 +554,25 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
     @Override
     public void schakelStatusKlant(String voornaam, String achternaam) throws RSVIERException {
         /**
-         * Methode om een klant te verwijderen op basis van alleen voor- en achternaam;
+         * Methode om een klant zijn/haar status te switchen op basis van alleen voor- en achternaam;
          *
          * @param voornaam Voornaam van de te verwijderen
          * @param achternaam Achternaam van de te verwijderen klant
          * @throws RSVIERException Foutmelding bij SQLException, info wordt meegegeven.
          */
 
-        String query = "SELECT klant_id FROM " +
-                "KLANT " +
-                "WHERE " +
-                "voornaam LIKE ? AND " +
-                "achternaam LIKE ?;";
+        ListIterator<Klant> klantListIterator = getKlantOpKlant(voornaam, achternaam);
 
-
-        try (
-                Connection connection = MySQLConnectieLeverancier.getConnection();
-                PreparedStatement statement = connection.prepareStatement(query);
-        ) {
-
-            statement.setString(1, voornaam);
-            statement.setString(2, achternaam);
-            resultSet = statement.executeQuery();
-
-            while (resultSet.next()) {
-                schakelStatusKlant(resultSet.getInt(1), 0);
-            }
-
-        } catch (SQLException ex) {
-            throw new RSVIERException("KlantDAOMySQL: SQL FOUT TIJDENS VERWIJDEREN KLANT OP VOORNAAM & ACHTERNAAM");
-        } finally {
-            MySQLHelper.close(resultSet);
+        while (klantListIterator.hasNext()) {
+            Klant tijdelijkeKlant = klantListIterator.next();
+            schakelStatusKlant(tijdelijkeKlant.getKlant_id(),
+                    (tijdelijkeKlant.getKlantActief().charAt(0) == '0' ? 1 : 0));
         }
     }
 
     /**
-     * Methode om een klant te verwijderen op basis van naamgegevens. Alle bestellingen van de klant worden
-     * tevens ook verwijderd.
+     * Methode om een klant zijn/haar status te switchen op basis van naamgegevens. Alle bestellingen van de klant worden
+     * tevens ook op non-actief gezet.
      *
      * @param voornaam De voornaam van de te verwijderen klant.
      * @param achternaam De achternaam van de te verwijderen klant.
@@ -643,31 +583,13 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
     public void schakelStatusKlant(String voornaam,
                                    String achternaam,
                                    String tussenvoegsel) throws RSVIERException {
-        String query = "SELECT klant_id FROM " +
-                "KLANT " +
-                "WHERE " +
-                "voornaam LIKE ? AND " +
-                "achternaam LIKE ? AND " +
-                "tussenvoegsel LIKE ?;";
+        ListIterator<Klant> klantListIterator =
+                getKlantOpKlant(new Klant(0, voornaam, achternaam, tussenvoegsel, "", null));
 
-        try (
-                Connection connection = MySQLConnectieLeverancier.getConnection();
-                PreparedStatement statement = connection.prepareStatement(query);
-        ) {
-            statement.setString(1, voornaam);
-            statement.setString(2, achternaam);
-            statement.setString(3, tussenvoegsel);
-            resultSet = statement.executeQuery();
-
-            while (resultSet.next()) {
-                schakelStatusKlant(resultSet.getInt(1), 0);
-            }
-
-        } catch (SQLException ex) {
-            throw new RSVIERException("KlantDAOMySQL: SQL FOUT TIJDENS VERWIJDEREN KLANT OP VOORNAAM, ACHTERNAAM & \" +\n" +
-                    "                    \"TUSSENVOEGSEL\"");
-        } finally {
-            MySQLHelper.close(resultSet);
+        while (klantListIterator.hasNext()) {
+            Klant tijdelijkeKlant = klantListIterator.next();
+            schakelStatusKlant(tijdelijkeKlant.getKlant_id(),
+                    (tijdelijkeKlant.getKlantActief().charAt(0) == '0' ? 1 : 0));
         }
     }
 
@@ -682,7 +604,6 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
     public long verwijderKlantOpBestellingId(long bestellingId) throws RSVIERException {
 
         //TODO: Aanpassen als bestelling weer klaar is
-
         // Klant wordt opgehaald uit de database om op basis van BestelID het klantID te vinden.
         ListIterator<Klant> klantenIterator = getKlantOpBestelling(bestellingId);
         long verwijderdId = -1;

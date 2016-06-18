@@ -36,6 +36,7 @@ public class Adres {
         this.toevoeging = toevoeging;
         this.huisnummer = huisnummer;
         this.woonplaats = woonplaats;
+        this.adres_id = 0;
     }
 
     //Getters and Setters

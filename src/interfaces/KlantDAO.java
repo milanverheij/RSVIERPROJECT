@@ -21,8 +21,45 @@ public interface KlantDAO {
 
 
     /** CREATE METHODS */
-    // TODO: JAvadoc
-    long nieuweKlant(Klant nieuweKlant) throws RSVIERException;
+
+    /**
+     * [HOOFD NIEUWEKLANTMETHODE]
+     * Maakt een nieuwe klant aan in de database met alle naamgegevens.
+     * Als er adres en/of bestelgegevens aanwezig zijn worden deze tevens ook toegevoegd.
+     * Er wordt in de database automatisch een uniek ID gegenereerd welke automatisch verhoogd wordt.
+     * Het is mogelijk door middel van een adres_id mee te geven geen nieuw adres aan te maken maar
+     * deze te koppelen aan de klant.
+     *
+     * @param voornaam De voornaam van de klant (max 50 karakters).
+     * @param achternaam De achternaam van de klant (max 51 karakters).
+     * @param tussenvoegsel Tussenvoegsel van de klant (max 10 karakters).
+     * @param email Emailadres van de klant (max 80 karakters).
+     * @param adresgegevens Adresgegevens van de klant in een Klant object (zie Klant).
+     * @param bestelGegevens Bestelgegevens van de klant in een Bestel object (zie Bestelling).
+     * @throws RSVIERException Foutmelding bij SQLException, info wordt meegegeven.
+     */
+    long nieuweKlant(String voornaam,
+                     String achternaam,
+                     String tussenvoegsel,
+                     String email,
+                     long adres_id,
+                     Adres adresgegevens,
+                     Bestelling bestelGegevens) throws RSVIERException;
+
+    /**
+     * Deze methode kan een Klant-object ontvangen en maakt op basis daarvan een nieuwe
+     * klant aan in de database. Adres-object en bestelling-object mogen null zijn.
+     * Zie verder de overloaded nieuweKlant methods.
+     *
+     * Als een bestaand adres gekoppeld dient te worden kan er een adres_id worden meegegeven.
+     * Er wordt dan geen nieuw adres meer aangemaakt.
+     *
+     * @param nieuweKlant Klantobject van de klant die gemaakt dient te worden.
+     * @param adres_id Er kan een adres_id worden meegegeven om een bestaand adres te koppelen.
+     * @return klant_id van de nieuwe klant.
+     * @throws RSVIERException
+     */
+    long nieuweKlant(Klant nieuweKlant, long adres_id) throws RSVIERException;
 
     /**
      * Maakt een nieuwe klant aan in de database met voornaam, achternaam en adresgegevens.
@@ -40,34 +77,14 @@ public interface KlantDAO {
     /**
      * Maakt een nieuwe klant aan in de database met voor- en achternaam.
      * Er wordt in de database automatisch een uniek ID gegenereerd welke automatisch verhoogd wordt.
+     * Aangezien geen adres wordt meegegeven wordt een null waarde gestuurd naar de HOOFDMETHODE van
+     * nieuweKlant.
      *
      * @param voornaam De voornaam van de klant (max 50 karakters).
      * @param achternaam De achternaam van de klant (max 51 karakters).
-     * @throws RSVIERException Foutmelding bij SQLException, info wordt meegegeven.
      */
     long nieuweKlant(String voornaam,
                      String achternaam) throws RSVIERException;
-
-    /**
-     * Maakt een nieuwe klant aan in de database met alle naamgegevens.
-     * Als er adres en/of bestelgegevens aanwezig zijn worden deze tevens ook toegevoegd.
-     * Er wordt in de database automatisch een uniek ID gegenereerd welke automatisch verhoogd wordt.
-     *
-     * @param voornaam De voornaam van de klant (max 50 karakters).
-     * @param achternaam De achternaam van de klant (max 51 karakters).
-     * @param tussenvoegsel Tussenvoegsel van de klant (max 10 karakters).
-     * @param email Emailadres van de klant (max 80 karakters).
-     * @param adresgegevens Adresgegevens van de klant in een Klant object (zie Klant).
-     * @param bestelGegevens Bestelgegevens van de klant in een Bestel object (zie Bestelling).
-     * @throws RSVIERException Foutmelding bij SQLException, info wordt meegegeven.
-     */
-    long nieuweKlant(String voornaam,
-                     String achternaam,
-                     String tussenvoegsel,
-                     String email,
-                     long adres_id,
-                     Adres adresgegevens,
-                     Bestelling bestelGegevens) throws RSVIERException;
 
     /** READ METHODS */
 
@@ -89,6 +106,18 @@ public interface KlantDAO {
      * @throws RSVIERException Foutmelding bij SQLException, info wordt meegegeven.
      */
     ListIterator<Klant> getAlleKlanten() throws RSVIERException;
+
+    /**
+     * HOOFD READ METHODE.
+     *
+     * In deze methode kan een klant-object ontvangen en op basis van de ingevulde velden de klant(en)
+     * opzoeken.
+     *
+     * @param klant De klantgegevens in een Klant-Object dat opgezocht dient te worden.
+     * @return een ListIterator wordt teruggegeven van de ArrayList met daarin Klant-objecten.
+     * @throws RSVIERException
+     */
+    ListIterator<Klant> getKlantOpKlant(Klant klant) throws RSVIERException;
 
     /**
      * Deze methode haalt op basis van klantId klanten (als het goed is 1) op uit de database en geeft dit
