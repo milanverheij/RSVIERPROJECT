@@ -19,7 +19,11 @@ import java.util.ListIterator;
 
 public interface KlantDAO {
 
+
     /** CREATE METHODS */
+    // TODO: JAvadoc
+    long nieuweKlant(Klant nieuweKlant) throws RSVIERException;
+
     /**
      * Maakt een nieuwe klant aan in de database met voornaam, achternaam en adresgegevens.
      * Er wordt in de database automatisch een uniek ID gegenereerd welke automatisch verhoogd wordt.
@@ -58,14 +62,26 @@ public interface KlantDAO {
      * @throws RSVIERException Foutmelding bij SQLException, info wordt meegegeven.
      */
     long nieuweKlant(String voornaam,
-                    String achternaam,
-                    String tussenvoegsel,
-                    String email,
-                    Adres adresgegevens,
-                    Bestelling bestelGegevens) throws RSVIERException;
+                     String achternaam,
+                     String tussenvoegsel,
+                     String email,
+                     long adres_id,
+                     Adres adresgegevens,
+                     Bestelling bestelGegevens) throws RSVIERException;
 
     /** READ METHODS */
 
+    /**
+     * De uniekheid van een klant is op basis van voornaam, achternaam en email, hier kan er dus maar 1 van bestaan.
+     *
+     * @param voornaam De te zoeken voornaam
+     * @param achternaam De te zoeken achternaam
+     * @param email De te zoeken email van de klant
+     * @return Het klant_id van de klant
+     */
+    long getKlantID(String voornaam,
+                    String achternaam,
+                    String email) throws RSVIERException;
     /**
      * Deze method haalt alle klanten op uit de database en stopt ze in een ArrayList waarna, zie @return.
      *
@@ -104,7 +120,7 @@ public interface KlantDAO {
      * @throws RSVIERException Foutmelding bij SQLException, info wordt meegegeven.
      */
     ListIterator<Klant> getKlantOpKlant(String voornaam,
-                        String achternaam) throws RSVIERException;
+                                        String achternaam) throws RSVIERException;
 
     /**
      * Deze methode haalt op basis van adresgegevens klanten op uit de database en geeft dit
@@ -136,7 +152,7 @@ public interface KlantDAO {
      * @throws RSVIERException Foutmelding bij SQLException, info wordt meegegeven.
      */
     ListIterator<Klant> getKlantOpAdres(String postcode,
-                         int huisnummer) throws RSVIERException;
+                                        int huisnummer) throws RSVIERException;
 
     /**
      * Deze methode haalt op basis van bestelId klanten op uit de database en geeft dit
@@ -183,6 +199,7 @@ public interface KlantDAO {
                      String achternaam,
                      String tussenvoegsel,
                      String email,
+                     long adres_id,
                      Adres adresgegevens) throws RSVIERException;
 
     /** DELETE METHODS */
@@ -194,7 +211,7 @@ public interface KlantDAO {
      * @param klantId Klant_id van de te verwijderen klant.
      * @throws RSVIERException Foutmelding bij SQLException, info wordt meegegeven.
      */
-    long verwijderKlant(long klantId) throws RSVIERException;
+    long schakelStatusKlant(long klantId, int status) throws RSVIERException;
 
     /**
      * Methode om een klant te verwijderen op basis van alleen voor- en achternaam;
@@ -203,8 +220,8 @@ public interface KlantDAO {
      * @param achternaam Achternaam van de te verwijderen klant
      * @throws RSVIERException Foutmelding bij SQLException, info wordt meegegeven.
      */
-    void verwijderKlant(String voornaam,
-                        String achternaam) throws RSVIERException;
+    void schakelStatusKlant(String voornaam,
+                            String achternaam) throws RSVIERException;
 
     /**
      * Methode om een klant te verwijderen op basis van naamgegevens. Alle bestellingen van de klant worden
@@ -215,9 +232,9 @@ public interface KlantDAO {
      * @param tussenvoegsel Het tussenvoegsel van de te verwijderen klant.
      * @throws RSVIERException Foutmelding bij SQLException, info wordt meegegeven.
      */
-    void verwijderKlant(String voornaam,
-                        String achternaam,
-                        String tussenvoegsel) throws RSVIERException;
+    void schakelStatusKlant(String voornaam,
+                            String achternaam,
+                            String tussenvoegsel) throws RSVIERException;
 
     /**
      * Methode om een klant te verwijderen op basis van een bestelnummer.

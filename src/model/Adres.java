@@ -15,6 +15,8 @@ public class Adres {
     private int huisnummer;
     private String woonplaats;
     private String datumAanmaak;
+    private String datumGewijzigd;
+    private String adresActief;
 
     //Consturctors
     public Adres() {
@@ -58,6 +60,12 @@ public class Adres {
     public String getDatumAanmaak() {
         return datumAanmaak;
     }
+    public String getDatumGewijzigd() {
+        return datumGewijzigd;
+    }
+    public String getAdresActief() {
+        return adresActief;
+    }
 
     public void setStraatnaam(String straatnaam) {
         this.straatnaam = straatnaam;
@@ -79,6 +87,12 @@ public class Adres {
     }
     public void setDatumAanmaak(String datumAanmaak) {
         this.datumAanmaak = datumAanmaak;
+    }
+    public void setDatumGewijzigd(String datumGewijzigd) {
+        this.datumGewijzigd = datumGewijzigd;
+    }
+    public void setAdresActief(String adresActief) {
+        this.adresActief = adresActief;
     }
 
     @Override

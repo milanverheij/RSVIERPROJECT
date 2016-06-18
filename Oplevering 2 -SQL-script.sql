@@ -26,12 +26,15 @@ CREATE TABLE IF NOT EXISTS `RSVIERPROJECTDEEL2`.`KLANT` (
   `achternaam` VARCHAR(51) NOT NULL COMMENT 'Not null, bij iedere klant minstens een achternaam.',
   `tussenvoegsel` VARCHAR(10) NULL,
   `email` VARCHAR(80) NULL,
-  `datumAanmaak` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `datumAanmaak` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `datumGewijzigd` TIMESTAMP NULL,
   `klantActief` TINYINT(1) NOT NULL DEFAULT 1,
   PRIMARY KEY (`klant_id`))
 ENGINE = InnoDB;
 
 CREATE UNIQUE INDEX `klant_id_UNIQUE` ON `RSVIERPROJECTDEEL2`.`KLANT` (`klant_id` ASC);
+
+CREATE UNIQUE INDEX `klant_uniekheid` ON `RSVIERPROJECTDEEL2`.`KLANT` (`voornaam` ASC, `achternaam` ASC, `email` ASC);
 
 
 -- -----------------------------------------------------
@@ -42,7 +45,7 @@ DROP TABLE IF EXISTS `RSVIERPROJECTDEEL2`.`BESTELLING` ;
 CREATE TABLE IF NOT EXISTS `RSVIERPROJECTDEEL2`.`BESTELLING` (
   `bestelling_id` INT NOT NULL AUTO_INCREMENT COMMENT 'Unique want geen dubbele bestelnummers.\n\nAutoincrement zodat geen nummers worden overgeslagen.\n\nPrimary omdat bestel-ID het belangrijkste in in bestelling.',
   `klant_id` INT NOT NULL COMMENT 'Not-null. Er moet altijd een klant gekoppeld zijn.\n\nForeign key met klant.',
-  `datumAanmaak` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `datumAanmaak` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `bestellingActief` TINYINT(1) NOT NULL DEFAULT 1,
   PRIMARY KEY (`bestelling_id`),
   CONSTRAINT `klant_id`
@@ -69,17 +72,21 @@ CREATE TABLE IF NOT EXISTS `RSVIERPROJECTDEEL2`.`ADRES` (
   `toevoeging` VARCHAR(45) NULL,
   `huisnummer` VARCHAR(4) NOT NULL,
   `woonplaats` VARCHAR(45) NULL,
-  `datumAanmaak` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `datumAanmaak` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `datumGewijzigd` TIMESTAMP NULL,
+  `adresActief` TINYINT(1) NULL DEFAULT 1,
   PRIMARY KEY (`adres_id`))
 ENGINE = InnoDB;
 
+CREATE UNIQUE INDEX `uniekAdres` ON `RSVIERPROJECTDEEL2`.`ADRES` (`postcode` ASC, `huisnummer` ASC, `toevoeging` ASC);
+
 
 -- -----------------------------------------------------
--- Table `RSVIERPROJECTDEEL2`.`PERSOON_HEEFT_ADRES`
+-- Table `RSVIERPROJECTDEEL2`.`KLANT_HEEFT_ADRES`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `RSVIERPROJECTDEEL2`.`PERSOON_HEEFT_ADRES` ;
+DROP TABLE IF EXISTS `RSVIERPROJECTDEEL2`.`KLANT_HEEFT_ADRES` ;
 
-CREATE TABLE IF NOT EXISTS `RSVIERPROJECTDEEL2`.`PERSOON_HEEFT_ADRES` (
+CREATE TABLE IF NOT EXISTS `RSVIERPROJECTDEEL2`.`KLANT_HEEFT_ADRES` (
   `klant_id_klant` INT NOT NULL,
   `adres_id_adres` INT NOT NULL,
   PRIMARY KEY (`klant_id_klant`, `adres_id_adres`),
@@ -95,7 +102,7 @@ CREATE TABLE IF NOT EXISTS `RSVIERPROJECTDEEL2`.`PERSOON_HEEFT_ADRES` (
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
-CREATE INDEX `adres_id_idx` ON `RSVIERPROJECTDEEL2`.`PERSOON_HEEFT_ADRES` (`adres_id_adres` ASC);
+CREATE INDEX `adres_id_idx` ON `RSVIERPROJECTDEEL2`.`KLANT_HEEFT_ADRES` (`adres_id_adres` ASC);
 
 
 -- -----------------------------------------------------
@@ -106,7 +113,7 @@ DROP TABLE IF EXISTS `RSVIERPROJECTDEEL2`.`PRIJS` ;
 CREATE TABLE IF NOT EXISTS `RSVIERPROJECTDEEL2`.`PRIJS` (
   `prijs_id` INT NOT NULL,
   `prijs` DECIMAL(10,2) NULL,
-  `datumAanmaake` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `datumAanmaak` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`prijs_id`))
 ENGINE = InnoDB;
 
@@ -121,7 +128,7 @@ CREATE TABLE IF NOT EXISTS `RSVIERPROJECTDEEL2`.`ARTIKEL` (
   `omschrijving` VARCHAR(45) NOT NULL,
   `prijs` VARCHAR(10) NOT NULL,
   `prijsId` INT NOT NULL,
-  `datumAanmaak` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `datumAanmaak` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `verwachteLevertijd` VARCHAR(10) NULL,
   `inAssortisement` TINYINT(1) NOT NULL,
   PRIMARY KEY (`artikel_id`),

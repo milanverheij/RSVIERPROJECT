@@ -18,8 +18,10 @@ public class Klant {
     private String tussenvoegsel;
     private String email;
     private String datumAanmaak;
+    private String datumGewijzigd;
     private String klantActief;
     private Adres adresGegevens;
+    private Bestelling bestellingGegevens;
 
     // Standaard public constructor met alle paramaters
     public Klant(long klant_id,
@@ -84,6 +86,12 @@ public class Klant {
     public void setDatumAanmaak(String datumAanmaak) {
         this.datumAanmaak = datumAanmaak;
     }
+    public String getDatumGewijzigd() {
+        return datumGewijzigd;
+    }
+    public void setDatumGewijzigd(String datumGewijzigd) {
+        this.datumGewijzigd = datumGewijzigd;
+    }
     public String getKlantActief() {
         return klantActief;
     }
@@ -93,6 +101,14 @@ public class Klant {
     public void setAdresGegevens(Adres adresGegevens) {
         this.adresGegevens = adresGegevens;
     } // TODO : NODIG?
+    public Bestelling getBestellingGegevens() {
+        return bestellingGegevens;
+    }
+    public void setBestellingGegevens(Bestelling bestellingGegevens) {
+        this.bestellingGegevens = bestellingGegevens;
+    } // TODO: NODIG?
+
+
     // Overrided methoden van Object etc.
 
     @Override

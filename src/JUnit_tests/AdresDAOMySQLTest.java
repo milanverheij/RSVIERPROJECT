@@ -45,7 +45,7 @@ public class AdresDAOMySQLTest {
 
     @After
     public void tearDown() throws Exception {
-        klantDAO.verwijderKlant(klant_id_te_testen);
+        klantDAO.schakelStatusKlant(klant_id_te_testen, 0);
     }
 
     @Test
