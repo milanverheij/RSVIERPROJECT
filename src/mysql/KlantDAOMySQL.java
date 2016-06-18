@@ -61,7 +61,6 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
                             Adres adresgegevens,
                             Bestelling bestelGegevens) throws RSVIERException {
 
-        ResultSet generatedKeys = null;
         query = "INSERT INTO KLANT " +
                 "(voornaam, achternaam, tussenvoegsel, email) " +
                 "VALUES " +
@@ -79,38 +78,43 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
 
             // Ophalen van de laatste genegeneerde sleutel uit de generatedkeys (de nieuwe klant_id)
             long nieuwId = 0;
-            generatedKeys = statement.getGeneratedKeys();
-            if (generatedKeys.next()) { nieuwId = generatedKeys.getInt(1); }
+            try (
+                    ResultSet generatedKeys = statement.getGeneratedKeys();
+            ) {
+                if (generatedKeys.next()) {
+                    nieuwId = generatedKeys.getInt(1);
+                }
 
-            // Als er een adres_id wordt meegegeven betekent dit dat er een bestaand adres gekoppeled wordt
-            // aan een nieuwe klant
-            if (adres_id > 0 && adresgegevens == null) {
-                adresDAO = new AdresDAOMySQL();
-                adresDAO.koppelAdresAanKlant(nieuwId, adres_id);
+                // Als er een adres_id wordt meegegeven betekent dit dat er een bestaand adres gekoppeled wordt
+                // aan een nieuwe klant
+                if (adres_id > 0 && adresgegevens == null) {
+                    adresDAO = new AdresDAOMySQL();
+                    adresDAO.koppelAdresAanKlant(nieuwId, adres_id);
+                }
+
+                // Als er adresgegeven worden meegegeven wordt er een adres aangemaakt op basis van het nieuwe klantId
+                else if (adresgegevens != null && adres_id == 0) {
+                    adresDAO = new AdresDAOMySQL();
+                    adresDAO.nieuwAdres(nieuwId, adresgegevens);
+                }
+
+                // Als er adresgegeven worden meegegeven en een adres_id wordt er zowel een nieuw adres aangemaakt
+                // en tevens het bestaande adres gekoppeld.
+                else if (adresgegevens != null && adres_id > 0) {
+                    adresDAO = new AdresDAOMySQL();
+                    adresDAO.nieuwAdres(nieuwId, adresgegevens);
+                    adresDAO.koppelAdresAanKlant(nieuwId, adres_id);
+                }
+
+                // Als er bestegegevens zijn meegegeven worden deze bijgevoegd
+                // TODO: Bestelling werkt nog na aanpassingen?
+                if (bestelGegevens != null) {
+                    bestellingDAO = new BestellingDAOMySQL();
+                    bestelGegevens.setKlant_id(nieuwId);
+                    bestellingDAO.nieuweBestelling(bestelGegevens);
+                }
+
             }
-
-            // Als er adresgegeven worden meegegeven wordt er een adres aangemaakt op basis van het nieuwe klantId
-            else if (adresgegevens != null && adres_id == 0) {
-                adresDAO = new AdresDAOMySQL();
-                adresDAO.nieuwAdres(nieuwId, adresgegevens);
-            }
-
-            // Als er adresgegeven worden meegegeven en een adres_id wordt er zowel een nieuw adres aangemaakt
-            // en tevens het bestaande adres gekoppeld.
-            else if (adresgegevens != null && adres_id > 0) {
-                adresDAO = new AdresDAOMySQL();
-                adresDAO.nieuwAdres(nieuwId, adresgegevens);
-                adresDAO.koppelAdresAanKlant(nieuwId, adres_id);
-            }
-
-            // Als er bestegegevens zijn meegegeven worden deze bijgevoegd
-            // TODO: Bestelling werkt nog na aanpassingen?
-            if (bestelGegevens != null) {
-                bestellingDAO = new BestellingDAOMySQL();
-                bestelGegevens.setKlant_id(nieuwId);
-                bestellingDAO.nieuweBestelling(bestelGegevens);
-            }
-
             return nieuwId;
 
         } catch (SQLException ex) {
@@ -119,8 +123,6 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
                         getKlantID(voornaam, achternaam, email));
             else
                 throw new RSVIERException("KlantDAOMySQL: SQL FOUT TIJDENS AANMAKEN KLANT: " + ex.getMessage());
-        } finally {
-            MySQLHelper.close(generatedKeys);
         }
     }
 
@@ -198,7 +200,6 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
      */
     @Override
     public long getKlantID(String voornaam, String achternaam, String email) throws RSVIERException {
-        ResultSet rs = null;
         String query = "SELECT klant_id " +
                 "FROM KLANT " +
                 "WHERE " +
@@ -213,19 +214,19 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
             statement.setString(1, voornaam);
             statement.setString(2, achternaam);
             statement.setString(3, email);
-            rs = statement.executeQuery();
 
-            // Als er een resultaat gevonden is bestaat de klant niet en wordt er een foutmelding gegooid.
-            if (!rs.next())
-                throw new RSVIERException("KlantDAOMySQL: KLANT NIET GEVONDEN");
-            else {
-                return rs.getLong(1); // Door if-statement is rs al bij next()
+            try (
+                    ResultSet rs = statement.executeQuery();
+            ){
+                // Als er een resultaat gevonden is bestaat de klant niet en wordt er een foutmelding gegooid.
+                if (!rs.next())
+                    throw new RSVIERException("KlantDAOMySQL: KLANT NIET GEVONDEN");
+                else {
+                    return rs.getLong(1); // Door if-statement is rs al bij next()
+                }
             }
-
         } catch (SQLException ex) {
             throw new RSVIERException("KlantDAOMySQL: SQL FOUT TIJDENS OPZOEKEN KLANT ID: " + ex.getMessage());
-        } finally {
-            MySQLHelper.close(rs);
         }
     }
 
@@ -237,21 +238,22 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
      */
     @Override
     public ListIterator<Klant> getAlleKlanten() throws RSVIERException {
-        resultSet = null;
         String query = "SELECT * FROM KLANT";
         try (
                 Connection connection = MySQLConnectieLeverancier.getConnection();
                 PreparedStatement statement = connection.prepareStatement(query);
 
         ) {
-            resultSet = statement.executeQuery();
-            klantenLijst = voegResultSetInLijst(resultSet);
-            return klantenLijst.listIterator();
+            try (
+                    ResultSet resultSet = statement.executeQuery();
+            ) {
+                klantenLijst = voegResultSetInLijst(resultSet);
+
+                return klantenLijst.listIterator();
+            }
 
         } catch (SQLException ex) {
             throw new RSVIERException("KlantDAOMySQL: SQL FOUT TIJDEN OPHALEN KLANTEN");
-        } finally {
-            MySQLHelper.close(resultSet);
         }
     }
 
@@ -285,13 +287,15 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
                 statement.setString(3, klant.getAchternaam().equals("") ? "%" : klant.getAchternaam());
                 statement.setString(4, klant.getTussenvoegsel().equals("") ? "%" : klant.getTussenvoegsel());
                 statement.setString(5, klant.getEmail().equals("") ? "%" : klant.getEmail());
-                resultSet = statement.executeQuery();
-                klantenLijst = voegResultSetInLijst(resultSet);
-                return klantenLijst.listIterator();
+
+                try (
+                        ResultSet resultSet = statement.executeQuery();
+                ) {
+                    klantenLijst = voegResultSetInLijst(resultSet);
+                    return klantenLijst.listIterator();
+                }
             } catch (SQLException ex) {
                 throw new RSVIERException("KlantDAOMySQL: SQL FOUT TIJDENS OPZOEKEN KLANT " + ex.getMessage());
-            } finally {
-                MySQLHelper.close(resultSet);
             }
         } else {
             throw new RSVIERException("KlantDAOMySQL: ER DIENT EEN GEVULD KLANTOBJECT MEEGEGEVEN TE WORDEN OM EEN KLANT TE ZOEKEN");
@@ -321,7 +325,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
      */
     @Override
     public ListIterator<Klant> getKlantOpKlant(String voornaam) throws RSVIERException {
-       return getKlantOpKlant(new Klant(0, voornaam, "", "", "", null));
+        return getKlantOpKlant(new Klant(0, voornaam, "", "", "", null));
     }
 
     /**
@@ -374,14 +378,16 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
             statement.setString(3, adresgegevens.getToevoeging().equals("") ? "%" : adresgegevens.getToevoeging());
             statement.setString(4, adresgegevens.getHuisnummer() == 0 ? "%" : String.valueOf(adresgegevens.getHuisnummer()));
             statement.setString(5, adresgegevens.getWoonplaats().equals("") ? "%" : adresgegevens.getWoonplaats());
-            resultSet = statement.executeQuery();
-            klantenLijst = voegResultSetInLijst(resultSet);
-            return klantenLijst.listIterator();
+
+            try (
+                    ResultSet resultSet = statement.executeQuery(); )
+            {
+                klantenLijst = voegResultSetInLijst(resultSet);
+                return klantenLijst.listIterator();
+            }
 
         } catch (SQLException ex) {
             throw new RSVIERException("KlantDAOMySQL: SQL FOUT TIJDENS OPZOEKEN KLANT OP VOLLE ADRES");
-        } finally {
-            MySQLHelper.close(resultSet);
         }
     }
 
@@ -424,7 +430,6 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
      */
     @Override
     public ListIterator<Klant> getKlantOpBestelling(long bestellingId) throws RSVIERException {
-
         String query = "SELECT klant_id FROM " +
                 "BESTELLING WHERE " +
                 "bestelling_id = ? " +
@@ -434,15 +439,17 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
                 PreparedStatement statement = connection.prepareStatement(query);
         ) {
             statement.setLong(1, bestellingId);
-            resultSet = statement.executeQuery();
-            while (resultSet.next()) {
-                return getKlantOpKlant((long)resultSet.getInt(1));
+
+            try (
+                    ResultSet resultSet = statement.executeQuery();
+            ) {
+                while (resultSet.next()) {
+                    return getKlantOpKlant((long) resultSet.getInt(1));
+                }
             }
         } catch (SQLException ex) {
             throw new RSVIERException("KlantDAOMySQL: SQL FOUT TIJDENS OPZOEKEN KLANT OP BESTELLINGID: " +
                     ex.getMessage());
-        } finally {
-            MySQLHelper.close(resultSet);
         }
         return null;
     }

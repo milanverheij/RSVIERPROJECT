@@ -116,7 +116,6 @@ public class AdresDAOMySQL extends AbstractDAOMySQL implements AdresDAO {
      */
     @Override
     public long nieuwAdres(long klant_id, Adres adresgegevens) throws RSVIERException {
-        ResultSet generatedKeys = null;
         String queryNieuwAdres = "INSERT INTO ADRES " +
                 "(straatnaam, postcode, toevoeging, huisnummer, woonplaats) " +
                 "VALUES " +
@@ -143,8 +142,13 @@ public class AdresDAOMySQL extends AbstractDAOMySQL implements AdresDAO {
 
             // Ophalen van de laatste genegeneerde sleutel uit de generatedkeys (de nieuwe klant_id)
             long nieuw_adres_id = 0;
-            generatedKeys = statementNieuwAdres.getGeneratedKeys();
-            if (generatedKeys.next()) { nieuw_adres_id = generatedKeys.getInt(1); }
+            try (
+                    ResultSet generatedKeys = statementNieuwAdres.getGeneratedKeys();
+            ) {
+                if (generatedKeys.next()) {
+                    nieuw_adres_id = generatedKeys.getInt(1);
+                }
+            }
 
             // Koppelingstabel BESTELLING_HEEFT_ARTIKEL updaten met de juiste klant_id en adres_id
             statementAdresKlantKoppeling.setLong(1, klant_id);
@@ -158,8 +162,6 @@ public class AdresDAOMySQL extends AbstractDAOMySQL implements AdresDAO {
                         getAdresID(adresgegevens.getPostcode(), adresgegevens.getHuisnummer(), adresgegevens.getToevoeging()));
             else
                 throw new RSVIERException("AdresDAOMySQL: SQL FOUT TIJDENS AANMAKEN ADRES");
-        } finally {
-            MySQLHelper.close(generatedKeys);
         }
     }
 
@@ -176,7 +178,6 @@ public class AdresDAOMySQL extends AbstractDAOMySQL implements AdresDAO {
      */
     @Override
     public long getAdresID(String postcode, int huisnummer, String toevoeging) throws RSVIERException {
-        ResultSet rs = null;
         String query = "SELECT adres_id " +
                 "FROM ADRES " +
                 "WHERE " +
@@ -192,18 +193,18 @@ public class AdresDAOMySQL extends AbstractDAOMySQL implements AdresDAO {
             statement.setInt(2, huisnummer);
             statement.setString(3, toevoeging);
 
-            rs = statement.executeQuery();
+            try (
+                    ResultSet rs = statement.executeQuery();
+            ) {
 
-            if (!rs.next())
-                throw new RSVIERException("AdresDAOMySQL: ADRES NIET GEVONDEN");
-            else {
-                return rs.getLong(1); // Door if-statement is rs al bij next()
+                if (!rs.next())
+                    throw new RSVIERException("AdresDAOMySQL: ADRES NIET GEVONDEN");
+                else {
+                    return rs.getLong(1); // Door if-statement is rs al bij next()
+                }
             }
-
         } catch (SQLException ex) {
             throw new RSVIERException("AdresDAOMySQL: SQL FOUT TIJDENS ZOEKEN ADRES: " + ex.getMessage());
-        } finally {
-            MySQLHelper.close(rs);
         }
     }
 
@@ -217,7 +218,6 @@ public class AdresDAOMySQL extends AbstractDAOMySQL implements AdresDAO {
      */
     @Override
     public ListIterator<Adres> getAdresOpKlantID(long klant_id) throws RSVIERException {
-        ResultSet rs = null;
         String query = "SELECT ADRES.* " +
                 "FROM ADRES, KLANT_HEEFT_ADRES " +
                 "WHERE " +
@@ -230,34 +230,36 @@ public class AdresDAOMySQL extends AbstractDAOMySQL implements AdresDAO {
                 PreparedStatement statement = connection.prepareStatement(query);
         ) {
             statement.setLong(1, klant_id);
-            rs = statement.executeQuery();
-            adresLijst = new ArrayList<>();
 
-            // Ga door alle adressen heen die bij deze klant horen en stop het in een ArrayList<Adres>
-            while (rs.next()) {
-                Adres tijdelijkAdres = new Adres();
-                // Adres aanmaken met lege waarden, default constructor.
+            try (
+                    ResultSet rs = statement.executeQuery();
+            ) {
 
-                tijdelijkAdres.setAdres_id(rs.getLong(1));
-                tijdelijkAdres.setStraatnaam(rs.getString(2));
-                tijdelijkAdres.setPostcode(rs.getString(3));
-                tijdelijkAdres.setToevoeging(rs.getString(4));
-                tijdelijkAdres.setHuisnummer(rs.getInt(5));
-                tijdelijkAdres.setWoonplaats(rs.getString(6));
-                tijdelijkAdres.setDatumAanmaak(rs.getString(7)); // TODO: Checken of aparte methode nodig is voor RS ->it
-                tijdelijkAdres.setDatumGewijzigd(rs.getString(8));
-                tijdelijkAdres.setAdresActief(rs.getString(9));
+                adresLijst = new ArrayList<>();
 
-                adresLijst.add(tijdelijkAdres);
+                // Ga door alle adressen heen die bij deze klant horen en stop het in een ArrayList<Adres>
+                while (rs.next()) {
+                    Adres tijdelijkAdres = new Adres();
+                    // Adres aanmaken met lege waarden, default constructor.
+
+                    tijdelijkAdres.setAdres_id(rs.getLong(1));
+                    tijdelijkAdres.setStraatnaam(rs.getString(2));
+                    tijdelijkAdres.setPostcode(rs.getString(3));
+                    tijdelijkAdres.setToevoeging(rs.getString(4));
+                    tijdelijkAdres.setHuisnummer(rs.getInt(5));
+                    tijdelijkAdres.setWoonplaats(rs.getString(6));
+                    tijdelijkAdres.setDatumAanmaak(rs.getString(7)); // TODO: Checken of aparte methode nodig is voor RS ->it
+                    tijdelijkAdres.setDatumGewijzigd(rs.getString(8));
+                    tijdelijkAdres.setAdresActief(rs.getString(9));
+
+                    adresLijst.add(tijdelijkAdres);
+                }
+
+                // Return een list-iterator
+                return adresLijst.listIterator();
             }
-
-            // Return een list-iterator
-            return adresLijst.listIterator();
-
         } catch (SQLException ex) {
             throw new RSVIERException("FOUT TIJDENS GETADRES: " + ex.getMessage());
-        } finally {
-            MySQLHelper.close(rs);
         }
     }
 
@@ -272,7 +274,7 @@ public class AdresDAOMySQL extends AbstractDAOMySQL implements AdresDAO {
     @Override
     public void schakelStatusAdres(long adres_id, int status) throws RSVIERException {
         String query =
-                        "UPDATE ADRES " +
+                "UPDATE ADRES " +
                         "SET " +
                         "adresActief = ? " +
                         "WHERE " +
