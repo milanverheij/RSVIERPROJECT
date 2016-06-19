@@ -29,6 +29,12 @@ public class HikariCPConnectionPool {
     private static final String MYSQL_PASSWORD = "slechtwachtwoord";
     private static final String MYSQL_DRIVER_CLASS = "com.mysql.jdbc.jdbc2.optional.MysqlDataSource";
 
+    private static final String FIREBIRD_DATABASE =
+            "//milanverheij.nl:3050//var//lib//firebird//2.5//data//RSVIERPROJECTDEEL2.fdb";
+    private static final String FIREBIRD_USER = "rsvierproject";
+    private static final String FIREBIRD_PASSWORD = "slechtwachtwoord";
+    private static final String FIREBIRD_DRIVER_CLASS = "org.firebirdsql.pool.FBSimpleDataSource";
+
     /**
      * Stelt de HikariCP configuratie in op het gekozen DataBase type.
      *
@@ -48,6 +54,20 @@ public class HikariCPConnectionPool {
             hikariConfig.addDataSourceProperty("databaseName", MYSQL_DATABASE);
             hikariConfig.addDataSourceProperty("user", MYSQL_USER);
             hikariConfig.addDataSourceProperty("password", MYSQL_PASSWORD);
+
+            hikariDataSource = new HikariDataSource(hikariConfig);
+        }
+
+        if (DBKeuze == 2) {
+            hikariConfig = new HikariConfig();
+            hikariConfig.setMinimumIdle(1);
+            hikariConfig.setMaximumPoolSize(2);
+            hikariConfig.setInitializationFailFast(true);
+
+            hikariConfig.setDataSourceClassName(FIREBIRD_DRIVER_CLASS);
+            hikariConfig.addDataSourceProperty("database", FIREBIRD_DATABASE);
+            hikariConfig.addDataSourceProperty("userName", FIREBIRD_USER);
+            hikariConfig.addDataSourceProperty("password", FIREBIRD_PASSWORD);
 
             hikariDataSource = new HikariDataSource(hikariConfig);
         }
