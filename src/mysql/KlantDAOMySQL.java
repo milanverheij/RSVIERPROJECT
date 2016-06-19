@@ -3,6 +3,7 @@ package mysql;
 import com.mysql.jdbc.Statement;
 import exceptions.RSVIERException;
 import interfaces.KlantDAO;
+import interfaces.VerkrijgConnectie;
 import model.Adres;
 import model.Bestelling;
 import model.Klant;
@@ -32,6 +33,11 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
     ArrayList<Klant> klantenLijst;
     BestellingDAOMySQL bestellingDAO;
     AdresDAOMySQL adresDAO;
+    VerkrijgConnectie connPool;
+
+    public KlantDAOMySQL(VerkrijgConnectie connPoolAdapter) {
+        this.connPool = connPoolAdapter;
+    }
 
     /** CREATE METHODS */
 
@@ -66,7 +72,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
                 "VALUES " +
                 "(?,        ?,          ?,              ?);";
         try (
-                Connection connection = MySQLConnectieLeverancier.getConnection();
+                Connection connection = connPool.verkrijgConnectie();
                 PreparedStatement statement = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
         ) {
             // Voer query uit en haal de gegenereerde sleutels op bij deze query
@@ -88,20 +94,20 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
                 // Als er een adres_id wordt meegegeven betekent dit dat er een bestaand adres gekoppeled wordt
                 // aan een nieuwe klant
                 if (adres_id > 0 && adresgegevens == null) {
-                    adresDAO = new AdresDAOMySQL();
+                    adresDAO = new AdresDAOMySQL(connPool);
                     adresDAO.koppelAdresAanKlant(nieuwId, adres_id);
                 }
 
                 // Als er adresgegeven worden meegegeven wordt er een adres aangemaakt op basis van het nieuwe klantId
                 else if (adresgegevens != null && adres_id == 0) {
-                    adresDAO = new AdresDAOMySQL();
+                    adresDAO = new AdresDAOMySQL(connPool);
                     adresDAO.nieuwAdres(nieuwId, adresgegevens);
                 }
 
                 // Als er adresgegeven worden meegegeven en een adres_id wordt er zowel een nieuw adres aangemaakt
                 // en tevens het bestaande adres gekoppeld.
                 else if (adresgegevens != null && adres_id > 0) {
-                    adresDAO = new AdresDAOMySQL();
+                    adresDAO = new AdresDAOMySQL(connPool);
                     adresDAO.nieuwAdres(nieuwId, adresgegevens);
                     adresDAO.koppelAdresAanKlant(nieuwId, adres_id);
                 }
@@ -208,7 +214,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
                 "email = ?;";
 
         try (
-                Connection connection = MySQLConnectieLeverancier.getConnection();
+                Connection connection = connPool.verkrijgConnectie();
                 PreparedStatement statement = connection.prepareStatement(query)
         ) {
             statement.setString(1, voornaam);
@@ -240,7 +246,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
     public ListIterator<Klant> getAlleKlanten() throws RSVIERException {
         String query = "SELECT * FROM KLANT";
         try (
-                Connection connection = MySQLConnectieLeverancier.getConnection();
+                Connection connection = connPool.verkrijgConnectie();
                 PreparedStatement statement = connection.prepareStatement(query);
 
         ) {
@@ -279,7 +285,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
                     "AND email LIKE ?";
 
             try (
-                    Connection connection = MySQLConnectieLeverancier.getConnection();
+                    Connection connection = connPool.verkrijgConnectie();
                     PreparedStatement statement = connection.prepareStatement(query);
             ) {
                 statement.setString(1, klant.getKlant_id() == 0 ? "%" : String.valueOf(klant.getKlant_id()) );
@@ -370,7 +376,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
                 "GROUP BY klant_id " +
                 "ORDER BY klant_id;";
         try (
-                Connection connection = MySQLConnectieLeverancier.getConnection();
+                Connection connection = connPool.verkrijgConnectie();
                 PreparedStatement statement = connection.prepareStatement(query);
         ) {
             statement.setString(1, adresgegevens.getStraatnaam().equals("") ? "%" : adresgegevens.getStraatnaam());
@@ -435,7 +441,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
                 "bestelling_id = ? " +
                 "LIMIT 1;";
         try (
-                Connection connection = MySQLConnectieLeverancier.getConnection();
+                Connection connection = connPool.verkrijgConnectie();
                 PreparedStatement statement = connection.prepareStatement(query);
         ) {
             statement.setLong(1, bestellingId);
@@ -481,7 +487,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
                 "WHERE " +
                 "klant_id = ?;";
         try (
-                Connection connection = MySQLConnectieLeverancier.getConnection();
+                Connection connection = connPool.verkrijgConnectie();
                 PreparedStatement statement = connection.prepareStatement(query);
         ) {
             statement.setString(1, voornaam);
@@ -516,7 +522,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
                             long adres_id,
                             Adres adresgegevens) throws RSVIERException {
         updateKlant(KlantId, voornaam, achternaam, tussenvoegsel, email);
-        adresDAO = new AdresDAOMySQL();
+        adresDAO = new AdresDAOMySQL(connPool);
         adresDAO.updateAdres(adres_id, adresgegevens);
     }
 
@@ -542,7 +548,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
         long verwijderdID = -1;
 
         try (
-                Connection connection = MySQLConnectieLeverancier.getConnection();
+                Connection connection = connPool.verkrijgConnectie();
                 PreparedStatement statement = connection.prepareStatement(query);
 
         ) {
@@ -627,8 +633,6 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
         return verwijderdId;
     }
 
-    // =
-
     /** ANDERE METHODS */
 
     /**
@@ -686,7 +690,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
                 System.out.print("\n\t----------");
 
                 // DAO voor adres-acties. Lijst verkrijgen van alle adressen bijbehorend bij klant_id
-                adresDAO = new AdresDAOMySQL();
+                adresDAO = new AdresDAOMySQL(connPool);
                 ListIterator<Adres> adresListIterator = adresDAO.getAdresOpKlantID(tijdelijkeKlant.getKlant_id());
                 while (adresListIterator.hasNext()) {
 

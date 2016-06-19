@@ -1,9 +1,10 @@
 package mysql;
 
+import connection_pools.C3POAdapter;
+import interfaces.VerkrijgConnectie;
+
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 
 public class AbstractDAOMySQL {
 	PreparedStatement statement;
-	ResultSet resultSet;
 }

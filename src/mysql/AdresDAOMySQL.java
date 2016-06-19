@@ -2,6 +2,7 @@ package mysql;
 
 import exceptions.RSVIERException;
 import interfaces.AdresDAO;
+import interfaces.VerkrijgConnectie;
 import model.Adres;
 
 import java.sql.*;
@@ -23,7 +24,12 @@ public class AdresDAOMySQL extends AbstractDAOMySQL implements AdresDAO {
     public static boolean klantWordtGetest = false;
     public static Adres aangeroepenAdresInTest = new Adres("XXXXXX", "XXXX", "XX", 0000, "XXXX"); // Geeft altijd FOUT
     private ArrayList<Adres> adresLijst;
+    VerkrijgConnectie connPool;
 
+
+    public AdresDAOMySQL(VerkrijgConnectie connPoolAdapter) {
+        this.connPool = connPoolAdapter;
+    }
     /**
      * Update een adres bij een klant op basis van een Adres-object en adres_id.
      *
@@ -55,7 +61,7 @@ public class AdresDAOMySQL extends AbstractDAOMySQL implements AdresDAO {
                 "WHERE adres_id = ?;";
 
         try (
-                Connection connection = MySQLConnectieLeverancier.getConnection();
+                Connection connection = connPool.verkrijgConnectie();
                 PreparedStatement statement= connection.prepareStatement(query)
         ) {
             statement.setString(1, adresgegevens.getStraatnaam());
@@ -88,7 +94,7 @@ public class AdresDAOMySQL extends AbstractDAOMySQL implements AdresDAO {
                 "(?,              ?);";
 
         try (
-                Connection connection = MySQLConnectieLeverancier.getConnection();
+                Connection connection = connPool.verkrijgConnectie();
                 PreparedStatement statement = connection.prepareStatement(query);
         )
         {
@@ -127,7 +133,7 @@ public class AdresDAOMySQL extends AbstractDAOMySQL implements AdresDAO {
                 "(?,        ?);";
 
         try (
-                Connection connection = MySQLConnectieLeverancier.getConnection();
+                Connection connection = connPool.verkrijgConnectie();
                 PreparedStatement statementNieuwAdres = connection.prepareStatement(queryNieuwAdres, Statement.RETURN_GENERATED_KEYS);
                 PreparedStatement statementAdresKlantKoppeling = connection.prepareStatement(queryAdresKlantKoppeling);
         )
@@ -186,7 +192,7 @@ public class AdresDAOMySQL extends AbstractDAOMySQL implements AdresDAO {
                 "toevoeging = ?;";
 
         try (
-                Connection connection = MySQLConnectieLeverancier.getConnection();
+                Connection connection = connPool.verkrijgConnectie();
                 PreparedStatement statement = connection.prepareStatement(query);
         ) {
             statement.setString(1, postcode);
@@ -226,7 +232,7 @@ public class AdresDAOMySQL extends AbstractDAOMySQL implements AdresDAO {
                 "KLANT_HEEFT_ADRES.klant_id_klant = ?;";
 
         try (
-                Connection connection = MySQLConnectieLeverancier.getConnection();
+                Connection connection = connPool.verkrijgConnectie();
                 PreparedStatement statement = connection.prepareStatement(query);
         ) {
             statement.setLong(1, klant_id);
@@ -281,7 +287,7 @@ public class AdresDAOMySQL extends AbstractDAOMySQL implements AdresDAO {
                         "adres_id = ?";
 
         try (
-                Connection connection = MySQLConnectieLeverancier.getConnection();
+                Connection connection = connPool.verkrijgConnectie();
                 PreparedStatement statement = connection.prepareStatement(query)
         ) {
             statement.setInt(1, status);

@@ -1,9 +1,7 @@
 package factories;
 
-import interfaces.AdresDAO;
-import interfaces.ArtikelDAO;
-import interfaces.BestellingDAO;
-import interfaces.KlantDAO;
+import exceptions.RSVIERException;
+import interfaces.*;
 
 /**
  * @author Milan_Verheij
@@ -20,8 +18,8 @@ public class DAOFactoryMySQL extends DAOFactory{
 	 * @return een KlantDAO van het MySQL-type
      */
 	@Override
-	public KlantDAO getKlantDAO() {
-		return new mysql.KlantDAOMySQL();
+	public KlantDAO getKlantDAO(String connPoolKeuze) throws RSVIERException {
+		return new mysql.KlantDAOMySQL(ConnectionPoolFactory.getConnectionPool(connPoolKeuze, 1));
 	}
 
 	/**
@@ -30,8 +28,8 @@ public class DAOFactoryMySQL extends DAOFactory{
 	 * @return een AdresDAO van het MySQL-type
      */
 	@Override
-	public AdresDAO getAdresDAO() {
-		return new mysql.AdresDAOMySQL();
+	public AdresDAO getAdresDAO(String connPoolKeuze) throws RSVIERException {
+		return new mysql.AdresDAOMySQL(ConnectionPoolFactory.getConnectionPool(connPoolKeuze, 1));
 	}
 
 	/**

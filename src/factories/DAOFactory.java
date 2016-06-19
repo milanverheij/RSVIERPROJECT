@@ -1,5 +1,8 @@
 package factories;
 
+import exceptions.RSVIERException;
+import interfaces.VerkrijgConnectie;
+
 /**
  * @author Milan_Verheij
  * <p>
@@ -30,9 +33,9 @@ public abstract class DAOFactory {
 	 *
 	 * @return Een KlantDAO van het eerder gekozen database-type.
      */
-	public abstract interfaces.KlantDAO getKlantDAO();
+	public abstract interfaces.KlantDAO getKlantDAO(String connPoolKeuze) throws RSVIERException;
 
-	public abstract interfaces.AdresDAO getAdresDAO();
+	public abstract interfaces.AdresDAO getAdresDAO(String connPoolKeuze) throws RSVIERException;
 
 	/**
 	 * De methode die geimplementeerd dient te worden door de concrete fabriek
