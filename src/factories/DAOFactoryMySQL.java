@@ -2,6 +2,9 @@ package factories;
 
 import exceptions.RSVIERException;
 import interfaces.*;
+import mysql.AbstractDAOMySQL;
+import mysql.AdresDAOMySQL;
+import mysql.KlantDAOMySQL;
 
 /**
  * @author Milan_Verheij
@@ -19,7 +22,8 @@ public class DAOFactoryMySQL extends DAOFactory{
      */
 	@Override
 	public KlantDAO getKlantDAO(String connPoolKeuze) throws RSVIERException {
-		return new mysql.KlantDAOMySQL(ConnectionPoolFactory.getConnectionPool(connPoolKeuze, 1));
+		AbstractDAOMySQL.setConnPool(ConnectionPoolFactory.getConnectionPool(connPoolKeuze, 1));
+		return new KlantDAOMySQL();
 	}
 
 	/**
@@ -29,7 +33,8 @@ public class DAOFactoryMySQL extends DAOFactory{
      */
 	@Override
 	public AdresDAO getAdresDAO(String connPoolKeuze) throws RSVIERException {
-		return new mysql.AdresDAOMySQL(ConnectionPoolFactory.getConnectionPool(connPoolKeuze, 1));
+		AbstractDAOMySQL.setConnPool(ConnectionPoolFactory.getConnectionPool(connPoolKeuze, 1));
+		return new AdresDAOMySQL();
 	}
 
 	/**

@@ -1,7 +1,6 @@
 package factories;
 
 import exceptions.RSVIERException;
-import interfaces.VerkrijgConnectie;
 
 /**
  * @author Milan_Verheij
@@ -18,8 +17,8 @@ public abstract class DAOFactory {
 	 * @param s De keuze van het databasetype in String formaat.
 	 * @return Geeft een concrete DAO fabriek terug.
      */
-	public static DAOFactory getDAOFactory(String s){
-		if(s.equals("MySQL")) 
+	public static DAOFactory getDAOFactory(String s) {
+		if(s.equals("MySQL"))
 			return new DAOFactoryMySQL();
 //		else if(s.equals("FireBird"))
 //			return new FireBirdDAOFactory();

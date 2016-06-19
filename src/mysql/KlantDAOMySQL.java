@@ -3,7 +3,6 @@ package mysql;
 import com.mysql.jdbc.Statement;
 import exceptions.RSVIERException;
 import interfaces.KlantDAO;
-import interfaces.VerkrijgConnectie;
 import model.Adres;
 import model.Bestelling;
 import model.Klant;
@@ -33,11 +32,10 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
     ArrayList<Klant> klantenLijst;
     BestellingDAOMySQL bestellingDAO;
     AdresDAOMySQL adresDAO;
-    VerkrijgConnectie connPool;
 
-    public KlantDAOMySQL(VerkrijgConnectie connPoolAdapter) {
-        this.connPool = connPoolAdapter;
-    }
+//    public KlantDAOMySQL(VerkrijgConnectie connPoolAdapter) {
+//        this.connPool = connPoolAdapter;
+//    }
 
     /** CREATE METHODS */
 
@@ -94,20 +92,20 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
                 // Als er een adres_id wordt meegegeven betekent dit dat er een bestaand adres gekoppeled wordt
                 // aan een nieuwe klant
                 if (adres_id > 0 && adresgegevens == null) {
-                    adresDAO = new AdresDAOMySQL(connPool);
+                    adresDAO = new AdresDAOMySQL();
                     adresDAO.koppelAdresAanKlant(nieuwId, adres_id);
                 }
 
                 // Als er adresgegeven worden meegegeven wordt er een adres aangemaakt op basis van het nieuwe klantId
                 else if (adresgegevens != null && adres_id == 0) {
-                    adresDAO = new AdresDAOMySQL(connPool);
+                    adresDAO = new AdresDAOMySQL();
                     adresDAO.nieuwAdres(nieuwId, adresgegevens);
                 }
 
                 // Als er adresgegeven worden meegegeven en een adres_id wordt er zowel een nieuw adres aangemaakt
                 // en tevens het bestaande adres gekoppeld.
                 else if (adresgegevens != null && adres_id > 0) {
-                    adresDAO = new AdresDAOMySQL(connPool);
+                    adresDAO = new AdresDAOMySQL();
                     adresDAO.nieuwAdres(nieuwId, adresgegevens);
                     adresDAO.koppelAdresAanKlant(nieuwId, adres_id);
                 }
@@ -522,7 +520,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
                             long adres_id,
                             Adres adresgegevens) throws RSVIERException {
         updateKlant(KlantId, voornaam, achternaam, tussenvoegsel, email);
-        adresDAO = new AdresDAOMySQL(connPool);
+        adresDAO = new AdresDAOMySQL();
         adresDAO.updateAdres(adres_id, adresgegevens);
     }
 
@@ -690,7 +688,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
                 System.out.print("\n\t----------");
 
                 // DAO voor adres-acties. Lijst verkrijgen van alle adressen bijbehorend bij klant_id
-                adresDAO = new AdresDAOMySQL(connPool);
+                adresDAO = new AdresDAOMySQL();
                 ListIterator<Adres> adresListIterator = adresDAO.getAdresOpKlantID(tijdelijkeKlant.getKlant_id());
                 while (adresListIterator.hasNext()) {
 

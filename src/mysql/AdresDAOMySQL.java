@@ -2,7 +2,6 @@ package mysql;
 
 import exceptions.RSVIERException;
 import interfaces.AdresDAO;
-import interfaces.VerkrijgConnectie;
 import model.Adres;
 
 import java.sql.*;
@@ -24,12 +23,8 @@ public class AdresDAOMySQL extends AbstractDAOMySQL implements AdresDAO {
     public static boolean klantWordtGetest = false;
     public static Adres aangeroepenAdresInTest = new Adres("XXXXXX", "XXXX", "XX", 0000, "XXXX"); // Geeft altijd FOUT
     private ArrayList<Adres> adresLijst;
-    VerkrijgConnectie connPool;
 
 
-    public AdresDAOMySQL(VerkrijgConnectie connPoolAdapter) {
-        this.connPool = connPoolAdapter;
-    }
     /**
      * Update een adres bij een klant op basis van een Adres-object en adres_id.
      *
