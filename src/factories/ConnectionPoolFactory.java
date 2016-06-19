@@ -16,6 +16,17 @@ import interfaces.VerkrijgConnectie;
  */
 
 public class ConnectionPoolFactory {
+
+    /**
+     * Geeft op basis van de gekozen Database Soort (1 = MySQL, 2 = FireBird) en
+     * gekozen Connection Pool (1 = C3PO, 2 = HikariCP, 3 = MySQlConnectieLeverancier)
+     * de juiste Connection Pool Adapter terug.
+     *
+     * @param connectionPoolKeuze Keuze voor de connection pool (zie keuzes hierboven).
+     * @param DBKeuze Keuze voor type database (zie keuzes hierboven).
+     * @return Adapter behorend bij bovenstaande keuzes.
+     * @throws RSVIERException Foutmelding met omschrijving.
+     */
     public static VerkrijgConnectie getConnectionPool(String connectionPoolKeuze, int DBKeuze) throws RSVIERException {
         if (connectionPoolKeuze.length() > 1 || connectionPoolKeuze.length() == 0) {
             throw new RSVIERException("ConnectionPoolFactory: U moet 1 karakter invullen als keuze" +

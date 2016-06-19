@@ -34,6 +34,12 @@ public abstract class DAOFactory {
      */
 	public abstract interfaces.KlantDAO getKlantDAO(String connPoolKeuze) throws RSVIERException;
 
+	/**
+	 * De methode die geimplementeerd dient te worden door de concrete fabriek
+	 * om een AdresDAO te maken.
+	 *
+	 * @return Een AdresDAO van het eerder gekozen database-type.
+	 */
 	public abstract interfaces.AdresDAO getAdresDAO(String connPoolKeuze) throws RSVIERException;
 
 	/**
@@ -43,6 +49,13 @@ public abstract class DAOFactory {
 	 * @return Een BestellingDAO van het eerder gekozen database-type.
      */
 	public abstract interfaces.BestellingDAO getBestellingDAO();
+
+	/**
+	 * De methode die geimplementeerd dient te worden door de concrete fabriek
+	 * om een ArtikelDAO te maken.
+	 *
+	 * @return Een ArtikelDAO van het eerder gekozen database-type.
+	 */
 	public abstract interfaces.ArtikelDAO getArtikelDAO();
 	
 	

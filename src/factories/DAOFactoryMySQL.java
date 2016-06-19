@@ -11,13 +11,17 @@ import mysql.KlantDAOMySQL;
  * <p>
  * Deze concrete factory van het type MySQL maakt DAO's
  * aan voor de database MySQL en geeft deze terug aan de gebruiker.
+ *
+ * Stelt daarnaast de AbstractDAOMySQL in op de gekozen Connection Pool.
  */
 
 public class DAOFactoryMySQL extends DAOFactory{
 
 	/**
 	 * Methode om de een KlantDAO te maken.
+	 * Stelt daarnaast de AbstractDAOMySQL in op de gekozen Connection Pool.
 	 *
+	 * @param connPoolKeuze Keuze voor het type connectionPool, zie ConnectionPoolFactory.
 	 * @return een KlantDAO van het MySQL-type
      */
 	@Override
@@ -28,7 +32,9 @@ public class DAOFactoryMySQL extends DAOFactory{
 
 	/**
 	 * Methode om de een AdresDAO te maken.
+	 * Stelt daarnaast de AbstractDAOMySQL in op de gekozen Connection Pool.
 	 *
+	 * @param connPoolKeuze Keuze voor het type connectionPool, zie ConnectionPoolFactory.
 	 * @return een AdresDAO van het MySQL-type
      */
 	@Override

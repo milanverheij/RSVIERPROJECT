@@ -10,9 +10,12 @@ import java.sql.SQLException;
 /**
  * Created by Milan_Verheij on 19-06-16.
  *
- * AANPASSEN
+ * HikariCP Connection Pool
  *
+ * Configuratie Object en uiteindelijke leverancier van 'HikariCP-Connecties'.
+ * Levert enkel connecties op basis van het meegegeven DataBase Type.
  */
+
 public class HikariCPConnectionPool {
     @SuppressWarnings("unused")
     private static HikariCPConnectionPool hikariCPConnectionPool;
@@ -26,6 +29,12 @@ public class HikariCPConnectionPool {
     private static final String MYSQL_PASSWORD = "slechtwachtwoord";
     private static final String MYSQL_DRIVER_CLASS = "com.mysql.jdbc.jdbc2.optional.MysqlDataSource";
 
+    /**
+     * Stelt de HikariCP configuratie in op het gekozen DataBase type.
+     *
+     * @param DBKeuze Keuze voor het type database (1 = MySQL, 2 = FireBird);
+     * @throws RSVIERException Foutmelding met gegevens.
+     */
     private HikariCPConnectionPool(int DBKeuze) throws RSVIERException {
         if (DBKeuze == 1) {
             hikariConfig = new HikariConfig();
@@ -44,6 +53,13 @@ public class HikariCPConnectionPool {
         }
     }
 
+    /**
+     * Retourneert een instance van HikariCPConnectionPool als deze nog niet bestond.
+     *
+     * @param DBKeuze Keuze voor het type database (1 = MySQL, 2 = FireBird);
+     * @return HikariCP Connection pool.
+     * @throws RSVIERException Foutmelding met gegevens.
+     */
     public static HikariCPConnectionPool getInstance(int DBKeuze) throws RSVIERException {
         if (hikariCPConnectionPool == null) {
             hikariCPConnectionPool = new HikariCPConnectionPool(DBKeuze);
@@ -53,6 +69,12 @@ public class HikariCPConnectionPool {
         }
     }
 
+    /**
+     * Retourneert een connectie behorend bij deze Connection Pool.
+     *
+     * @return Connection-Object.
+     * @throws SQLException Foutmelding met gegevens.
+     */
     public Connection getConnection() throws SQLException, RSVIERException {
         return this.hikariDataSource.getConnection();
     }

@@ -10,9 +10,12 @@ import java.sql.SQLException;
 /**
  * Created by Milan_Verheij on 19-06-16.
  *
- * AANPASSEN
+ * C3PO Connection Pool
  *
+ * Configuratie Object en uiteindelijke leverancier van 'C3PO-Connecties'.
+ * Levert enkel connecties op basis van het meegegeven DataBase Type.
  */
+
 public class C3POConnectionPool {
     private static C3POConnectionPool C3POConnectionPool;
     private ComboPooledDataSource cpds;
@@ -22,6 +25,12 @@ public class C3POConnectionPool {
     private static final String MYSQL_PASSWORD = "slechtwachtwoord";
     private static final String MYSQL_DRIVER_CLASS = "com.mysql.jdbc.Driver";
 
+    /**
+     * Stelt de C3PO configuratie in op het gekozen DataBase type.
+     *
+     * @param DBKeuze Keuze voor het type database (1 = MySQL, 2 = FireBird);
+     * @throws RSVIERException Foutmelding met gegevens.
+     */
     private C3POConnectionPool(int DBKeuze) throws RSVIERException {
         if (DBKeuze == 1) {
             try {
@@ -38,6 +47,13 @@ public class C3POConnectionPool {
         }
     }
 
+    /**
+     * Retourneert een instance van C3POConnectionPool als deze nog niet bestond.
+     *
+     * @param DBKeuze Keuze voor het type database (1 = MySQL, 2 = FireBird);
+     * @return C3PO Connection pool.
+     * @throws RSVIERException Foutmelding met gegevens.
+     */
     public static C3POConnectionPool getInstance(int DBKeuze) throws RSVIERException {
         if (C3POConnectionPool == null) {
             C3POConnectionPool = new C3POConnectionPool(DBKeuze);
@@ -47,6 +63,12 @@ public class C3POConnectionPool {
         }
     }
 
+    /**
+     * Retourneert een connectie behorend bij deze Connection Pool.
+     *
+     * @return Connection-Object.
+     * @throws SQLException Foutmelding met gegevens.
+     */
     public Connection getConnection() throws SQLException {
         return this.cpds.getConnection();
     }
