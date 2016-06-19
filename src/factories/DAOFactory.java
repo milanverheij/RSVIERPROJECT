@@ -20,8 +20,8 @@ public abstract class DAOFactory {
 	public static DAOFactory getDAOFactory(String s) {
 		if(s.equals("MySQL"))
 			return new DAOFactoryMySQL();
-//		else if(s.equals("FireBird"))
-//			return new FireBirdDAOFactory();
+		else if(s.equals("FireBird"))
+			return new DAOFactoryFireBird();
 		else
 			return null;
 	}
@@ -48,7 +48,7 @@ public abstract class DAOFactory {
 	 *
 	 * @return Een BestellingDAO van het eerder gekozen database-type.
      */
-	public abstract interfaces.BestellingDAO getBestellingDAO();
+	public abstract interfaces.BestellingDAO getBestellingDAO(String connPoolKeuze) throws RSVIERException;
 
 	/**
 	 * De methode die geimplementeerd dient te worden door de concrete fabriek
@@ -56,7 +56,7 @@ public abstract class DAOFactory {
 	 *
 	 * @return Een ArtikelDAO van het eerder gekozen database-type.
 	 */
-	public abstract interfaces.ArtikelDAO getArtikelDAO();
+	public abstract interfaces.ArtikelDAO getArtikelDAO(String connPoolKeuze) throws RSVIERException;
 	
 	
 }

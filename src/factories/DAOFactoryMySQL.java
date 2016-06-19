@@ -2,9 +2,7 @@ package factories;
 
 import exceptions.RSVIERException;
 import interfaces.*;
-import mysql.AbstractDAOMySQL;
-import mysql.AdresDAOMySQL;
-import mysql.KlantDAOMySQL;
+import mysql.*;
 
 /**
  * @author Milan_Verheij
@@ -22,7 +20,7 @@ public class DAOFactoryMySQL extends DAOFactory{
 	 * Stelt daarnaast de AbstractDAOMySQL in op de gekozen Connection Pool.
 	 *
 	 * @param connPoolKeuze Keuze voor het type connectionPool, zie ConnectionPoolFactory.
-	 * @return een KlantDAO van het MySQL-type
+	 * @return een KlantDAO van het MySQL-type(DBKeuze 1).
      */
 	@Override
 	public KlantDAO getKlantDAO(String connPoolKeuze) throws RSVIERException {
@@ -35,7 +33,7 @@ public class DAOFactoryMySQL extends DAOFactory{
 	 * Stelt daarnaast de AbstractDAOMySQL in op de gekozen Connection Pool.
 	 *
 	 * @param connPoolKeuze Keuze voor het type connectionPool, zie ConnectionPoolFactory.
-	 * @return een AdresDAO van het MySQL-type
+	 * @return een AdresDAO van het MySQL-type(DBKeuze 1).
      */
 	@Override
 	public AdresDAO getAdresDAO(String connPoolKeuze) throws RSVIERException {
@@ -43,23 +41,30 @@ public class DAOFactoryMySQL extends DAOFactory{
 		return new AdresDAOMySQL();
 	}
 
-	/**
-	 * Methode om een BestellingDAO te maken.
-	 *
-	 * @return een BestellingDAO van het MySQL-type.
+    /**
+     * Methode om de een BestellingDAO te maken.
+     * Stelt daarnaast de AbstractDAOMySQL in op de gekozen Connection Pool.
+     *
+     * @param connPoolKeuze Keuze voor het type connectionPool, zie ConnectionPoolFactory.
+     * @return een BestellingDAO van het MySQL-type(DBKeuze 1).
      */
 	@Override
-	public BestellingDAO getBestellingDAO() {
-		return new mysql.BestellingDAOMySQL();
+	public BestellingDAO getBestellingDAO(String connPoolKeuze) throws RSVIERException {
+		AbstractDAOMySQL.setConnPool(ConnectionPoolFactory.getConnectionPool(connPoolKeuze, 1));
+		return new BestellingDAOMySQL();
 	}
 
-	/**
-	 * Methode om een ArtikelDAO te maken;
-	 * @return een ArtikelDAO van het MySQL-type
+    /**
+     * Methode om de een ArtikelDAO te maken.
+     * Stelt daarnaast de AbstractDAOMySQL in op de gekozen Connection Pool.
+     *
+     * @param connPoolKeuze Keuze voor het type connectionPool, zie ConnectionPoolFactory.
+     * @return een ArtikelDAO van het MySQL-type(DBKeuze 1).
      */
 	@Override
-	public ArtikelDAO getArtikelDAO() {
-		return new mysql.ArtikelDAOMySQL();
+	public ArtikelDAO getArtikelDAO(String connPoolKeuze) throws RSVIERException {
+		AbstractDAOMySQL.setConnPool(ConnectionPoolFactory.getConnectionPool(connPoolKeuze, 1));
+		return new ArtikelDAOMySQL();
 	}
 
 }
