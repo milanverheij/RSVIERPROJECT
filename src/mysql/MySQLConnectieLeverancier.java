@@ -20,6 +20,7 @@ import java.sql.SQLException;
  *
  */
 
+@Deprecated
 public class MySQLConnectieLeverancier {
     // Instant van deze klasse. De enige instance die er zal zijn.
     @SuppressWarnings("unused")
@@ -37,6 +38,7 @@ public class MySQLConnectieLeverancier {
      *
      *  Geen parameters
      */
+    @Deprecated
     private MySQLConnectieLeverancier() {
         try {
             // Laden van de mysql Driver en log in console als dit gelukt is
@@ -55,6 +57,7 @@ public class MySQLConnectieLeverancier {
      *
      * @return De gemaakte connectie met de database.
      */
+    @Deprecated
     private synchronized static Connection connectToDatabase() throws RSVIERException {
         try {
             connection = DriverManager.getConnection(URL, USER, PASSWORD);
@@ -70,6 +73,7 @@ public class MySQLConnectieLeverancier {
      *
      * @return de connectie gemaakt in de methode connecToDatabase
      */
+    @Deprecated
     public static Connection getConnection() throws RSVIERException {
         return connectToDatabase();
     }
@@ -78,6 +82,7 @@ public class MySQLConnectieLeverancier {
      * Methode om de logModus van de connector aan en uit te zetten
      * @param logModus Logmodus uit (0) of logModus aan (1).
      */
+    @Deprecated
     public static void setLogModus(int logModus) {
         MySQLConnectieLeverancier.logModus = logModus;
     }
