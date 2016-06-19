@@ -80,6 +80,8 @@ ENGINE = InnoDB;
 
 CREATE UNIQUE INDEX `uniekAdres` ON `RSVIERPROJECTDEEL2`.`ADRES` (`postcode` ASC, `huisnummer` ASC, `toevoeging` ASC);
 
+CREATE UNIQUE INDEX `adres_id_UNIQUE` ON `RSVIERPROJECTDEEL2`.`ADRES` (`adres_id` ASC);
+
 
 -- -----------------------------------------------------
 -- Table `RSVIERPROJECTDEEL2`.`KLANT_HEEFT_ADRES`
