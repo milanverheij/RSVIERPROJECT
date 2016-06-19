@@ -15,6 +15,7 @@ import java.sql.SQLException;
  * ter voorkoming van dubbele code in het kader try / catch blocken e.d.
  *
  */
+@Deprecated
 public class MySQLHelper {
     private static int logModus = 0; // 0 is standaard uit, 1 is aan
 
