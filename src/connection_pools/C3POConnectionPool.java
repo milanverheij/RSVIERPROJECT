@@ -13,8 +13,8 @@ import java.sql.SQLException;
  * AANPASSEN
  *
  */
-public class c3poDataSource {
-    private static connection_pools.c3poDataSource c3poDataSource;
+public class C3POConnectionPool {
+    private static C3POConnectionPool C3POConnectionPool;
     private ComboPooledDataSource cpds;
 
     private static final String MYSQL_URL = "jdbc:mysql://milanverheij.nl/RSVIERPROJECTDEEL2";
@@ -22,7 +22,7 @@ public class c3poDataSource {
     private static final String MYSQL_PASSWORD = "slechtwachtwoord";
     private static final String MYSQL_DRIVER_CLASS = "com.mysql.jdbc.Driver";
 
-    private c3poDataSource(int DBKeuze) throws RSVIERException {
+    private C3POConnectionPool(int DBKeuze) throws RSVIERException {
         if (DBKeuze == 1) {
             try {
                 cpds = new ComboPooledDataSource();
@@ -38,12 +38,12 @@ public class c3poDataSource {
         }
     }
 
-    public static connection_pools.c3poDataSource getInstance(int DBKeuze) throws RSVIERException {
-        if (c3poDataSource == null) {
-            c3poDataSource = new c3poDataSource(DBKeuze);
-            return c3poDataSource;
+    public static C3POConnectionPool getInstance(int DBKeuze) throws RSVIERException {
+        if (C3POConnectionPool == null) {
+            C3POConnectionPool = new C3POConnectionPool(DBKeuze);
+            return C3POConnectionPool;
         } else {
-            return c3poDataSource;
+            return C3POConnectionPool;
         }
     }
 

@@ -13,7 +13,7 @@ import java.sql.SQLException;
  *
  */
 public class C3POAdapter implements VerkrijgConnectie {
-    c3poDataSource c3PODataSource;
+    C3POConnectionPool C3POConnectionPool;
     private int DBKeuze;
 
     public C3POAdapter(int DBKeuze) throws RSVIERException {
@@ -23,7 +23,7 @@ public class C3POAdapter implements VerkrijgConnectie {
     @Override
     public Connection verkrijgConnectie() throws RSVIERException {
         try {
-        return c3PODataSource.getInstance(DBKeuze).getConnection();
+        return C3POConnectionPool.getInstance(DBKeuze).getConnection();
         } catch (SQLException ex) {
             throw new RSVIERException("C3POAdapter SQL Exception" + ex.getMessage());
         }
