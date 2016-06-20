@@ -5,307 +5,251 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.List;
 
+import exceptions.RSVIERException;
 import interfaces.BestellingDAO;
 import model.Artikel;
 import model.Bestelling;
-import exceptions.RSVIERException;
 
 public class BestellingDAOMySQL extends AbstractDAOMySQL implements BestellingDAO{
-	public BestellingDAOMySQL(){}
 	public static boolean bestellingWordGetest = false; //Kijken of een JUnit test loopt
-	public static Bestelling aangeroepenBestellingInTest =	//Standaardwaarden voor de JUnit test instellen 
-			new Bestelling(1, new Artikel(666, "Necronomicon", 6.66), new Artikel(123, "Voynich Manuscript", 1.23), new Artikel(999, "Munich Manual of Demonic Magic", 9.99));
+	public static Bestelling aangeroepenBestellingInTest; //TODO nieuwe bestelling voor test maken
 
-	//Create
-	@Override
-	public long nieuweBestelling(long klantId, Artikel a1, Artikel a2, Artikel a3) throws SQLException, RSVIERException {
-		Bestelling bestelling = new Bestelling();
-		bestelling.setKlant_id(klantId);
-		bestelling.voegArtikelToe(a1);
-		bestelling.voegArtikelToe(a2);
-		bestelling.voegArtikelToe(a3);
-		return nieuweBestelling(bestelling);
+	public long nieuweBestelling(Bestelling bestelling) throws SQLException, RSVIERException {
+		long bestellingId = 0;
+
+		try (Connection con = MySQLConnectieLeverancier.getConnection();
+				PreparedStatement statementBestelTabel = con.prepareStatement(
+						"INSERT INTO `BESTELLING` (klant_id) VALUES (?)",
+						PreparedStatement.RETURN_GENERATED_KEYS);){
+
+			con.setAutoCommit(false);
+
+			statementBestelTabel.setLong(1, bestelling.getKlant_id());
+			statementBestelTabel.executeUpdate();
+
+			schrijfAlleArtikelenNaarDeDatabase(con, statementBestelTabel, bestelling.getArtikelLijst());
+
+			con.commit();
+		}
+		return bestellingId;
 	}
-	@Override
-	public long nieuweBestelling(long klantId, Artikel a1, Artikel a2) throws SQLException, RSVIERException {
-		return nieuweBestelling(klantId, a1, a2, null);
+
+	public long nieuweBestelling(long klantId, List<Artikel> artikelList) throws SQLException, RSVIERException {
+
+		// De eerste try haalt het id van de nieuwe bestelling op, in de tweede try word de lijst met artikelen verwerkt
+		try (Connection con = MySQLConnectieLeverancier.getConnection();
+				PreparedStatement statementBestelTabel = con.prepareStatement(
+						"INSERT INTO `BESTELLING` (klant_id) VALUES (?)",
+						PreparedStatement.RETURN_GENERATED_KEYS);){
+
+			// Auto-commit uit om alles tegelijk door te voeren, voorkomt fouten in de database wanneer
+			// de bestelling en de artikellijst niet beide goed gaan
+			con.setAutoCommit(false);
+
+			statementBestelTabel.setLong(1, klantId);
+			statementBestelTabel.executeUpdate();
+
+			schrijfAlleArtikelenNaarDeDatabase(con, statementBestelTabel, artikelList);
+
+			// Voer al de statements definitief uit
+			con.commit();
+		}
+		return 0;
 	}
+
 	@Override
-	public long nieuweBestelling(long klantId, Artikel a1) throws SQLException, RSVIERException {
-		return nieuweBestelling(klantId, a1, null, null);
+	public Iterator<Bestelling> getBestellingOpKlantId(long klantId) throws SQLException, RSVIERException{
+		try(Connection con = MySQLConnectieLeverancier.getConnection();
+				PreparedStatement statement = con.prepareStatement(
+						"SELECT `BESTELLING`.klant_id, `BESTELLING`.bestelling_id, `ARTIKEL`.artikel_id, `ARTIKEL`.omschrijving, `BESTELLING_HEEFT_ARTIKEL`.aantal, "
+								+ "`BESTELLING_HEEFT_ARTIKEL`.prijs_id_prijs, `PRIJS`.prijs, `BESTELLING`.datumAanmaak"
+
+							+ " FROM `BESTELLING_HEEFT_ARTIKEL`, `ARTIKEL`, `BESTELLING`, `PRIJS`"
+
+							+ " WHERE `BESTELLING`.klant_id = ?"
+							+ " AND `BESTELLING_HEEFT_ARTIKEL`.prijs_id_prijs = `PRIJS`.prijs_id"
+							+ " AND `BESTELLING_HEEFT_ARTIKEL`.bestelling_id_best = `BESTELLING`.bestelling_id"
+							+ " AND `BESTELLING_HEEFT_ARTIKEL`.artikel_id_art = `ARTIKEL`.artikel_id;");){
+
+			statement.setLong(1, klantId);
+
+			return verwerkResultSetGetBestelling(statement).iterator();
+		}
 	}
+
 	@Override
-	public long nieuweBestelling(Bestelling bestelling) throws SQLException, RSVIERException{
-		if(bestellingWordGetest)
-			aangeroepenBestellingInTest = bestelling;
-		
-		Connection connection = MySQLConnectieLeverancier.getConnection();
-		ResultSet rs = null;
-		
-		try{
-			statement = connection.prepareStatement("INSERT INTO `BESTELLING` "
-					+ "(artikel1_id, artikel1_naam, artikel1_prijs, "
-					+ "artikel2_id, artikel2_naam, artikel2_prijs, "
-					+ "artikel3_id, artikel3_naam, artikel3_prijs, "
-					+ "klant_id)"
-					+ "VALUES "
-					+ "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?);", PreparedStatement.RETURN_GENERATED_KEYS);
+	public Iterator<Bestelling> getBestellingOpBestellingId(long bestellingId) throws RSVIERException, SQLException {
+		try(Connection con = MySQLConnectieLeverancier.getConnection();
+				PreparedStatement statement = con.prepareStatement(
+						"SELECT `BESTELLING`.klant_id, `BESTELLING`.bestelling_id, `ARTIKEL`.artikel_id, "
+								+ "`ARTIKEL`.omschrijving, `BESTELLING_HEEFT_ARTIKEL`.aantal, "
+								+ "`BESTELLING_HEEFT_ARTIKEL`.prijs_id_prijs, `PRIJS`.prijs, "
+								+ "`BESTELLING`.datumAanmaak"
 
-			statement.setLong(10, bestelling.getKlant_id());
+						+ " FROM `BESTELLING_HEEFT_ARTIKEL`, `ARTIKEL`, `BESTELLING`, `PRIJS`"
 
-			//Bijhouden hoeveel artikelen er bijgevoegd zijn
-			int count = 1;
+						+ " WHERE `BESTELLING`.bestelling_id = ?"
+						+ " AND `BESTELLING_HEEFT_ARTIKEL`.prijs_id_prijs = `PRIJS`.prijs_id"
+						+ " AND `BESTELLING_HEEFT_ARTIKEL`.bestelling_id_best = `BESTELLING`.bestelling_id"
+						+ " AND `BESTELLING_HEEFT_ARTIKEL`.artikel_id_art = `ARTIKEL`.artikel_id;");){
 
-			LinkedHashMap<Artikel, Integer> artikelen = bestelling.getArtikelLijst();
+			statement.setLong(1, bestellingId);
 
-			//De losse artikelen in een iterable vorm krijgen
-			Set<Artikel> artikelSet = artikelen.keySet();
+			return verwerkResultSetGetBestelling(statement).iterator();
+		}
+	}
 
-			//Voor ieder artikel de PreparedStatement invullen
-			for(Artikel artikel : artikelSet){
+	@Override
+	public void updateBestelling(Bestelling bestelling) throws SQLException, RSVIERException {
+		// TODO Auto-generated method stub
 
-				//Als er een artikel 2x of vaker besteld is moet deze iedere keer toegevoegd worden
-				//Dus een for-loop aan de hand van de Integer waarde
-				for(int x = 0; x < artikelen.get(artikel); x++){
-					buildNieuwBestellingStatement(artikel, count);
-					count++;
-				}
-			}
+	}
 
-			//Als er nog geen 3 artikelen toegevoegd zijn, de rest van de PreparedStatement
-			//afvullen met null-waarden
-			while(count < 4){
-				buildNieuwBestellingStatement(null, count);
-				count++;
-			}
-			
+	@Override
+	public void verwijderAlleBestellingenKlant(long klantId) throws RSVIERException, SQLException {
+		try(Connection con = MySQLConnectieLeverancier.getConnection();
+				PreparedStatement updateStatement = con.prepareStatement(
+						"UPDATE `BESTELLING` "
+							+ "SET bestellingActief = 0 "
+							+ "WHERE klant_id = ?;");){
+			updateStatement.setLong(1, klantId);
+			updateStatement.executeUpdate();
+		}
+	}
+
+	/* De echte verwijder methode staat in dit comment
+	 * Dit staat hier alleen voor display purposes omdat we een verwijdermethode moesten maken voor de opdracht
+	 * Alleen zetten wij de bestelling op inactief zodat er altijd een geschiedenis van bestellingen is
+ 	@Override
+	public long verwijderAlleBestellingenKlant(long klantId) throws RSVIERException, SQLException {
+		try(Connection con = MySQLConnectieLeverancier.getConnection();
+			PreparedStatement statement = con.prepareStatement(
+					"DELETE `BESTELLING_HEEFT_ARTIKEL` "
+					+ "FROM `BESTELLING_HEEFT_ARTIKEL` "
+					+ "INNER JOIN `BESTELLING` "
+					+ "ON `BESTELLING_HEEFT_ARTIKEL`.bestelling_id_best = `BESTELLING`.bestelling_id "
+					+ "WHERE `BESTELLING`.klant_id = ?;");){
+
+			// Auto-commit uit want we werken op 2 tabellen
+			// Dus het moet allebei goed gaan
+			con.setAutoCommit(false);
+
+			//Verwijder alle items met het klantId uit BESTELLING_HEEFT_ARTIKEL
+			statement.setLong(1, klantId);
 			statement.executeUpdate();
-			rs = statement.getGeneratedKeys();
+
+			// Verwijder bestelling
+			try(PreparedStatement updateStatement = con.prepareStatement(
+					"DELETE `BESTELLING` "
+					+ "FROM `BESTELLING`"
+					+ "WHERE klant_id = ?;");){
+				updateStatement.setLong(1, klantId);
+				updateStatement.executeUpdate();
+			}
+			con.commit();
+
+		}
+		return 0;
+	}
+	 */
+
+	@Override
+	public void verwijderEnkeleBestelling(long bestellingId) throws RSVIERException, SQLException {
+		try(Connection con = MySQLConnectieLeverancier.getConnection();
+			PreparedStatement statement = con.prepareStatement(
+					"UPDATE `BESTELLING` SET bestellingActief = 0 WHERE bestelling_id = ?")){
+			statement.setLong(1, bestellingId);
+			statement.executeUpdate();
+		}
+	}
+
+	/* Wederom staat de echte verwijdermethode in dit comment
+	 	@Override
+	public void verwijderEnkeleBestelling(long bestellingId) throws RSVIERException, SQLException {
+		try(Connection con = MySQLConnectieLeverancier.getConnection();
+			PreparedStatement statement = con.prepareStatement(
+					"DELETE `BESTELLING` FROM `BESTELLING` WHERE bestelling_id = ?";
+					PreparedStatement statement2 = con.prepareStatement(
+					"DELETE `BESTELLING_HEEFT_ARTIKEL` FROM `BESTELLING_HEEFT_ARTIKEL` WHERE bestelling_id_best = ?")){
+
+			con.setAutoCommit(false);
+			statement.setLong(1, bestellingId);
+			statement.executeUpdate();
+
+			statement2.setLong(1, bestellingId);
+			statement2.executeUpdate();
+			con.commit();
+		}
+	}
+	 * */
+
+	private void schrijfAlleArtikelenNaarDeDatabase(Connection con, PreparedStatement statement, List<Artikel> artikelList) throws SQLException {
+		try(ResultSet rs = statement.getGeneratedKeys();
+			PreparedStatement statementBestelHeeftArtikelTabel = con.prepareStatement(
+				"INSERT INTO `BESTELLING_HEEFT_ARTIKEL` (bestelling_id_best, artikel_id_art, prijs_id_prijs, aantal)"
+				+ " VALUES (?, ?, ?, ?)");){
+
+			// Nieuw aangemaakte bestellingId ophalen
 			rs.next();
-			return rs.getLong(1);
-		}finally{
-			MySQLHelper.close(connection, statement, rs);	//Connection en statement niet meer nodig dus sluiten
-		}
+			long bestellingId = rs.getLong(1);
 
-	}
-
-	//Read
-	@Override
-	public Iterator<Bestelling> getBestellingOpKlantGegevens(long klantId) throws RSVIERException {
-		Connection connection = MySQLConnectieLeverancier.getConnection();
-		//Alle bestellingen voor de klant
-		LinkedHashSet<Bestelling> bestellijst = new LinkedHashSet<Bestelling>();
-		//De artikelen binnen een bestelling
-		LinkedHashMap<Artikel, Integer> map;
-		ResultSet rs = null;
-
-		try {
-			//Alle bestellingen van de klant in de ResultSet laden
-			statement = connection.prepareStatement("SELECT * FROM `BESTELLING` WHERE klant_id =  ?;");
-			statement.setLong(1, klantId);
-			rs = statement.executeQuery();
-
-			if(rs.next()){
-				do{ 	//Alle 'rs' entries verwerken naar een Bestelling object
-					map = new LinkedHashMap<Artikel, Integer>();
-
-					//Nieuwe Bestelling aanmaken en invullen
-					bestellijst.add(maakBestelling(rs, map));
-				}while(rs.next());
-				return bestellijst.iterator(); //Iterator van de bestellijst terug sturen
+			for(Artikel artikel : artikelList){
+				statementBestelHeeftArtikelTabel.setLong(1, bestellingId);
+				statementBestelHeeftArtikelTabel.setLong(2, artikel.getArtikel_id());
+				statementBestelHeeftArtikelTabel.setLong(3, artikel.getArtikel_prijs_id());
+				statementBestelHeeftArtikelTabel.setLong(4, artikel.getAantal());
+				statementBestelHeeftArtikelTabel.executeUpdate();
 			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}finally{ // Alles connections sluiten
-			MySQLHelper.close(connection, statement, rs);
 		}
-		return null;
-	}
-	@Override
-	public Iterator<Bestelling> getBestellingOpBestelling(long bestellingId) throws RSVIERException {
-		Connection connection = MySQLConnectieLeverancier.getConnection();
-		ResultSet rs = null;
-		try {
-			statement = connection.prepareStatement("SELECT * FROM `BESTELLING` WHERE bestelling_id =  ? ;");
-			statement.setLong(1, bestellingId);
 
-			rs = statement.executeQuery();
-			if(rs.next()){
-				LinkedHashSet<Bestelling> bestellijst = new LinkedHashSet<Bestelling>();
-				LinkedHashMap<Artikel, Integer> map = new LinkedHashMap<Artikel, Integer>();
-
-				bestellijst.add(maakBestelling(rs, map));
-
-				//Geeft een Iterator terug om op dezelfde manier als de andere getBetselling
-				//doorlopen te kunnen worden, anders kon het net zo goed Bestelling object geven
-
-				return bestellijst.iterator();
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}finally{	//Sluit alle conntections
-			MySQLHelper.close(connection, statement, rs);
-		}
-		return null;
 	}
 
-	//Update
-	@Override
-	public void updateBestelling(long bestellingId, Artikel a1) throws SQLException, RSVIERException {
-		updateBestelling(bestellingId, a1, null, null);
-	}
-	@Override
-	public void updateBestelling(long bestellingId, Artikel a1, Artikel a2) throws SQLException, RSVIERException {
-		updateBestelling(bestellingId, a1, a2, null);
-	}
-	@Override
-	public void updateBestelling(long bestellingId, Artikel a1, Artikel a2, Artikel a3) throws SQLException, RSVIERException {
-		updateBestelling(new Bestelling(bestellingId, a1, a2, a3));
-	}
-	@Override
-	public void updateBestelling(Bestelling bestelling) throws SQLException, RSVIERException{
-		Connection connection = MySQLConnectieLeverancier.getConnection();
-		try {
-			statement = connection.prepareStatement("UPDATE `BESTELLING` "
-					+ "SET artikel1_id = ?, artikel1_naam = ?, artikel1_prijs = ?, "
-					+ "artikel2_id = ?, artikel2_naam = ?, artikel2_prijs = ?, "
-					+ "artikel3_id = ?, artikel3_naam = ?, artikel3_prijs = ? "
-					+ "WHERE bestelling_id = ?;");
+	private LinkedHashSet<Bestelling> verwerkResultSetGetBestelling(PreparedStatement statement) throws SQLException{
+		try(ResultSet rs = statement.executeQuery();){
+			LinkedHashSet<Bestelling> bestellingSet = new LinkedHashSet<Bestelling>();
 
-			statement.setLong(10, bestelling.getBestelling_id());
+			// Eerste rij verwerken tot bestelling zodat ik straks een fixed bestellingId heb om
+			// mee te vergelijken in de while loop
+			Bestelling best = new Bestelling();
+			Artikel art;
 
-			//Bijhouden hoeveel artikelen er bijgevoegd zijn
-			int count = 1;
-
-			LinkedHashMap<Artikel, Integer> artikelen = bestelling.getArtikelLijst();
-
-			//De losse artikelen in een iterable vorm krijgen
-			Set<Artikel> artikelSet = artikelen.keySet();
-
-			//Voor ieder artikel de PreparedStatement invullen
-			for(Artikel artikel : artikelSet){
-				//Als er een artikel 2x of vaker besteld is moet deze iedere keer toegevoegd worden
-				//Dus een for-loop aan de hand van de Integer waarde
-				for(int x = 0; x < artikelen.get(artikel); x++){
-					buildUpdateStatement(artikel, count);
-					count++;
+			// Voeg artikelen toe aan de bestelling zolang het bestellingId gelijk is aan
+			// die op de vorige rij van de ResultSet, maak anders een nieuwe Bestelling aan
+			while(rs.next()){
+				// Kijk of het de eerste bestelling is
+				if(best.getBestelling_id() == 0){
+					setBestellingGegevens(rs, best);
 				}
-			}
 
-			//Als er nog geen 3 artikelen toegevoegd zijn, de rest van de PreparedStatement
-			//afvullen met null-waarden
-			while(count < 4){
-				buildUpdateStatement(null, count);
-				count++;
-			}
-			statement.executeUpdate();
-		}finally{
-			MySQLHelper.close(connection, statement);	//Connection en statement niet meer nodig dus sluiten
-		}
-	}
-
-	//Delete
-	@Override
-	//Verwijder alle bestellingen van een klant
-	public long verwijderAlleBestellingenKlant(long klantId) throws RSVIERException {
-		Connection connection = MySQLConnectieLeverancier.getConnection();
-		try {
-			statement = connection.prepareStatement("DELETE FROM `BESTELLING` WHERE klant_id = ?;");
-			statement.setLong(1, klantId);
-			statement.executeUpdate();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}finally{
-			MySQLHelper.close(connection, statement);	//Connection en statement niet meer nodig dus sluiten
-		}
-		return klantId;
-
-	}
-
-	@Override
-	//Verwijder 1 bestelling uit een tabel
-	public void verwijderEnkeleBestelling(long bestellingId) throws RSVIERException {
-		Connection connection = MySQLConnectieLeverancier.getConnection();
-		try {
-			statement = connection.prepareStatement("DELETE FROM `BESTELLING` WHERE bestelling_id = ?;");
-			statement.setLong(1, bestellingId);
-			statement.executeUpdate();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}finally{
-			MySQLHelper.close(connection, statement);	//Connection en statement niet meer nodig dus sluiten
-		}
-	}
-
-	//Utility
-	//Voeg artikelen uit een ResultSet toe aan de LinkedHashMap
-	private void voegArtikelToe(ResultSet rs, LinkedHashMap<Artikel, Integer> map){
-		for(int x = 0; x < 3; x++){
-			try {
-				if(!(rs.getString(x + 3) == null)){ //Controleer iedere row of er een "not null" artikel_id is
-					Artikel artikel = new Artikel();
-					artikel.setArtikel_id(rs.getInt(x + 3));
-					artikel.setArtikel_naam(rs.getString(x + 6));
-					artikel.setArtikel_prijs(Double.parseDouble(rs.getString(x + 9)));
-
-					if(map.containsKey(artikel)){
-						map.put(artikel, map.get(artikel) + 1);
-					}else{
-						map.put(artikel, 1);
-					}
+				// Wanneer er een volgende bestelling is, schrijf de vorige naar de ArrayList
+				// en maak een nieuwe bestelling aan
+				if(best.getBestelling_id() != (rs.getLong("bestelling_id"))){
+					bestellingSet.add(best);
+					best = new Bestelling();
+					setBestellingGegevens(rs, best);
 				}
-			} catch (NumberFormatException | SQLException e) {
-				e.printStackTrace();
+
+				// Maak een nieuw Artikel object aan en voeg deze toe aan de ArrayList
+				// met Artikel objecten in Bestelling
+				art = new Artikel(rs.getInt("artikel_id"), rs.getString("omschrijving"),
+						rs.getDouble("prijs"), rs.getInt("prijs_id_prijs"), rs.getInt("aantal"));
+				best.voegArtikelToe(art);
 			}
+
+			//Laatste bestelling ook toevoegen aan de ArrayList
+			bestellingSet.add(best);
+
+			return bestellingSet;
 		}
 	}
 
-	//Vult de PreparedStatement voor nieuweBestelling(...) in
-	//Gooit een exception wanneer er 4 of meer artikelen worden geupdate.
-	private void buildNieuwBestellingStatement(Artikel artikel, int nr) throws SQLException, RSVIERException{
-		if(nr >= 4) throw new RSVIERException("Teveel artikelen");
-		if(artikel != null){
-			statement.setLong(  -2 + 3 * nr, artikel.getArtikel_id());
-			statement.setString(-1 + 3 * nr, artikel.getArtikel_naam());
-			statement.setDouble(     3 * nr, artikel.getArtikel_prijs());
-		}else{
-			statement.setString(-2 + 3 * nr, null);
-			statement.setString(-1 + 3 * nr, null);
-			statement.setString(     3 * nr, null);
-		}
-	}
-
-	//Vult de PreparedStatement voor updateBestelling(...) in
-	//Gooit een exception wanneer er 4 of meer artikelen worden geupdate.
-	private void buildUpdateStatement(Artikel artikel, int nr) throws SQLException, RSVIERException{
-		if(nr >= 4) throw new RSVIERException("Teveel artikelen");
-		if(artikel != null){
-			statement.setLong(-2 + 3 * nr, artikel.getArtikel_id());
-			statement.setString(-1 + 3 * nr, artikel.getArtikel_naam());
-			statement.setDouble(3 * nr, artikel.getArtikel_prijs());
-		}else{
-			statement.setString(-2 + 3 * nr, null);
-			statement.setString(-1 + 3 * nr, null);
-			statement.setString(3 * nr, null);
-		}
-
-	}
-
-	private Bestelling maakBestelling(ResultSet rs, LinkedHashMap<Artikel, Integer> map){
-		Bestelling bestelling = new Bestelling();
-		try {
-			bestelling.setBestelling_id(rs.getLong(1));
-			bestelling.setKlant_id(rs.getLong(2));
-			voegArtikelToe(rs, map);					//Artikelen uit rs toevoegen aan de LinkedHashMap
-			bestelling.setArtikelLijst(map);
-		}catch (SQLException e){
-			e.printStackTrace();
-		}
-		return bestelling;
+	private void setBestellingGegevens(ResultSet rs, Bestelling best) throws SQLException{
+		best.setBestelling_id(rs.getLong("bestelling_id"));
+		best.setKlant_id(rs.getLong("klant_id"));
+		best.setDatumAanmaak(rs.getDate("datumAanmaak"));
 	}
 
 }

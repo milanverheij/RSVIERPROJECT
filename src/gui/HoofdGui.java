@@ -1,12 +1,12 @@
 package gui;
-import exceptions.RSVIERException;
+import java.sql.SQLException;
 
+import exceptions.RSVIERException;
 import factories.DAOFactory;
 import interfaces.AdresDAO;
 import interfaces.ArtikelDAO;
 import interfaces.BestellingDAO;
 import interfaces.KlantDAO;
-
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
@@ -19,17 +19,16 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-
 import model.Artikel;
 import model.GuiPojo;
-import mysql.GuiMySQLBewerkingen;
+import mysql.GuiBewerkingenMySQL;
 
 public class HoofdGui extends Application{
 	private final Insets INSET = new Insets(4);
 
 	ErrorBox errorBox = new ErrorBox();
 
-	GuiMySQLBewerkingen guiMySQL = new GuiMySQLBewerkingen();
+	GuiBewerkingenMySQL guiBewerkingen = new GuiBewerkingenMySQL();
 	DAOFactory factory = DAOFactory.getDAOFactory("MySQL");
 
 	BestellingDAO bestelDAO = factory.getBestellingDAO();
@@ -69,10 +68,6 @@ public class HoofdGui extends Application{
 	Button nieuweKlantButton;
 	Button updateKlantButton;
 
-	public static void main(String[] args){
-		launch();
-	}
-	
 	@Override
 	public void start(Stage stage) throws Exception {
 		maakListViewsAan();
@@ -87,9 +82,9 @@ public class HoofdGui extends Application{
 		gridBox.setSpacing(5);
 
 		HBox knoppenBox = new HBox();
-		knoppenBox.getChildren().addAll(zoekKlantButton, 
-				new Label("  "), leegButton, 
-				new Label("  "), updateArtikelButton, 
+		knoppenBox.getChildren().addAll(zoekKlantButton,
+				new Label("  "), leegButton,
+				new Label("  "), updateArtikelButton,
 				new Label("  "), nieuweBestellingButton, updateBestellingButton, verwijderBestelling,
 				new Label("  "), nieuweKlantButton, updateKlantButton);
 		knoppenBox.setSpacing(5);
@@ -102,7 +97,7 @@ public class HoofdGui extends Application{
 		Scene scene = new Scene(verticalBox);
 		stage.setScene(scene);
 		stage.setTitle("Exotische Dieren Emporium");
-		stage.getIcons().add(new Image("/images/icon.jpg"));
+		stage.getIcons().add(new Image("\\images\\icon.jpg"));
 		stage.setTitle("Harrie's Tweedehands Beessies");
 		stage.show();
 	}
@@ -154,19 +149,15 @@ public class HoofdGui extends Application{
 		updateArtikelButton.setOnAction(e -> updateArtikel());
 
 		nieuweKlantButton.setOnAction(e -> nieuweKlant());
-		updateKlantButton.setOnAction(e -> updateKlant());		
+		updateKlantButton.setOnAction(e -> updateKlant());
 	}
 
 	/* Verwijdert een enkele bestelling uit de database */
 	private void verwijderBestelling(){
-		try {
-			GuiPojo.bestellingLijst.remove(GuiPojo.bestelling.getBestelling_id());
-			guiMySQL.verwijderEnkeleBestelling();
-			bestellingListView.getItems().clear();
-			guiMySQL.populateBestellingListView(bestellingListView);
-		} catch (RSVIERException e) {
-			errorBox.setMessageAndStart(e.getMessage());
-		}
+		GuiPojo.bestellingLijst.remove(GuiPojo.bestelling.getBestelling_id());
+		guiBewerkingen.verwijderEnkeleBestelling();
+		bestellingListView.getItems().clear();
+		guiBewerkingen.populateBestellingListView(bestellingListView);
 	}
 
 	//zoekGrid bevat alle velden met info waarop gezocht kan worden
@@ -218,7 +209,7 @@ public class HoofdGui extends Application{
 		leegViews();
 
 		if(bestellingIdField.getText().equals(""))
-			guiMySQL.zoekKlant(klantListView, klantIdField.getText(), voorNaamField.getText(), 
+			guiBewerkingen.zoekKlant(klantListView, klantIdField.getText(), voorNaamField.getText(),
 					achterNaamField.getText(), tussenVoegselField.getText(), emailField.getText());
 		else
 			zoekBestelling();
@@ -230,7 +221,7 @@ public class HoofdGui extends Application{
 	 */
 	private void zoekBestelling(){
 		String bron = bestellingIdField.getText().equals("") ? "klantId" : "bestellingId";
-		guiMySQL.zoekBestelling(bron, bestellingListView, klantIdField.getText(), bestellingIdField.getText());
+		guiBewerkingen.zoekBestelling(bron, bestellingListView, klantIdField.getText(), bestellingIdField.getText());
 	}
 
 	/* Leegt de TextField van klantgegevens */
@@ -250,13 +241,13 @@ public class HoofdGui extends Application{
 		artikelPrijsField.setText("");
 	}
 
-	//Leegt alle ListViews en reset de variabelen waarmee ze opgebouwd 
+	//Leegt alle ListViews en reset de variabelen waarmee ze opgebouwd
 	//worden en selecties mee bijgehouden worden
 	private void leegViews(){
 		bestellingListView.getItems().clear();
 		artikelListView.getItems().clear();
 		klantListView.getItems().clear();
-		guiMySQL.leegKlantBestellingArtikel();
+		guiBewerkingen.leegKlantBestellingArtikel();
 	}
 
 	//Leegt alle TextFields in de HoofdGui
@@ -275,7 +266,7 @@ public class HoofdGui extends Application{
 	 * op een item geklikt is
 	 */
 	private void getItemVanKlantenLijst(){
-		guiMySQL.getItemVanKlantenLijst(klantListView);
+		guiBewerkingen.getItemVanKlantenLijst(klantListView);
 
 		if(GuiPojo.klant != null){
 			leegAlleVelden();
@@ -302,13 +293,13 @@ public class HoofdGui extends Application{
 		if(bestellingListView.getSelectionModel().getSelectedItem() != null){
 			long selectedItem = bestellingListView.getSelectionModel().getSelectedItem();
 			if(selectedItem >= 0){
-				guiMySQL.getItemVanBestellingLijst(selectedItem);
+				guiBewerkingen.getItemVanBestellingLijst(selectedItem);
 				leegArtikelVelden();
 			}
 			setArtikelListView();
 		}
 	}
-	
+
 	private void setArtikelListView(){
 		if(GuiPojo.artikel != null){
 			artikelListView.getItems().clear();
@@ -318,14 +309,14 @@ public class HoofdGui extends Application{
 			if(GuiPojo.bestelling.getBestelling_id() != 0)
 				bestellingIdField.setText("" + GuiPojo.bestelling.getBestelling_id());
 
-			guiMySQL.setArtikelLijst();
+			guiBewerkingen.setArtikelLijst();
 
 			for(Artikel artikel : GuiPojo.artikelLijst){
-				artikelListView.getItems().add("Naam: " + artikel.getArtikel_naam() + "\nPrijs: " + artikel.getArtikel_prijs() + 
-						"\nAantal: " + GuiPojo.bestelling.getArtikelLijst().get(artikel));
+				artikelListView.getItems().add("Naam: " + artikel.getArtikel_naam() + "\nPrijs: " + artikel.getArtikel_prijs() +
+						"\nAantal: " + artikel.getAantal());
 			}
 			if(klantIdField.getText().isEmpty())
-				guiMySQL.zoekKlant(klantListView, klantIdField.getText(), voorNaamField.getText(), 
+				guiBewerkingen.zoekKlant(klantListView, klantIdField.getText(), voorNaamField.getText(),
 						achterNaamField.getText(), tussenVoegselField.getText(), emailField.getText());
 		}
 	}
@@ -337,9 +328,9 @@ public class HoofdGui extends Application{
 		int index = artikelListView.getSelectionModel().getSelectedIndex();
 
 		if(index >= 0){
-			guiMySQL.getItemVanArtikelLijst(index);
+			guiBewerkingen.getItemVanArtikelLijst(index);
 
-			if(GuiPojo.artikel != null)	
+			if(GuiPojo.artikel != null)
 				setArtikelFields(GuiPojo.artikel);
 		}
 	}
@@ -356,13 +347,13 @@ public class HoofdGui extends Application{
 	private void updateArtikel(){
 		if(!artikelIdField.getText().isEmpty()){
 			Artikel nieuwArtikel = new Artikel(Integer.parseInt(artikelIdField.getText()), artikelNaamField.getText(), Double.parseDouble(artikelPrijsField.getText()));
-			guiMySQL.updateArtikel(nieuwArtikel);
+			guiBewerkingen.updateArtikel(nieuwArtikel);
 			setArtikelListView();
 		}
 	}
 
 	/* Lanceert een nieuw Stage waar een bestelling aangepast kan worden
-	 * bestellingId en klantId blijven gelijk, alleen de artikelen kunnen 
+	 * bestellingId en klantId blijven gelijk, alleen de artikelen kunnen
 	 * veranderen. Een bestaande bestelling moet geselecteerd zijn
 	 */
 	private void updateBestelling(){

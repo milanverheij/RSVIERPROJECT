@@ -1,8 +1,8 @@
 package gui;
+
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.Map.Entry;
 
 import exceptions.RSVIERException;
@@ -13,7 +13,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
-import javafx.scene.image.Image;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
@@ -56,7 +55,6 @@ public class GuiVoorBestellingBewerkingen extends Application{
 	@Override
 	public void start(Stage bestellingStage) throws Exception {
 		this.bestellingStage = bestellingStage;
-		bestellingStage.getIcons().add(new Image("/images/icon.jpg"));
 		maakButtons();
 		populateArrayListsEnListView();
 
@@ -79,11 +77,11 @@ public class GuiVoorBestellingBewerkingen extends Application{
 	}
 
 	private void setArtikelAantallen(){
-		LinkedHashMap<Artikel, Integer> map = bestelling.getArtikelLijst();
-		int size = artikelArrayList.size();
-		for(int it = 0; it < size; it++){
-			if(map.get(artikelArrayList.get(it)) != null)
-				textFieldArrayList.get(it).setText("" + map.get(artikelArrayList.get(it)));
+		ArrayList<Artikel> artikelLijst = bestelling.getArtikelLijst();
+		int count = 0;
+		for(Artikel artikel : artikelLijst){
+			textFieldArrayList.get(count).setText("" + artikel.getAantal());
+			count++;
 		}
 	}
 
@@ -98,10 +96,10 @@ public class GuiVoorBestellingBewerkingen extends Application{
 	private void maakbestelling(){
 		if(checkAantal()){
 			bestelling.setKlant_id(1);
-			
+
 			if(bestelling.getArtikelLijst() != null)
 				bestelling.getArtikelLijst().clear();
-			
+
 			voegArtikelenAanBestellingToe();
 			BestellingDAOMySQL bestelDAO = new BestellingDAOMySQL();
 
@@ -137,7 +135,7 @@ public class GuiVoorBestellingBewerkingen extends Application{
 				for(int aantalIt = 0; aantalIt < aantal; aantalIt++)
 					bestelling.voegArtikelToe(artikelArrayList.get(x));
 			}
-		}		
+		}
 	}
 
 	private boolean checkAantal(){
@@ -203,6 +201,4 @@ public class GuiVoorBestellingBewerkingen extends Application{
 	protected void setBestelling(Bestelling bestelling){
 		this.bestelling = bestelling;
 	}
-
-
 }

@@ -33,16 +33,16 @@ public class GuiVoorKlantBewerkingen extends Application{
 
 	public void start(Stage klantStage) throws Exception {
 		GridPane grid = new GridPane();
-		
+
 		final BooleanProperty eersteKeer = new SimpleBooleanProperty(true); // Of de stage de eerste keer geladen word
 		setFocus(grid, eersteKeer);
-		
+
 		populateTextFields();
 		populateGrid(grid);
 		maakButtonsEnVoegAanGridToe(grid, klantStage);
 
 		klantStage.setScene(new Scene(grid));
-		klantStage.getIcons().add(new Image("/images/icon.jpg"));
+		klantStage.getIcons().add(new Image("\\images\\icon.jpg"));
 		klantStage.setTitle("Nieuwe klant voor Harrie's Tweedehands Beessies");
 		klantStage.show();
 
@@ -62,8 +62,8 @@ public class GuiVoorKlantBewerkingen extends Application{
 	private void setFocus(GridPane grid, BooleanProperty eersteKeer){
 		voorNaam.focusedProperty().addListener((observable,  oldValue,  newValue) -> {
 			if(newValue && eersteKeer.get()){
-				grid.requestFocus(); 
-				eersteKeer.setValue(false); 
+				grid.requestFocus();
+				eersteKeer.setValue(false);
 			}
 		});
 	}
@@ -114,15 +114,15 @@ public class GuiVoorKlantBewerkingen extends Application{
 	}
 
 	private void maakKlantAan(Stage klantStage){
-		KlantDAO klantDAO = DAOFactory.getDAOFactory("MySQL").getKlantDAO();
+		KlantDAO klantDAO = DAOFactory.getDAOFactory("MySQL").getKlantDAO(); //TODO: Connection pool meegeven
 		Adres adres = new Adres(straatNaam.getText(), postcode.getText(), toevoeging.getText(),
 				Integer.parseInt(huisNummer.getText()), woonplaats.getText());
 		try {
 			if(klant == null)
-				klantDAO.nieuweKlant(voorNaam.getText(), achterNaam.getText(), 
-						tussenVoegsel.getText(), email.getText(), adres, null);
+				klantDAO.nieuweKlant(voorNaam.getText(), achterNaam.getText(),
+						tussenVoegsel.getText(), email.getText(), adres, null); // TODO: 0 voor adres voor nieuw adres
 			else
-				klantDAO.updateKlant(klant.getKlant_id(), voorNaam.getText(), achterNaam.getText(), 
+				klantDAO.updateKlant(klant.getKlant_id(), voorNaam.getText(), achterNaam.getText(),
 						tussenVoegsel.getText(), email.getText(), adres);
 			klantStage.close();
 		} catch (RSVIERException e) {

@@ -22,14 +22,14 @@ public class StartGui extends Application{
 	Stage stage;
 	VBox vbox;
 	StackPane stackPane;
-	
+
 	TextField inlogNaamField;
 	PasswordField wachtwoordField;
 	Button inlogButton;
 	Label issues;
-	
+
 	final BooleanProperty firstTime = new SimpleBooleanProperty(true); // Variable to store the focus on stage load
-	
+
 	public static void main(String[] args) {
 		Application.launch(args);
 	}
@@ -37,16 +37,16 @@ public class StartGui extends Application{
 	@Override
 	public void start(Stage primaryStage) throws Exception {
 		stage = primaryStage;
-		
+
 		inlogNaamField = new TextField();
 		wachtwoordField = new PasswordField();
-		
+
 		inlogNaamField.setPromptText("Inlognaam");
 		wachtwoordField.setPromptText("Wachtwoord");
-		
+
 		inlogButton = new Button("Log in");
 		issues = new Label();
-		
+
 		inlogButton.setOnAction(e -> controleerGegevens());
 
 		populateVbox();
@@ -61,43 +61,43 @@ public class StartGui extends Application{
 	private void haalFocusVanTextField(){
 		inlogNaamField.focusedProperty().addListener((observable,  oldValue,  newValue) -> {
 			if(newValue && firstTime.get()){
-				vbox.requestFocus(); 
-				firstTime.setValue(false); 
+				vbox.requestFocus();
+				firstTime.setValue(false);
 			}
 		});
 	}
-	
+
 	private void populateStackPane(){
 		stackPane = new StackPane();
 		Rectangle rect = new Rectangle(400, 300);
 		rect.setFill(Color.WHITE);
-		
+
 		stackPane.getChildren().add(rect);
 		stackPane.getChildren().add(getAchtergrond());
 		stackPane.getChildren().add(vbox);
 		StackPane.setAlignment(vbox, Pos.CENTER);
 	}
-	
+
 	private ImageView getAchtergrond(){
 		Image image = new Image("/images/achtergrond.jpg", 300, 300, false, false);
 		return new ImageView(image);
 	}
-	
+
 	private void setStageProperties(){
 		stage.getIcons().add(new Image("/images/icon.jpg"));
 		stage.setTitle("Harrie's Tweedehands Beessies");
 	}
-	
+
 	private void populateVbox(){
 		vbox = new VBox();
 		vbox.setPadding(new Insets(5));
 		vbox.setSpacing(10);
-		
+
 		vbox.getChildren().addAll(inlogNaamField, wachtwoordField, inlogButton, issues);
 		vbox.setMaxHeight(108);
 		vbox.setMaxWidth(159);
 	}
-	
+
 	private void controleerGegevens(){
 		if(inlogNaamField.getText().equals("rs4") && wachtwoordField.getText().equals("1234")){
 			HoofdGui hoofd = new HoofdGui();
