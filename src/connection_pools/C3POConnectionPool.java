@@ -96,7 +96,6 @@ public class C3POConnectionPool {
      * @throws SQLException Foutmelding met gegevens.
      */
     public Connection getConnection() throws SQLException {
-
         return this.cpds.getConnection();
     }
 }

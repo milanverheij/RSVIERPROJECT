@@ -10,7 +10,7 @@ RECREATE TABLE KLANT (
   tussenvoegsel VARCHAR(10), 
   email VARCHAR(80),
   datumAanmaak TIMESTAMP DEFAULT 'NOW' NOT NULL,
-  datumGewijzigd TIMESTAMP NOT NULL,
+  datumGewijzigd TIMESTAMP,
   klantActief CHAR(1) DEFAULT 1);
 
 CREATE UNIQUE INDEX klant_id_UNIQUE ON KLANT (klant_id);
@@ -40,7 +40,7 @@ RECREATE TABLE ADRES (
   huisnummer VARCHAR(4) NOT NULL,
   woonplaats VARCHAR(45),
   datumAanmaak TIMESTAMP DEFAULT 'NOW' NOT NULL,
-  datumGewijzigd TIMESTAMP NOT NULL,
+  datumGewijzigd TIMESTAMP,
   adresActief CHAR(1) DEFAULT 1);
 
 CREATE UNIQUE INDEX uniekAdres ON ADRES (postcode, huisnummer, toevoeging);
@@ -110,7 +110,6 @@ THEN NEW."BESTELLING_ID" = GEN_ID(gen_bestelling_id, 1);
 END^
 SET TERM ; ^
 
-
 -- -----------------------------------------------------
 -- Table `RSVIERPROJECTDEEL2`.`PRIJS`
 -- -----------------------------------------------------
@@ -118,7 +117,10 @@ SET TERM ; ^
 RECREATE TABLE PRIJS (
   prijs_id INT NOT NULL PRIMARY KEY,
   prijs DECIMAL(10,2) DEFAULT NULL,
+  artikel_id INT,
   datumAanmaak TIMESTAMP DEFAULT 'NOW' NOT NULL);
+
+CREATE INDEX artikel_id_pr_idx ON PRIJS (artikel_id);
 
 -- -----------------------------------------------------
 -- Table `RSVIERPROJECTDEEL2`.`ARTIKEL`
@@ -153,6 +155,12 @@ THEN NEW."ARTIKEL_ID" = GEN_ID(gen_artikel_id, 1);
 END^
 SET TERM ; ^
 
+
+ALTER TABLE PRIJS ADD CONSTRAINT artikel_id_pr
+    FOREIGN KEY (artikel_id)
+    REFERENCES ARTIKEL (artikel_id)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION;
 
 -- -----------------------------------------------------
 -- Table `RSVIERPROJECTDEEL2`.`BESTELLING_HEEFT_ARTIKEL`

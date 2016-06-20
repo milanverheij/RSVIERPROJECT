@@ -8,7 +8,7 @@ package model;
 
 public class Adres {
     //Datafield
-    private long adres_id;
+    private long adres_id = 0;
     private String straatnaam;
     private String postcode;
     private String toevoeging;
@@ -36,7 +36,6 @@ public class Adres {
         this.toevoeging = toevoeging;
         this.huisnummer = huisnummer;
         this.woonplaats = woonplaats;
-        this.adres_id = 0;
     }
 
     //Getters and Setters

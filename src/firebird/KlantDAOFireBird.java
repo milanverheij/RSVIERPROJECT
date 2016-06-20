@@ -1,4 +1,4 @@
-package mysql;
+package firebird;
 
 import com.mysql.jdbc.Statement;
 import exceptions.RSVIERException;
@@ -6,6 +6,7 @@ import interfaces.KlantDAO;
 import model.Adres;
 import model.Bestelling;
 import model.Klant;
+import mysql.BestellingDAOMySQL;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -18,21 +19,20 @@ import java.util.ListIterator;
  * Created by Milan_Verheij on 06-06-16.
  *
  * KlantDAOMySQL is de DAO van de Klant POJO. <p>
- * Het verzorgt de database-operaties tussen MySQL en de objecten. <p>
+ * Het verzorgt de database-operaties tussen FireBird en de objecten. <p>
  *
  * De DAO is opgezet in CRUD volgorde (Create, Read, Update, Delete)<p>
  *
  * Zie de afzonderlijke methods en constructor voor commentaar.
  */
 
-public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
+public class KlantDAOFireBird extends AbstractDAOFireBird implements KlantDAO {
 
     // GLOBALE VARIABELEN
     String query = "";
     ArrayList<Klant> klantenLijst;
     BestellingDAOMySQL bestellingDAO;
-    AdresDAOMySQL adresDAO;
-
+    AdresDAOFireBird adresDAO;
 
     /** CREATE METHODS */
 
@@ -65,44 +65,45 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
         query = "INSERT INTO KLANT " +
                 "(voornaam, achternaam, tussenvoegsel, email) " +
                 "VALUES " +
-                "(?,        ?,          ?,              ?);";
+                "(?,        ?,          ?,              ?) " +
+                "RETURNING klant_id;";
         try (
                 Connection connection = connPool.verkrijgConnectie();
-                PreparedStatement statement = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
+                PreparedStatement statement = connection.prepareStatement(query);
         ) {
             // Voer query uit en haal de gegenereerde sleutels op bij deze query
             statement.setString(1, voornaam);
             statement.setString(2, achternaam);
             statement.setString(3, tussenvoegsel);
             statement.setString(4, email);
-            statement.execute();
+//            statement.execute();
 
-            // Ophalen van de laatste genegeneerde sleutel uit de generatedkeys (de nieuwe klant_id)
+            // Ophalen van de laatste genegeneerde sleutel (de nieuwe klant_id)
             long nieuwId = 0;
             try (
-                    ResultSet generatedKeys = statement.getGeneratedKeys();
+                    ResultSet resultSet = statement.executeQuery();
             ) {
-                if (generatedKeys.next()) {
-                    nieuwId = generatedKeys.getInt(1);
+                while (resultSet.next()) {
+                    nieuwId = resultSet.getInt("klant_id");
                 }
 
                 // Als er een adres_id wordt meegegeven betekent dit dat er een bestaand adres gekoppeled wordt
                 // aan een nieuwe klant
                 if (adres_id > 0 && adresgegevens == null) {
-                    adresDAO = new AdresDAOMySQL();
+                    adresDAO = new AdresDAOFireBird();
                     adresDAO.koppelAdresAanKlant(nieuwId, adres_id);
                 }
 
                 // Als er adresgegeven worden meegegeven wordt er een adres aangemaakt op basis van het nieuwe klantId
                 else if (adresgegevens != null && adres_id == 0) {
-                    adresDAO = new AdresDAOMySQL();
+                    adresDAO = new AdresDAOFireBird();
                     adresDAO.nieuwAdres(nieuwId, adresgegevens);
                 }
 
                 // Als er adresgegeven worden meegegeven en een adres_id wordt er zowel een nieuw adres aangemaakt
                 // en tevens het bestaande adres gekoppeld.
                 else if (adresgegevens != null && adres_id > 0) {
-                    adresDAO = new AdresDAOMySQL();
+                    adresDAO = new AdresDAOFireBird();
                     adresDAO.nieuwAdres(nieuwId, adresgegevens);
                     adresDAO.koppelAdresAanKlant(nieuwId, adres_id);
                 }
@@ -218,7 +219,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
 
             try (
                     ResultSet rs = statement.executeQuery();
-            ){
+            ) {
                 // Als er een resultaat gevonden is bestaat de klant niet en wordt er een foutmelding gegooid.
                 if (!rs.next())
                     throw new RSVIERException("KlantDAOMySQL: KLANT NIET GEVONDEN");
@@ -517,7 +518,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
                             long adres_id,
                             Adres adresgegevens) throws RSVIERException {
         updateKlant(KlantId, voornaam, achternaam, tussenvoegsel, email);
-        adresDAO = new AdresDAOMySQL();
+        adresDAO = new AdresDAOFireBird();
         adresDAO.updateAdres(adres_id, adresgegevens);
     }
 
@@ -685,7 +686,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
                 System.out.print("\n\t----------");
 
                 // DAO voor adres-acties. Lijst verkrijgen van alle adressen bijbehorend bij klant_id
-                adresDAO = new AdresDAOMySQL();
+                adresDAO = new AdresDAOFireBird();
                 ListIterator<Adres> adresListIterator = adresDAO.getAdresOpKlantID(tijdelijkeKlant.getKlant_id());
                 while (adresListIterator.hasNext()) {
 

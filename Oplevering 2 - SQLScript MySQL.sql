@@ -115,9 +115,17 @@ DROP TABLE IF EXISTS `RSVIERPROJECTDEEL2`.`PRIJS` ;
 CREATE TABLE IF NOT EXISTS `RSVIERPROJECTDEEL2`.`PRIJS` (
   `prijs_id` INT NOT NULL,
   `prijs` DECIMAL(10,2) NULL,
+  `artikel_id` INT NULL,
   `datumAanmaak` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`prijs_id`))
+  PRIMARY KEY (`prijs_id`),
+  CONSTRAINT `artikel_id_pr`
+    FOREIGN KEY (`artikel_id`)
+    REFERENCES `RSVIERPROJECTDEEL2`.`ARTIKEL` (`artikel_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
 ENGINE = InnoDB;
+
+CREATE INDEX `artikel_id_pr_idx` ON `RSVIERPROJECTDEEL2`.`PRIJS` (`artikel_id` ASC);
 
 
 -- -----------------------------------------------------

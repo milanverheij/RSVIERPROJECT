@@ -2,6 +2,8 @@ package factories;
 
 import exceptions.RSVIERException;
 import firebird.AbstractDAOFireBird;
+import firebird.AdresDAOFireBird;
+import firebird.KlantDAOFireBird;
 import interfaces.AdresDAO;
 import interfaces.ArtikelDAO;
 import interfaces.BestellingDAO;
@@ -28,7 +30,7 @@ public class DAOFactoryFireBird extends DAOFactory{
 	@Override
 	public KlantDAO getKlantDAO(String connPoolKeuze) throws RSVIERException {
 		AbstractDAOFireBird.setConnPool(ConnectionPoolFactory.getConnectionPool(connPoolKeuze, 2));
-		return null;
+		return new KlantDAOFireBird();
 	}
 
 	/**
@@ -41,7 +43,7 @@ public class DAOFactoryFireBird extends DAOFactory{
 	@Override
 	public AdresDAO getAdresDAO(String connPoolKeuze) throws RSVIERException {
 		AbstractDAOFireBird.setConnPool(ConnectionPoolFactory.getConnectionPool(connPoolKeuze, 2));
-		return null;
+		return new AdresDAOFireBird();
 	}
 
 	/**
