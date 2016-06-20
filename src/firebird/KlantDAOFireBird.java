@@ -357,7 +357,7 @@ public class KlantDAOFireBird extends AbstractDAOFireBird implements KlantDAO {
      */
     @Override
     public ListIterator<Klant> getKlantOpAdres(Adres adresgegevens) throws RSVIERException {
-        String query = "SELECT KLANT.* " +
+        String query = "SELECT DISTINCT KLANT.* " +
                 "FROM " +
                 "KLANT_HEEFT_ADRES, ADRES, KLANT " +
                 "WHERE " +
@@ -368,9 +368,7 @@ public class KlantDAOFireBird extends AbstractDAOFireBird implements KlantDAO {
                 "woonplaats LIKE ? " +
                 "AND " +
                 "KLANT_HEEFT_ADRES.adres_id_adres = ADRES.ADRES_id AND " +
-                "KLANT_HEEFT_ADRES.klant_id_klant = KLANT.KLANT_ID " +
-                "GROUP BY klant_id " +
-                "ORDER BY klant_id;";
+                "KLANT_HEEFT_ADRES.klant_id_klant = KLANT.KLANT_ID; ";
         try (
                 Connection connection = connPool.verkrijgConnectie();
                 PreparedStatement statement = connection.prepareStatement(query);
@@ -389,7 +387,7 @@ public class KlantDAOFireBird extends AbstractDAOFireBird implements KlantDAO {
             }
 
         } catch (SQLException ex) {
-            throw new RSVIERException("KlantDAOMySQL: SQL FOUT TIJDENS OPZOEKEN KLANT OP VOLLE ADRES");
+            throw new RSVIERException("KlantDAOMySQL: SQL FOUT TIJDENS OPZOEKEN KLANT OP VOLLE ADRES: " + ex.getMessage());
         }
     }
 
