@@ -1,4 +1,3 @@
-
 package JUnit_tests;
 
 import static org.junit.Assert.*;
@@ -203,9 +202,9 @@ public class ArtikelDAOMySQLTest {
 		artikelDao.updateArtikelen(a3);
 
 		//Bestellingen weer uit de database halen
-		Bestelling teTesten1 = bestellingDao.getBestellingOpBestelling(id1).next();
-		Bestelling teTesten2 = bestellingDao.getBestellingOpBestelling(id2).next();
-		Bestelling teTesten3 = bestellingDao.getBestellingOpBestelling(id3).next();
+		Bestelling teTesten1 = bestellingDao.getBestellingOpBestellingId(id1).next();
+		Bestelling teTesten2 = bestellingDao.getBestellingOpBestellingId(id2).next();
+		Bestelling teTesten3 = bestellingDao.getBestellingOpBestellingId(id3).next();
 
 		//Eerste bestelling testen
 		Iterator<Artikel> artikelIterator = getIteratorMetDubbelen(teTesten1);

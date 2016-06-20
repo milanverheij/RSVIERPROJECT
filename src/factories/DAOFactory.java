@@ -1,5 +1,7 @@
 package factories;
 
+import exceptions.RSVIERException;
+
 /**
  * @author Milan_Verheij
  * <p>
@@ -15,11 +17,11 @@ public abstract class DAOFactory {
 	 * @param s De keuze van het databasetype in String formaat.
 	 * @return Geeft een concrete DAO fabriek terug.
      */
-	public static DAOFactory getDAOFactory(String s){
-		if(s.equals("MySQL")) 
+	public static DAOFactory getDAOFactory(String s) {
+		if(s.equals("MySQL"))
 			return new DAOFactoryMySQL();
-//		else if(s.equals("FireBird"))
-//			return new FireBirdDAOFactory();
+		else if(s.equals("FireBird"))
+			return new DAOFactoryFireBird();
 		else
 			return null;
 	}
@@ -30,9 +32,15 @@ public abstract class DAOFactory {
 	 *
 	 * @return Een KlantDAO van het eerder gekozen database-type.
      */
-	public abstract interfaces.KlantDAO getKlantDAO();
+	public abstract interfaces.KlantDAO getKlantDAO(String connPoolKeuze) throws RSVIERException;
 
-	public abstract interfaces.AdresDAO getAdresDAO();
+	/**
+	 * De methode die geimplementeerd dient te worden door de concrete fabriek
+	 * om een AdresDAO te maken.
+	 *
+	 * @return Een AdresDAO van het eerder gekozen database-type.
+	 */
+	public abstract interfaces.AdresDAO getAdresDAO(String connPoolKeuze) throws RSVIERException;
 
 	/**
 	 * De methode die geimplementeerd dient te worden door de concrete fabriek
@@ -40,8 +48,15 @@ public abstract class DAOFactory {
 	 *
 	 * @return Een BestellingDAO van het eerder gekozen database-type.
      */
-	public abstract interfaces.BestellingDAO getBestellingDAO();
-	public abstract interfaces.ArtikelDAO getArtikelDAO();
+	public abstract interfaces.BestellingDAO getBestellingDAO(String connPoolKeuze) throws RSVIERException;
+
+	/**
+	 * De methode die geimplementeerd dient te worden door de concrete fabriek
+	 * om een ArtikelDAO te maken.
+	 *
+	 * @return Een ArtikelDAO van het eerder gekozen database-type.
+	 */
+	public abstract interfaces.ArtikelDAO getArtikelDAO(String connPoolKeuze) throws RSVIERException;
 	
 	
 }

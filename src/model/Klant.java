@@ -15,7 +15,11 @@ public class Klant {
     private String achternaam;
     private String tussenvoegsel;
     private String email;
+    private String datumAanmaak;
+    private String datumGewijzigd;
+    private String klantActief;
     private Adres adresGegevens;
+    private Bestelling bestellingGegevens;
 
     // Standaard public constructor met alle paramaters
     public Klant(long klant_id,
@@ -37,6 +41,7 @@ public class Klant {
 
     // Als er een klant aangemaakt wordt, wordt er een Adres-object aan gekoppeld
     public Klant() {
+        klant_id = -1;
         adresGegevens = null;
     }
 
@@ -74,6 +79,34 @@ public class Klant {
     public Adres getAdresGegevens() {
         return adresGegevens;
     }
+    public String getDatumAanmaak() {
+        return datumAanmaak;
+    }
+    public void setDatumAanmaak(String datumAanmaak) {
+        this.datumAanmaak = datumAanmaak;
+    }
+    public String getDatumGewijzigd() {
+        return datumGewijzigd;
+    }
+    public void setDatumGewijzigd(String datumGewijzigd) {
+        this.datumGewijzigd = datumGewijzigd;
+    }
+    public String getKlantActief() {
+        return klantActief;
+    }
+    public void setKlantActief(String klantActief) {
+        this.klantActief = klantActief;
+    }
+    public void setAdresGegevens(Adres adresGegevens) {
+        this.adresGegevens = adresGegevens;
+    } // TODO : NODIG?
+    public Bestelling getBestellingGegevens() {
+        return bestellingGegevens;
+    }
+    public void setBestellingGegevens(Bestelling bestellingGegevens) {
+        this.bestellingGegevens = bestellingGegevens;
+    } // TODO: NODIG?
+
 
     // Overrided methoden van Object etc.
 

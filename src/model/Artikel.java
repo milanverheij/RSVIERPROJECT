@@ -7,7 +7,7 @@ package model;
  * in een LinkedHasMap kunnen worden opgeslagen in de database.
  */
 
-public class Artikel implements Comparable<Artikel>{
+public class Artikel implements Comparable{
 	//Data field
 	private int artikel_id;
 	private String artikel_naam;
@@ -61,11 +61,11 @@ public class Artikel implements Comparable<Artikel>{
 	}
 
 	@Override
-	public int compareTo(Artikel o) {
-		if (this.artikel_id == o.getArtikel_id()) {
+	public int compareTo(Object o) {
+		if (this.artikel_id == ((Artikel)o).getArtikel_id()) {
 			return 0;
 		}
-		else if (this.artikel_id > o.getArtikel_id()) {
+		else if (this.artikel_id > ((Artikel)o).getArtikel_id()) {
 			return 1;
 		}
 		else {

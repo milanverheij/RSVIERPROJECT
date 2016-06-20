@@ -1,4 +1,4 @@
-package mysql;
+package firebird;
 
 import exceptions.RSVIERException;
 import interfaces.AdresDAO;
@@ -11,12 +11,12 @@ import java.util.ListIterator;
 /**
  * Created by Milan_Verheij on 08-06-16.
  *
- * Dit is de AdresDAO die de connectie regelt tussen de MySQL database
+ * Dit is de AdresDAO die de connectie regelt tussen de FireBird database
  * en de CRUD acties verzorgt.
  *
  */
 
-public class AdresDAOMySQL extends AbstractDAOMySQL implements AdresDAO {
+public class AdresDAOFireBird extends AbstractDAOFireBird implements AdresDAO {
     // public om test toegang te laten hebben, heeft verder geen impact op functionaliteit derhalve geen
     // veiligheidsrisico. Standaard wordt een sowieso fout adres meegegeven. Enkel als deze gewijzigd wordt
     // door middel van de klantWordtGetet 'schakelaar' kan deze het juiste adres of null aannemen.
@@ -120,38 +120,35 @@ public class AdresDAOMySQL extends AbstractDAOMySQL implements AdresDAO {
         String queryNieuwAdres = "INSERT INTO ADRES " +
                 "(straatnaam, postcode, toevoeging, huisnummer, woonplaats) " +
                 "VALUES " +
-                "(?,        ?,          ?,          ?,          ?);";
+                "(?,        ?,          ?,          ?,          ?) " +
+                "RETURNING adres_id;";
 
         String queryAdresKlantKoppeling = "INSERT INTO KLANT_HEEFT_ADRES " +
                 "(klant_id_klant, adres_id_adres) " +
                 "VALUES " +
                 "(?,        ?);";
 
-        //TODO: Transaction testen
-
         try (
                 Connection connection = connPool.verkrijgConnectie();
-                PreparedStatement statementNieuwAdres = connection.prepareStatement(queryNieuwAdres, Statement.RETURN_GENERATED_KEYS);
+                PreparedStatement statementNieuwAdres = connection.prepareStatement(queryNieuwAdres);
                 PreparedStatement statementAdresKlantKoppeling = connection.prepareStatement(queryAdresKlantKoppeling);
         )
         {
-            connection.setAutoCommit(false);
-
             // Voer query uit en haal de gegenereerde sleutels op bij deze query
             statementNieuwAdres.setString(1, adresgegevens.getStraatnaam());
             statementNieuwAdres.setString(2, adresgegevens.getPostcode());
             statementNieuwAdres.setString(3, adresgegevens.getToevoeging());
-            statementNieuwAdres.setInt(4, adresgegevens.getHuisnummer());
+            statementNieuwAdres.setInt(4, adresgegevens.getHuisnummer()); // TODO Naar string in model
             statementNieuwAdres.setString(5, adresgegevens.getWoonplaats());
-            statementNieuwAdres.execute();
+//            statementNieuwAdres.execute();
 
             // Ophalen van de laatste genegeneerde sleutel uit de generatedkeys (de nieuwe klant_id)
             long nieuw_adres_id = 0;
             try (
-                    ResultSet generatedKeys = statementNieuwAdres.getGeneratedKeys();
+                    ResultSet resultSet = statementNieuwAdres.executeQuery();
             ) {
-                if (generatedKeys.next()) {
-                    nieuw_adres_id = generatedKeys.getInt(1);
+                while (resultSet.next()) {
+                    nieuw_adres_id = resultSet.getInt("adres_id");
                 }
             }
 
@@ -160,15 +157,13 @@ public class AdresDAOMySQL extends AbstractDAOMySQL implements AdresDAO {
             statementAdresKlantKoppeling.setLong(2, nieuw_adres_id);
             statementAdresKlantKoppeling.execute();
 
-            connection.commit();
-
             return nieuw_adres_id;
         } catch (SQLException ex) {
             if (ex.getMessage().contains("Duplicate entry"))
                 throw new RSVIERException("AdresDAOMySQL: DIT ADRES BESTAAT AL IN DE DATABASE MET ID: " +
                         getAdresID(adresgegevens.getPostcode(), adresgegevens.getHuisnummer(), adresgegevens.getToevoeging()));
             else
-                throw new RSVIERException("AdresDAOMySQL: SQL FOUT TIJDENS AANMAKEN ADRES");
+                throw new RSVIERException("AdresDAOMySQL: SQL FOUT TIJDENS AANMAKEN ADRES: " + ex.getMessage());
         }
     }
 

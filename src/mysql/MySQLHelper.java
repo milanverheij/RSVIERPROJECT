@@ -15,6 +15,7 @@ import java.sql.SQLException;
  * ter voorkoming van dubbele code in het kader try / catch blocken e.d.
  *
  */
+@Deprecated
 public class MySQLHelper {
     private static int logModus = 0; // 0 is standaard uit, 1 is aan
 
@@ -25,6 +26,7 @@ public class MySQLHelper {
      *
      * @param connection Meegegeven connectie om te sluiten
      */
+    @Deprecated
     public static void close(Connection connection, PreparedStatement preparedStatement, ResultSet resultSet) {
         close(resultSet);
         close(preparedStatement);
@@ -39,6 +41,7 @@ public class MySQLHelper {
      * @param preparedStatement Meegegeven statement om te sluiten
      * @param connection Meegegeven connectie om te sluiten
      */
+    @Deprecated
     public static void close(Connection connection, PreparedStatement preparedStatement) {
         close(preparedStatement);
         close(connection);
@@ -52,6 +55,7 @@ public class MySQLHelper {
      * @param preparedStatement Meegegeven statement om te sluiten
      * @param resultSet Meegegeven resultset om te sluiten
      */
+    @Deprecated
     public static void close(PreparedStatement preparedStatement, ResultSet resultSet) {
         close(resultSet);
         close(preparedStatement);
@@ -61,6 +65,7 @@ public class MySQLHelper {
      * Als er een connectie is wordt deze gesloten.
      * @param connection Meegegeven connectie om te sluiten
      */
+    @Deprecated
     public static void close(Connection connection) {
         if (connection != null) {
             try {
@@ -78,6 +83,7 @@ public class MySQLHelper {
      * Als er een PreparedStatement is wordt deze gesloten
      * @param statement Meegegeven statement om te sluiten
      */
+    @Deprecated
     public static void close(PreparedStatement statement) {
         if (statement != null) {
             try {
@@ -94,6 +100,7 @@ public class MySQLHelper {
      * Als er een resultSet is wordt deze gesloten
      * @param resultSet Meegegeven resultset om te sluiten
      */
+    @Deprecated
     public static void close(ResultSet resultSet) {
         if (resultSet != null) {
             try {
@@ -110,6 +117,7 @@ public class MySQLHelper {
      * Als er een rowSet is wordt deze gesloten.
      * @param rowSet Meegegeven rowSet om te sluiten
      */
+    @Deprecated
     public static void close(RowSet rowSet) {
         if (rowSet != null) {
             try {
@@ -126,6 +134,7 @@ public class MySQLHelper {
      *
      * @param logModus: Logmodus uit(0) of aan(1)
      */
+    @Deprecated
     public static void setLogModus(int logModus) {
         MySQLHelper.logModus = logModus;
     }

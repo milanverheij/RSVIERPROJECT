@@ -93,10 +93,7 @@ public class ArtikelDAOMySQL extends AbstractDAOMySQL implements interfaces.Arti
 	// Onderstaande methode retourneert alle artikelen van de bestelling in een Iterator
 	@Override
 	public Iterator<Artikel> getAlleArtikelenOpBestelling(long bestelling_id) throws RSVIERException {
-
 		connection = MySQLConnectieLeverancier.getConnection();
-
-
 		//Sla alle artikelen van de bestelling op in een ArrayList
 		ArrayList<Artikel> artikelLijst = new ArrayList<>();
 
@@ -128,16 +125,10 @@ public class ArtikelDAOMySQL extends AbstractDAOMySQL implements interfaces.Arti
 	// Onderstaande methode retouneerd alle unieke artikelen + hoevaak ze besteld zijn in een Iterator
 	@Override
 	public Iterator<Entry<Artikel, Integer>> getAlleArtikelen() throws RSVIERException {
-
 		connection = MySQLConnectieLeverancier.getConnection();
-
 		// Sla alle unieke artikelen binnen de tabel BESTELLING op in een map
 		LinkedHashMap<Artikel, Integer> map = new LinkedHashMap<>();
 		// Alle unieke atikelen worden in een iterator geretouneerd
-
-		@SuppressWarnings("unused")
-
-
 		Iterator<Entry<Artikel,Integer>> iterator = null;
 
 		try {
@@ -170,9 +161,7 @@ public class ArtikelDAOMySQL extends AbstractDAOMySQL implements interfaces.Arti
 	// Onderstaande methode vervangt het artikel dat zich op het doorgegeven artikel(1, 2, 3) nummer bevind met het nieuwe artikel aNieuw
 	@Override
 	public void updateArtikelOpBestelling(long bestelling_id, int artikelNummer, Artikel aNieuw) throws RSVIERException {
-
 		connection = MySQLConnectieLeverancier.getConnection();
-
 		try {
 			statement = connection.prepareStatement("UPDATE BESTELLING SET "
 					+ "artikel" + artikelNummer + "_id = ?,"
@@ -198,9 +187,7 @@ public class ArtikelDAOMySQL extends AbstractDAOMySQL implements interfaces.Arti
 	// Onderstaande methode vervangt Artikel aOud met Artikel aNieuw op bestelling(bestelling_id).
 	@Override
 	public void updateArtikelOpBestelling(long bestelling_id, Artikel aOud, Artikel aNieuw) throws RSVIERException {
-
 		connection = MySQLConnectieLeverancier.getConnection();
-
 		int artikelNummer = 0;
 
 		try {
@@ -243,6 +230,7 @@ public class ArtikelDAOMySQL extends AbstractDAOMySQL implements interfaces.Arti
 		}
 	}
 
+
 	// Update alle artikelen van bestelling(bestelling_id) met drie nieuwe artikelen.
 	@Override 
 	public void updateAlleArtikelenOpBestelling(long bestelling_id, Artikel a1, Artikel a2, Artikel a3)
@@ -279,51 +267,14 @@ public class ArtikelDAOMySQL extends AbstractDAOMySQL implements interfaces.Arti
 
 	// Onderstaande methode update alle gegevens van het artikel dat meegegeven wordt in de ghele DataBase
 	public void updateArtikelen(Artikel aNieuw) throws RSVIERException {
-
 		connection = MySQLConnectieLeverancier.getConnection();
 
 		try {
 			connection.setAutoCommit(false);
 			statement = connection.prepareStatement("UPDATE BESTELLING SET "
-					+ "artikel1_id = ?,"
 					+ "artikel1_naam = ?,"
 					+ "artikel1_prijs = ? "
 					+ "WHERE artikel1_id = ?;");
-
-			connection.setAutoCommit(false);
-			statement = connection.prepareStatement("UPDATE BESTELLING SET "
-					+ "artikel1_naam = ?,"
-					+ "artikel1_prijs = ? "
-					+ "WHERE artikel1_id = ?;");
-
-			statement.setLong(1, aNieuw.getArtikel_id());
-			statement.setString(2, aNieuw.getArtikel_naam());
-			statement.setDouble(3, aNieuw.getArtikel_prijs());
-			statement.setLong(4, aNieuw.getArtikel_id());
-			statement.executeUpdate();
-
-			statement = connection.prepareStatement("UPDATE BESTELLING SET "
-					+ "artikel2_id = ?,"
-					+ "artikel2_naam = ?,"
-					+ "artikel2_prijs = ? "
-					+ "WHERE artikel2_id = ?;");
-
-			statement.setLong(1, aNieuw.getArtikel_id());
-			statement.setString(2, aNieuw.getArtikel_naam());
-			statement.setDouble(3, aNieuw.getArtikel_prijs());
-			statement.setString(4, aNieuw.getArtikel_naam());
-			statement.executeUpdate();
-
-			statement = connection.prepareStatement("UPDATE BESTELLING SET "
-					+ "artikel3_id = ?,"
-					+ "artikel3_naam = ?,"
-					+ "artikel3_prijs = ? "
-					+ "WHERE artikel3_id = ?;");
-
-			statement.setLong(1, aNieuw.getArtikel_id());
-			statement.setString(2, aNieuw.getArtikel_naam());
-			statement.setDouble(3, aNieuw.getArtikel_prijs());
-			statement.setString(4, aNieuw.getArtikel_naam());
 
 			statement.setString(1, aNieuw.getArtikel_naam());
 			statement.setDouble(2, aNieuw.getArtikel_prijs());
@@ -348,7 +299,6 @@ public class ArtikelDAOMySQL extends AbstractDAOMySQL implements interfaces.Arti
 			statement.setString(1, aNieuw.getArtikel_naam());
 			statement.setDouble(2, aNieuw.getArtikel_prijs());
 			statement.setLong(3, aNieuw.getArtikel_id());
-
 			statement.executeUpdate();
 
 			connection.commit();

@@ -1,9 +1,14 @@
 package mysql;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
+import interfaces.VerkrijgConnectie;
 
-public class AbstractDAOMySQL {
+import java.sql.PreparedStatement;
+
+public abstract class AbstractDAOMySQL {
 	PreparedStatement statement;
-	ResultSet resultSet;
+	static VerkrijgConnectie connPool;
+
+	public static void setConnPool(VerkrijgConnectie connPool) {
+		AbstractDAOMySQL.connPool = connPool;
+	}
 }
