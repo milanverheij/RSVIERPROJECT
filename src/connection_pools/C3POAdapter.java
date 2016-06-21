@@ -15,7 +15,7 @@ import java.sql.SQLException;
  *
  */
 public class C3POAdapter implements VerkrijgConnectie {
-    private int DBKeuze;
+    private String DBKeuze;
 
     /**
      * Standaard C3PO Adapter.
@@ -24,7 +24,7 @@ public class C3POAdapter implements VerkrijgConnectie {
      *                gebruikt moet worden.
      * @throws RSVIERException Geeft een foutmelding met bijhorende melding.
      */
-    public C3POAdapter(int DBKeuze) throws RSVIERException {
+    public C3POAdapter(String DBKeuze) throws RSVIERException {
         this.DBKeuze = DBKeuze;
     }
 
