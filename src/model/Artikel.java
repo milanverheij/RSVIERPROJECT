@@ -13,6 +13,7 @@ public class Artikel implements Comparable{
 	//Data field
 	private int artikelId = 0;
 	private String artikelNaam;
+	private int aantalBesteld;
 	private BigDecimal artikelPrijs;//TODO
 	private int prijsId;
 	private String datumAanmaak;
@@ -38,6 +39,9 @@ public class Artikel implements Comparable{
 	public String getArtikelNaam() {
 		return artikelNaam;
 	}
+	public int getAantalBesteld() {
+		return aantalBesteld;
+	}
 	public BigDecimal getArtikelPrijs() {
 		return artikelPrijs;
 	}
@@ -59,6 +63,9 @@ public class Artikel implements Comparable{
 	}
 	public void setArtikelNaam(String artikelNaam) {
 		this.artikelNaam = artikelNaam;
+	}
+	public void setAantalBesteld(int aantalBesteld) {
+		this.aantalBesteld = aantalBesteld;
 	}
 	public void setArtikelPrijs(BigDecimal artikelPrijs) {
 		this.artikelPrijs = artikelPrijs;
