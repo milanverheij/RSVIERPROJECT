@@ -122,6 +122,19 @@ RECREATE TABLE PRIJS (
 
 CREATE INDEX artikel_id_pr_idx ON PRIJS (artikel_id);
 
+CREATE GENERATOR gen_prijs_id;
+SET GENERATOR gen_prijs_id TO 0;
+
+SET TERM ^ ;
+CREATE TRIGGER trigger_prijs_id FOR prijs
+ACTIVE BEFORE INSERT POSITION 0
+AS
+BEGIN
+IF (NEW."PRIJS_ID" IS NULL)
+THEN NEW."PRIJS_ID" = GEN_ID(gen_prijs_id, 1);
+END^
+SET TERM ; ^
+
 -- -----------------------------------------------------
 -- Table `RSVIERPROJECTDEEL2`.`ARTIKEL`
 -- -----------------------------------------------------
