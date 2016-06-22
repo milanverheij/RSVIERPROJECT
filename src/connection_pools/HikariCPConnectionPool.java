@@ -41,8 +41,8 @@ public class HikariCPConnectionPool {
      * @param DBKeuze Keuze voor het type database (1 = MySQL, 2 = FireBird);
      * @throws RSVIERException Foutmelding met gegevens.
      */
-    private HikariCPConnectionPool(int DBKeuze) throws RSVIERException {
-        if (DBKeuze == 1) {
+    private HikariCPConnectionPool(String DBKeuze) throws RSVIERException {
+        if (DBKeuze.equals("MySQL")) {
             hikariConfig = new HikariConfig();
             hikariConfig.setMinimumIdle(1);
             hikariConfig.setMaximumPoolSize(2);
@@ -58,7 +58,7 @@ public class HikariCPConnectionPool {
             hikariDataSource = new HikariDataSource(hikariConfig);
         }
 
-        if (DBKeuze == 2) {
+        if (DBKeuze.equals("FireBird")) {
             hikariConfig = new HikariConfig();
             hikariConfig.setMinimumIdle(1);
             hikariConfig.setMaximumPoolSize(2);
@@ -80,7 +80,7 @@ public class HikariCPConnectionPool {
      * @return HikariCP Connection pool.
      * @throws RSVIERException Foutmelding met gegevens.
      */
-    public static HikariCPConnectionPool getInstance(int DBKeuze) throws RSVIERException {
+    public static HikariCPConnectionPool getInstance(String DBKeuze) throws RSVIERException {
         if (hikariCPConnectionPool == null) {
             hikariCPConnectionPool = new HikariCPConnectionPool(DBKeuze);
             return hikariCPConnectionPool;

@@ -69,7 +69,7 @@ CREATE TABLE IF NOT EXISTS `RSVIERPROJECTDEEL2`.`ADRES` (
   `adres_id` INT NOT NULL AUTO_INCREMENT,
   `straatnaam` VARCHAR(26) NOT NULL,
   `postcode` VARCHAR(6) NOT NULL,
-  `toevoeging` VARCHAR(45) NULL,
+  `toevoeging` VARCHAR(6) NULL,
   `huisnummer` VARCHAR(4) NOT NULL,
   `woonplaats` VARCHAR(45) NULL,
   `datumAanmaak` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -136,20 +136,19 @@ DROP TABLE IF EXISTS `RSVIERPROJECTDEEL2`.`ARTIKEL` ;
 CREATE TABLE IF NOT EXISTS `RSVIERPROJECTDEEL2`.`ARTIKEL` (
   `artikel_id` INT NOT NULL AUTO_INCREMENT,
   `omschrijving` VARCHAR(45) NOT NULL,
-  `prijs` VARCHAR(10) NOT NULL,
-  `prijsId` INT NOT NULL,
+  `prijs_id` INT NULL DEFAULT 0,
   `datumAanmaak` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `verwachteLevertijd` VARCHAR(10) NULL,
   `inAssortisement` TINYINT(1) NOT NULL,
   PRIMARY KEY (`artikel_id`),
   CONSTRAINT `prijs_id_prijs`
-    FOREIGN KEY (`prijsId`)
+    FOREIGN KEY (`prijs_id`)
     REFERENCES `RSVIERPROJECTDEEL2`.`PRIJS` (`prijs_id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
-CREATE INDEX `prijs_id_prijs_idx` ON `RSVIERPROJECTDEEL2`.`ARTIKEL` (`prijsId` ASC);
+CREATE INDEX `prijs_id_prijs_idx` ON `RSVIERPROJECTDEEL2`.`ARTIKEL` (`prijs_id` ASC);
 
 
 -- -----------------------------------------------------

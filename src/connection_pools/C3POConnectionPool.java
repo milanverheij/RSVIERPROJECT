@@ -41,8 +41,8 @@ public class C3POConnectionPool {
      * @param DBKeuze Keuze voor het type database (1 = MySQL, 2 = FireBird);
      * @throws RSVIERException Foutmelding met gegevens.
      */
-    private C3POConnectionPool(int DBKeuze) throws RSVIERException {
-        if (DBKeuze == 1) {
+    private C3POConnectionPool(String DBKeuze) throws RSVIERException {
+        if (DBKeuze.equals("MySQL")) {
             try {
                 cpds = new ComboPooledDataSource();
 
@@ -55,7 +55,7 @@ public class C3POConnectionPool {
                 throw new RSVIERException("PropertyVetoExcepton in C3PO connection pool");
             }
         }
-        else if (DBKeuze == 2) {
+        else if (DBKeuze.equals("FireBird")) {
             try {
                 cpds = new ComboPooledDataSource();
 
@@ -80,7 +80,7 @@ public class C3POConnectionPool {
      * @return C3PO Connection pool.
      * @throws RSVIERException Foutmelding met gegevens.
      */
-    public static C3POConnectionPool getInstance(int DBKeuze) throws RSVIERException {
+    public static C3POConnectionPool getInstance(String DBKeuze) throws RSVIERException {
         if (C3POConnectionPool == null) {
             C3POConnectionPool = new C3POConnectionPool(DBKeuze);
             return C3POConnectionPool;

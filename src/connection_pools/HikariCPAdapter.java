@@ -15,7 +15,7 @@ import java.sql.SQLException;
  *
  */
 public class HikariCPAdapter implements VerkrijgConnectie {
-    private int DBKeuze;
+    private String DBKeuze;
 
     /**
      * Standaard HikariCPAdater.
@@ -23,7 +23,7 @@ public class HikariCPAdapter implements VerkrijgConnectie {
      * @param DBKeuze Keuze van het type database welke door de connection pool
      *                gebruikt moet worden.
      */
-    public HikariCPAdapter(int DBKeuze) {
+    public HikariCPAdapter(String DBKeuze) {
         this.DBKeuze = DBKeuze;
     }
 

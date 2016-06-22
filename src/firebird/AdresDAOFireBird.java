@@ -138,7 +138,7 @@ public class AdresDAOFireBird extends AbstractDAOFireBird implements AdresDAO {
             statementNieuwAdres.setString(1, adresgegevens.getStraatnaam());
             statementNieuwAdres.setString(2, adresgegevens.getPostcode());
             statementNieuwAdres.setString(3, adresgegevens.getToevoeging());
-            statementNieuwAdres.setInt(4, adresgegevens.getHuisnummer()); // TODO Naar string in model
+            statementNieuwAdres.setInt(4, adresgegevens.getHuisnummer());
             statementNieuwAdres.setString(5, adresgegevens.getWoonplaats());
 //            statementNieuwAdres.execute();
 
@@ -250,7 +250,7 @@ public class AdresDAOFireBird extends AbstractDAOFireBird implements AdresDAO {
                     tijdelijkAdres.setToevoeging(rs.getString(4));
                     tijdelijkAdres.setHuisnummer(rs.getInt(5));
                     tijdelijkAdres.setWoonplaats(rs.getString(6));
-                    tijdelijkAdres.setDatumAanmaak(rs.getString(7)); // TODO: Checken of aparte methode nodig is voor RS ->it
+                    tijdelijkAdres.setDatumAanmaak(rs.getString(7));
                     tijdelijkAdres.setDatumGewijzigd(rs.getString(8));
                     tijdelijkAdres.setAdresActief(rs.getString(9));
 
