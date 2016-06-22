@@ -1,5 +1,7 @@
 package model;
 
+import java.math.BigDecimal;
+
 /*
  * Created by Douwe_Jongeneel on 06-06-16.
  * 
@@ -9,63 +11,100 @@ package model;
 
 public class Artikel implements Comparable{
 	//Data field
-	private int artikel_id;
-	private String artikel_naam;
-	private double artikel_prijs;
+	private int artikelId = 0;
+	private String artikelNaam;
+	private int aantalBesteld;
+	private BigDecimal artikelPrijs;//TODO
+	private int prijsId;
+	private String datumAanmaak;
+	private int verwachteLevertijd;
+	private boolean inAssortiment;
 	
 	//Constructors
 	public Artikel() {
 	}
-	public Artikel(int artikel_id, String artikel_naam, double artikel_prijs) {
-		this.artikel_id = artikel_id;
-		this.artikel_naam = artikel_naam;
-		this.artikel_prijs = artikel_prijs;
+	public Artikel(String artikelNaam, BigDecimal artikelPrijs, 
+			String datumAanmaak, int verwachteLevertijd, boolean inAssortiment) {
+		this.artikelNaam = artikelNaam;
+		this.artikelPrijs = artikelPrijs;
+		this.datumAanmaak = datumAanmaak;
+		this.verwachteLevertijd = verwachteLevertijd;
+		this.inAssortiment = inAssortiment;
 	}
 	
 	//Getters and Setters
-	public int getArtikel_id() {
-		return artikel_id;
+	public int getArtikelId() {
+		return artikelId;
 	}
-	public String getArtikel_naam() {
-		return artikel_naam;
+	public String getArtikelNaam() {
+		return artikelNaam;
 	}
-	public double getArtikel_prijs() {
-		return artikel_prijs;
+	public int getAantalBesteld() {
+		return aantalBesteld;
+	}
+	public BigDecimal getArtikelPrijs() {
+		return artikelPrijs;
+	}
+	public int getPrijsId() {
+		return prijsId;
+	}
+	public String getDatumAanmaak() {
+		return datumAanmaak;
+	}
+	public int getVerwachteLevertijd() {
+		return verwachteLevertijd;
+	}
+	public boolean isInAssortiment() {
+		return inAssortiment;
 	}
 
-	public void setArtikel_id(int artikel_id) {
-		this.artikel_id = artikel_id;
+	public void setArtikelId(int artikelId) {
+		this.artikelId = artikelId;
 	}
-	public void setArtikel_naam(String artikel_naam) {
-		this.artikel_naam = artikel_naam;
+	public void setArtikelNaam(String artikelNaam) {
+		this.artikelNaam = artikelNaam;
 	}
-	public void setArtikel_prijs(double artikel_prijs) {
-		this.artikel_prijs = artikel_prijs;
+	public void setAantalBesteld(int aantalBesteld) {
+		this.aantalBesteld = aantalBesteld;
+	}
+	public void setArtikelPrijs(BigDecimal artikelPrijs) {
+		this.artikelPrijs = artikelPrijs;
+	}
+	public void setPrijsId(int prijs_id) {
+		this.prijsId = prijs_id;
+	}
+	public void setDatumAanmaak(String datumAanmaak) {
+		this.datumAanmaak = datumAanmaak;
+	}
+	public void setVerwachteLevertijd(int verwachteLevertijd) {
+		this.verwachteLevertijd = verwachteLevertijd;
+	}
+	public void setInAssortiment(boolean inAssortiment) {
+		this.inAssortiment = inAssortiment;
 	}
 	
-	// Het vergelijken van artikelen gebeurt op basis van artikel_naam & artikel_id.
-	// artikel_prijs wordt niet langer meegenomen in de vergelijking.
+	// Methodes die overschreven worden
 	@Override
 	public int hashCode(){ 
-		return artikel_naam.hashCode();
+		return artikelNaam.hashCode();
 	}
 
 	@Override
 	public boolean equals(Object o) {
-		return (artikel_naam.equals(((Artikel)o).getArtikel_naam()) && artikel_id == ((Artikel)o).getArtikel_id());
+		return artikelId == ((Artikel)o).getArtikelId();
 	}
 
 	@Override
 	public String toString(){
-		return "" + artikel_id + " " + artikel_naam + " $" + artikel_prijs;
+		return "" + artikelId + " " + artikelNaam + " $" + artikelPrijs.toPlainString(); //To string methode met BigDecimal nog testen!!
 	}
 
 	@Override
 	public int compareTo(Object o) {
-		if (this.artikel_id == ((Artikel)o).getArtikel_id()) {
+		if (this.artikelId == ((Artikel)o).getArtikelId()) {
 			return 0;
 		}
-		else if (this.artikel_id > ((Artikel)o).getArtikel_id()) {
+		else if (this.artikelId > ((Artikel)o).getArtikelId()) {
 			return 1;
 		}
 		else {
