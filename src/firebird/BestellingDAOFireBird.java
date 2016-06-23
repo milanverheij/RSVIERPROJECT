@@ -4,12 +4,11 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 
-import exceptions.RSVIERException;
+import exceptions.GeneriekeFoutmelding;
 import interfaces.BestellingDAO;
 import model.Artikel;
 import model.Bestelling;
@@ -18,7 +17,7 @@ public class BestellingDAOFireBird extends AbstractDAOFireBird implements Bestel
 	public static boolean bestellingWordGetest = false; //Kijken of een JUnit test loopt
 	public static Bestelling aangeroepenBestellingInTest; //TODO nieuwe bestelling voor test maken
 
-	public long nieuweBestelling(Bestelling bestelling) throws RSVIERException {
+	public long nieuweBestelling(Bestelling bestelling) throws GeneriekeFoutmelding {
 		try (Connection con = connPool.verkrijgConnectie();
 				PreparedStatement statementBestelTabel = con.prepareStatement("INSERT INTO BESTELLING (klant_id) VALUES (?) RETURNING bestelling_id");){
 			// Auto-commit uit om alles tegelijk door te voeren, voorkomt fouten in de database wanneer
@@ -29,12 +28,12 @@ public class BestellingDAOFireBird extends AbstractDAOFireBird implements Bestel
 			// Voer al de statements definitief uit
 			con.commit();
 		}catch(SQLException e){
-			throw new RSVIERException("Error in: " + this.getClass() + ": nieuweBestelling(Bestelling bestelling): " + e.getMessage());
+			throw new GeneriekeFoutmelding("Error in: " + this.getClass() + ": nieuweBestelling(Bestelling bestelling): " + e.getMessage());
 		}
 		return 0;
 	}
 
-	public long nieuweBestelling(long klantId, List<Artikel> artikelList) throws RSVIERException {
+	public long nieuweBestelling(long klantId, List<Artikel> artikelList) throws GeneriekeFoutmelding {
 
 		// De eerste try haalt het id van de nieuwe bestelling op, in de tweede try word de lijst met artikelen verwerkt
 		try (Connection con = connPool.verkrijgConnectie();
@@ -49,13 +48,13 @@ public class BestellingDAOFireBird extends AbstractDAOFireBird implements Bestel
 			// Voer al de statements definitief uit
 			con.commit();
 		}catch(SQLException e){
-			throw new RSVIERException("Error in: " + this.getClass() + ": nieuweBestelling(long klantId, List<Artikel> artikelList): " + e.getMessage());
+			throw new GeneriekeFoutmelding("Error in: " + this.getClass() + ": nieuweBestelling(long klantId, List<Artikel> artikelList): " + e.getMessage());
 		}
 		return 0;
 	}
 
 	@Override
-	public Iterator<Bestelling> getBestellingOpKlantId(long klantId) throws RSVIERException{
+	public Iterator<Bestelling> getBestellingOpKlantId(long klantId) throws GeneriekeFoutmelding {
 		try(Connection con = connPool.verkrijgConnectie();
 				PreparedStatement statement = con.prepareStatement(
 						"SELECT BESTELLING.klant_id, BESTELLING.bestelling_id, ARTIKEL.artikel_id, ARTIKEL.omschrijving, BESTELLING_HEEFT_ARTIKEL.aantal, "
@@ -72,12 +71,12 @@ public class BestellingDAOFireBird extends AbstractDAOFireBird implements Bestel
 
 			return verwerkResultSetGetBestelling(statement).iterator();
 		}catch(SQLException e){
-			throw new RSVIERException("Error in: " + this.getClass() + ": getBestellingOpKlantId(long klantId): " + e.getMessage());
+			throw new GeneriekeFoutmelding("Error in: " + this.getClass() + ": getBestellingOpKlantId(long klantId): " + e.getMessage());
 		}
 	}
 
 	@Override
-	public Iterator<Bestelling> getBestellingOpBestellingId(long bestellingId) throws RSVIERException{
+	public Iterator<Bestelling> getBestellingOpBestellingId(long bestellingId) throws GeneriekeFoutmelding {
 		try(Connection con = connPool.verkrijgConnectie();
 				PreparedStatement statement = con.prepareStatement(
 						"SELECT BESTELLING.klant_id, BESTELLING.bestelling_id, ARTIKEL.artikel_id, "
@@ -96,18 +95,18 @@ public class BestellingDAOFireBird extends AbstractDAOFireBird implements Bestel
 
 			return verwerkResultSetGetBestelling(statement).iterator();
 		}catch(SQLException e){
-			throw new RSVIERException("Error in: " + this.getClass() + ": getBestellingOpBestellingId(long bestellingId) " + e.getMessage());
+			throw new GeneriekeFoutmelding("Error in: " + this.getClass() + ": getBestellingOpBestellingId(long bestellingId) " + e.getMessage());
 		}
 	}
 
 	@Override
-	public void updateBestelling(Bestelling bestelling) throws SQLException, RSVIERException {
+	public void updateBestelling(Bestelling bestelling) throws SQLException, GeneriekeFoutmelding {
 		// TODO Auto-generated method stub
 
 	}
 
 	@Override
-	public void verwijderAlleBestellingenKlant(long klantId) throws RSVIERException{
+	public void verwijderAlleBestellingenKlant(long klantId) throws GeneriekeFoutmelding {
 		try(Connection con = connPool.verkrijgConnectie();
 				PreparedStatement updateStatement = con.prepareStatement(
 						"UPDATE BESTELLING "
@@ -116,7 +115,7 @@ public class BestellingDAOFireBird extends AbstractDAOFireBird implements Bestel
 			updateStatement.setLong(1, klantId);
 			updateStatement.executeUpdate();
 		}catch(SQLException e){
-			throw new RSVIERException("Error in: " + this.getClass() + ": verwijderAlleBestellingenKlant(long klantId) " + e.getMessage());
+			throw new GeneriekeFoutmelding("Error in: " + this.getClass() + ": verwijderAlleBestellingenKlant(long klantId) " + e.getMessage());
 		}
 	}
 
@@ -124,7 +123,7 @@ public class BestellingDAOFireBird extends AbstractDAOFireBird implements Bestel
 	 * Dit staat hier alleen voor display purposes omdat we een verwijdermethode moesten maken voor de opdracht
 	 * Alleen zetten wij de bestelling op inactief zodat er altijd een geschiedenis van bestellingen is
  	@Override
-	public long verwijderAlleBestellingenKlant(long klantId) throws RSVIERException, SQLException {
+	public long verwijderAlleBestellingenKlant(long klantId) throws GeneriekeFoutmelding, SQLException {
 		try(Connection con = MySQLConnectieLeverancier.getConnection();
 			PreparedStatement statement = con.prepareStatement(
 					"DELETE BESTELLING_HEEFT_ARTIKEL "
@@ -157,20 +156,20 @@ public class BestellingDAOFireBird extends AbstractDAOFireBird implements Bestel
 	 */
 
 	@Override
-	public void verwijderEnkeleBestelling(long bestellingId) throws RSVIERException, SQLException {
+	public void verwijderEnkeleBestelling(long bestellingId) throws GeneriekeFoutmelding, SQLException {
 		try(Connection con = connPool.verkrijgConnectie();
 			PreparedStatement statement = con.prepareStatement(
 					"UPDATE BESTELLING SET bestellingActief = 0 WHERE bestelling_id = ?")){
 			statement.setLong(1, bestellingId);
 			statement.executeUpdate();
 		}catch(SQLException e){
-			throw new RSVIERException("Error in: " + this.getClass() + ": verwijderEnkeleBestelling(long bestellingId) " + e.getMessage());
+			throw new GeneriekeFoutmelding("Error in: " + this.getClass() + ": verwijderEnkeleBestelling(long bestellingId) " + e.getMessage());
 		}
 	}
 
 	/* Wederom staat de echte verwijdermethode in dit comment
 	 	@Override
-	public void verwijderEnkeleBestelling(long bestellingId) throws RSVIERException, SQLException {
+	public void verwijderEnkeleBestelling(long bestellingId) throws GeneriekeFoutmelding, SQLException {
 		try(Connection con = MySQLConnectieLeverancier.getConnection();
 			PreparedStatement statement = con.prepareStatement(
 					"DELETE BESTELLING FROM BESTELLING WHERE bestelling_id = ?";
@@ -188,7 +187,7 @@ public class BestellingDAOFireBird extends AbstractDAOFireBird implements Bestel
 	}
 	 * */
 
-	private void schrijfAlleArtikelenNaarDeDatabase(Connection con, PreparedStatement statement, List<Artikel> artikelList) throws RSVIERException {
+	private void schrijfAlleArtikelenNaarDeDatabase(Connection con, PreparedStatement statement, List<Artikel> artikelList) throws GeneriekeFoutmelding {
 		try(ResultSet rs = statement.executeQuery();
 			PreparedStatement statementBestelHeeftArtikelTabel = con.prepareStatement(
 				"INSERT INTO BESTELLING_HEEFT_ARTIKEL (bestelling_id_best, artikel_id_art, prijs_id_prijs, aantal)"
@@ -208,7 +207,7 @@ public class BestellingDAOFireBird extends AbstractDAOFireBird implements Bestel
 				statementBestelHeeftArtikelTabel.executeUpdate();
 			}
 		}catch(SQLException e){
-			throw new RSVIERException("Error in: " + this.getClass() + ": schrijfAlleArtikelenNaarDeDatabase " + e.getMessage());
+			throw new GeneriekeFoutmelding("Error in: " + this.getClass() + ": schrijfAlleArtikelenNaarDeDatabase " + e.getMessage());
 		}
 
 	}
@@ -254,7 +253,7 @@ public class BestellingDAOFireBird extends AbstractDAOFireBird implements Bestel
 
 			return bestellingSet;
 		}catch(SQLException e){
-			throw new RSVIERException("Error in: " + this.getClass() + ": verwerkResultSetGetBestelling(PreparedStatement statement) " + e.getMessage());
+			throw new GeneriekeFoutmelding("Error in: " + this.getClass() + ": verwerkResultSetGetBestelling(PreparedStatement statement) " + e.getMessage());
 		}
 	}
 

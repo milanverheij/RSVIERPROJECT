@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map.Entry;
 
-import exceptions.RSVIERException;
+import exceptions.GeneriekeFoutmelding;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
@@ -43,6 +43,7 @@ public class GuiVoorBestellingBewerkingen extends Application{
 
 	public void setKlantIdAndRun(long klantId) throws Exception{
 		this.klantId = klantId;
+		start(new Stage());
 		start(new Stage());
 	}
 
@@ -113,7 +114,7 @@ public class GuiVoorBestellingBewerkingen extends Application{
 					GuiPojo.bestellingLijst.put(bestellingId, bestelling);
 				}
 				bestellingStage.close();
-			}catch(SQLException | RSVIERException e) {
+			}catch(SQLException | GeneriekeFoutmelding e) {
 				e.printStackTrace();
 			}catch(Exception e){
 				e.printStackTrace();
@@ -193,7 +194,7 @@ public class GuiVoorBestellingBewerkingen extends Application{
 				artikelArrayList.add(artikel);
 				textFieldArrayList.add(new TextField("0"));
 			}
-		} catch (RSVIERException e) {
+		} catch (GeneriekeFoutmelding e) {
 			e.printStackTrace();
 		}
 	}

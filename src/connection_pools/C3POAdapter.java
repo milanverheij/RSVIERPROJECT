@@ -1,6 +1,6 @@
 package connection_pools;
 
-import exceptions.RSVIERException;
+import exceptions.GeneriekeFoutmelding;
 import interfaces.VerkrijgConnectie;
 
 import java.sql.Connection;
@@ -22,9 +22,9 @@ public class C3POAdapter implements VerkrijgConnectie {
      *
      * @param DBKeuze Keuze van het type database welke door de connection pool
      *                gebruikt moet worden.
-     * @throws RSVIERException Geeft een foutmelding met bijhorende melding.
+     * @throws GeneriekeFoutmelding Geeft een foutmelding met bijhorende melding.
      */
-    public C3POAdapter(String DBKeuze) throws RSVIERException {
+    public C3POAdapter(String DBKeuze) throws GeneriekeFoutmelding {
         this.DBKeuze = DBKeuze;
     }
 
@@ -33,14 +33,14 @@ public class C3POAdapter implements VerkrijgConnectie {
      * connection pools welke deze interface implementeren.
      *
      * @return Een connection object van een van de connection pools.
-     * @throws RSVIERException Gooit een fout terug met de bijbehorende message.
+     * @throws GeneriekeFoutmelding Gooit een fout terug met de bijbehorende message.
      */
     @Override
-    public Connection verkrijgConnectie() throws RSVIERException {
+    public Connection verkrijgConnectie() throws GeneriekeFoutmelding {
         try {
         return C3POConnectionPool.getInstance(DBKeuze).getConnection();
         } catch (SQLException ex) {
-            throw new RSVIERException("C3POAdapter SQL Exception" + ex.getMessage());
+            throw new GeneriekeFoutmelding("C3POAdapter SQL Exception" + ex.getMessage());
         }
     }
 }

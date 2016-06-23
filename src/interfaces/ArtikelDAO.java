@@ -2,10 +2,7 @@ package interfaces;
 
 
 
-import java.util.Iterator;
-import java.util.Map.Entry;
-
-import exceptions.RSVIERException;
+import exceptions.GeneriekeFoutmelding;
 import model.Artikel;
 
 /**
@@ -14,15 +11,15 @@ import model.Artikel;
 public interface ArtikelDAO {
 
 	//Create
-	public int nieuwArtikel(Artikel aNieuw) throws RSVIERException;
+	public int nieuwArtikel(Artikel aNieuw) throws GeneriekeFoutmelding;
 
 	//Read
-	public Artikel getArtikel(int artikel_id) throws RSVIERException;
+	public Artikel getArtikel(int artikel_id) throws GeneriekeFoutmelding;
 
 	//Update
-	public void updateArtikel(int artikel_id, Artikel aNieuw) throws RSVIERException;
+	public void updateArtikel(int artikel_id, Artikel aNieuw) throws GeneriekeFoutmelding;
 	
 	//Delete
-	public void verwijderArtikel(int artikel_id) throws RSVIERException;
+	public void verwijderArtikel(int artikel_id) throws GeneriekeFoutmelding;
 	
 }

@@ -1,5 +1,5 @@
 package gui;
-import exceptions.RSVIERException;
+import exceptions.GeneriekeFoutmelding;
 import factories.DAOFactory;
 import interfaces.KlantDAO;
 import javafx.application.Application;
@@ -125,7 +125,7 @@ public class GuiVoorKlantBewerkingen extends Application{
 				klantDAO.updateKlant(klant.getKlant_id(), voorNaam.getText(), achterNaam.getText(),
 						tussenVoegsel.getText(), email.getText(), adres);
 			klantStage.close();
-		} catch (RSVIERException e) {
+		} catch (GeneriekeFoutmelding e) {
 			new ErrorBox().setMessageAndStart(e.getMessage());
 		}
 	}

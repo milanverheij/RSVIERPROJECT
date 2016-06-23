@@ -2,7 +2,7 @@ package connection_pools;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
-import exceptions.RSVIERException;
+import exceptions.GeneriekeFoutmelding;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -39,9 +39,9 @@ public class HikariCPConnectionPool {
      * Stelt de HikariCP configuratie in op het gekozen DataBase type.
      *
      * @param DBKeuze Keuze voor het type database (1 = MySQL, 2 = FireBird);
-     * @throws RSVIERException Foutmelding met gegevens.
+     * @throws GeneriekeFoutmelding Foutmelding met gegevens.
      */
-    private HikariCPConnectionPool(String DBKeuze) throws RSVIERException {
+    private HikariCPConnectionPool(String DBKeuze) throws GeneriekeFoutmelding {
         if (DBKeuze.equals("MySQL")) {
             hikariConfig = new HikariConfig();
             hikariConfig.setMinimumIdle(1);
@@ -78,9 +78,9 @@ public class HikariCPConnectionPool {
      *
      * @param DBKeuze Keuze voor het type database (1 = MySQL, 2 = FireBird);
      * @return HikariCP Connection pool.
-     * @throws RSVIERException Foutmelding met gegevens.
+     * @throws GeneriekeFoutmelding Foutmelding met gegevens.
      */
-    public static HikariCPConnectionPool getInstance(String DBKeuze) throws RSVIERException {
+    public static HikariCPConnectionPool getInstance(String DBKeuze) throws GeneriekeFoutmelding {
         if (hikariCPConnectionPool == null) {
             hikariCPConnectionPool = new HikariCPConnectionPool(DBKeuze);
             return hikariCPConnectionPool;
@@ -95,7 +95,7 @@ public class HikariCPConnectionPool {
      * @return Connection-Object.
      * @throws SQLException Foutmelding met gegevens.
      */
-    public Connection getConnection() throws SQLException, RSVIERException {
+    public Connection getConnection() throws SQLException, GeneriekeFoutmelding {
         return this.hikariDataSource.getConnection();
     }
 }

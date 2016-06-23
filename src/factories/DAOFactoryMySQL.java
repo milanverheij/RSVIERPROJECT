@@ -1,6 +1,6 @@
 package factories;
 
-import exceptions.RSVIERException;
+import exceptions.GeneriekeFoutmelding;
 import interfaces.*;
 import mysql.*;
 
@@ -20,7 +20,7 @@ public class DAOFactoryMySQL extends DAOFactory{
 	 * @return een KlantDAO van het MySQL-type(DBKeuze 1).
      */
 	@Override
-	public KlantDAO getKlantDAO() throws RSVIERException {
+	public KlantDAO getKlantDAO() throws GeneriekeFoutmelding {
 		return new KlantDAOMySQL();
 	}
 
@@ -30,7 +30,7 @@ public class DAOFactoryMySQL extends DAOFactory{
 	 * @return een AdresDAO van het MySQL-type(DBKeuze 1).
      */
 	@Override
-	public AdresDAO getAdresDAO() throws RSVIERException {
+	public AdresDAO getAdresDAO() throws GeneriekeFoutmelding {
 		return new AdresDAOMySQL();
 	}
 
@@ -40,7 +40,7 @@ public class DAOFactoryMySQL extends DAOFactory{
      * @return een BestellingDAO van het MySQL-type(DBKeuze 1).
      */
 	@Override
-	public BestellingDAO getBestellingDAO() throws RSVIERException {
+	public BestellingDAO getBestellingDAO() throws GeneriekeFoutmelding {
 		return new BestellingDAOMySQL();
 	}
 
@@ -50,7 +50,7 @@ public class DAOFactoryMySQL extends DAOFactory{
      * @return een ArtikelDAO van het MySQL-type(DBKeuze 1).
      */
 	@Override
-	public ArtikelDAO getArtikelDAO() throws RSVIERException {
+	public ArtikelDAO getArtikelDAO() throws GeneriekeFoutmelding {
 		return new ArtikelDAOMySQL();
 	}
 

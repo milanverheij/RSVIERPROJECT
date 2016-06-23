@@ -8,10 +8,10 @@ package exceptions;
  *
  */
 @SuppressWarnings("serial")
-public class RSVIERException extends Exception {
+public class GeneriekeFoutmelding extends Exception {
 
     /** Standaard constructor om message mee te geven */
-    public RSVIERException(String message) {
+    public GeneriekeFoutmelding(String message) {
         super(message);
     }
 }

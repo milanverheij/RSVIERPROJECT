@@ -1,6 +1,6 @@
 package factories;
 
-import exceptions.RSVIERException;
+import exceptions.GeneriekeFoutmelding;
 import firebird.AdresDAOFireBird;
 import firebird.KlantDAOFireBird;
 //import firebird.BestellingDAOFireBird;
@@ -26,7 +26,7 @@ public class DAOFactoryFireBird extends DAOFactory{
 	 * @return een KlantDAO van het FireBird-type(DBKeuze 2).
      */
 	@Override
-	public KlantDAO getKlantDAO() throws RSVIERException {
+	public KlantDAO getKlantDAO() throws GeneriekeFoutmelding {
 		return new KlantDAOFireBird();
 	}
 
@@ -36,7 +36,7 @@ public class DAOFactoryFireBird extends DAOFactory{
 	 * @return een AdresDAO van het FireBird-type(DBKeuze 2).
      */
 	@Override
-	public AdresDAO getAdresDAO() throws RSVIERException {
+	public AdresDAO getAdresDAO() throws GeneriekeFoutmelding {
 		return new AdresDAOFireBird();
 	}
 
@@ -46,7 +46,7 @@ public class DAOFactoryFireBird extends DAOFactory{
 	 * @return een BestellingDAO van het FireBird-type(DBKeuze 2).
 	 */
 	@Override
-	public BestellingDAO getBestellingDAO() throws RSVIERException {
+	public BestellingDAO getBestellingDAO() throws GeneriekeFoutmelding {
 //		return new BestellingDAOFireBird();
 		return null;
 	}
@@ -57,7 +57,7 @@ public class DAOFactoryFireBird extends DAOFactory{
 	 * @return een ArtikelDAO van het FireBird-type(DBKeuze 2).
 	 */
 	@Override
-	public ArtikelDAO getArtikelDAO() throws RSVIERException {
+	public ArtikelDAO getArtikelDAO() throws GeneriekeFoutmelding {
 //		return new ArtikelDAOFireBird();
 		return null;
 	}

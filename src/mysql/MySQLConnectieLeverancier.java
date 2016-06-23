@@ -1,6 +1,6 @@
 package mysql;
 
-import exceptions.RSVIERException;
+import exceptions.GeneriekeFoutmelding;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -58,14 +58,14 @@ public class MySQLConnectieLeverancier {
      * @return De gemaakte connectie met de database.
      */
     @Deprecated
-    private synchronized static Connection connectToDatabase() throws RSVIERException {
+    private synchronized static Connection connectToDatabase() throws GeneriekeFoutmelding {
         try {
             connection = DriverManager.getConnection(URL, USER, PASSWORD);
             if(logModus == 1)
                 System.out.println("\n\tMySQLConnectie: DATABASE SUCCESVOL VERBONDEN" );
             return connection;
         } catch (SQLException e) {
-            throw new RSVIERException("MySQLConnectie: MISLUKT MET DATABASE TE VERBINDEN");
+            throw new GeneriekeFoutmelding("MySQLConnectie: MISLUKT MET DATABASE TE VERBINDEN");
         }
     }
 
@@ -74,7 +74,7 @@ public class MySQLConnectieLeverancier {
      * @return de connectie gemaakt in de methode connecToDatabase
      */
     @Deprecated
-    public static Connection getConnection() throws RSVIERException {
+    public static Connection getConnection() throws GeneriekeFoutmelding {
         return connectToDatabase();
     }
 
