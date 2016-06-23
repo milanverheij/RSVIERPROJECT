@@ -23,7 +23,7 @@ import model.Artikel;
 public class ArtikelDAOMySQL extends AbstractDAOMySQL implements interfaces.ArtikelDAO{
 	private String artikelQuery = "";
 	private String prijsQuery = "";
-	private Artikel artikel = new Artikel();
+	private Artikel artikel = null;
 
 
 	public ArtikelDAOMySQL() {
@@ -66,7 +66,7 @@ public class ArtikelDAOMySQL extends AbstractDAOMySQL implements interfaces.Arti
 			statementArtikel.setString(1, aNieuw.getArtikelNaam());
 			statementArtikel.setInt(2, aNieuw.getPrijsId());
 			statementArtikel.setInt(3, aNieuw.getVerwachteLevertijd());
-			statementArtikel.setBoolean(4, true);
+			statementArtikel.setBoolean(4, aNieuw.isInAssortiment());
 			statementArtikel.executeUpdate();
 
 			try (ResultSet generatedArtikelId = statementArtikel.getGeneratedKeys()) {
@@ -142,11 +142,52 @@ public class ArtikelDAOMySQL extends AbstractDAOMySQL implements interfaces.Arti
 			throw new RSVIERException("TODO");
 		}
 	}
-	// artikelActief = 0 vraag alle artikelen op
-	// artikelActief = 1 vraag de actieve bestellingen op
+	
+	// Onderstaande methode haalt alle artiekelen uit de database en geeft ze terug in een iterator.
+	// Er kan gekozen worden om alleen de actieve artikelen of alle artikelen uit de database te halen.
+	// artikelActief = 0 vraagt zowel de actieve als inactieve artikelen op.
+	// artikelActief = 1 vraagt alleen de actieve artikelen op.
 	public LinkedHashSet<Artikel> getAlleArtikelen(int artikelActief) throws RSVIERException {
 		
-		return null; //TODO!!!!!!
+		// Alle artikelen worden in een Set opgeslagen
+		LinkedHashSet<Artikel> artikelSet = new LinkedHashSet<>()	;
+		
+		// Onderstaande query combineert de ARTIKEL en PRIJS tabel zodat alle artikel gegevens in een
+		// keer uitgelezen kunnen worden, tevens kan er geselecteerd worden op alle of alleen actieve artikelen.
+		artikelQuery = "SELECT ARTIKEL.artikel_id, ARTIKEL.omschrijving, ARTIKEL.prijs_id, PRIJS.prijs, "
+				+ "ARTIKEL.datumAanmaak, ARTIKEL.verwachteLevertijd, ARTIKEL.inAssortiment FROM ARTIKEL "
+				+ "LEFT JOIN PRIJS ON ARTIKEL.prijs_id = PRIJS.prijs_id WHERE inAssortiment LIKE ?;";
+		
+		try (//Connection connection = connPool.verkrijgConnectie();
+				Connection connection = MySQLConnectieLeverancier.getConnection();
+				PreparedStatement artikelStatement = connection.prepareStatement(artikelQuery)) {
+			
+			connection.setAutoCommit(false);
+			artikelStatement.setString(1, (artikelActief == 0) ? "%" : "1");
+			
+			try (ResultSet artikelRset = artikelStatement.executeQuery()) {
+				while (artikelRset.next()){
+					
+					artikel = new Artikel();
+					artikel.setArtikelId(artikelRset.getInt(1));
+					artikel.setArtikelNaam(artikelRset.getString(2));
+					artikel.setPrijsId(artikelRset.getInt(3));
+					artikel.setArtikelPrijs(artikelRset.getBigDecimal(4));
+					artikel.setDatumAanmaak(artikelRset.getString(5));
+					artikel.setVerwachteLevertijd(artikelRset.getInt(6));
+					artikel.setInAssortiment(artikelRset.getBoolean(7));
+					artikelSet.add(artikel);
+				}
+			}
+			// Execute transaction
+			connection.commit();
+			return artikelSet;
+		}
+		catch (SQLException ex) {
+			ex.printStackTrace();
+			DeLogger.getLogger().error("SQL fout tijdens opvragen van alle " + ((artikelActief == 0) ? "artikelen " : "actieve artikelen "));
+			throw new RSVIERException("SQL fout tijdens opvragen van alle " + ((artikelActief == 0) ? "artikelen " : "actieve artikelen "));
+		}
 	}
 	
 	/*

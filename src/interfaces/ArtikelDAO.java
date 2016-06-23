@@ -1,11 +1,6 @@
 package interfaces;
 
-
-
-import java.util.Iterator;
 import java.util.LinkedHashSet;
-import java.util.Map.Entry;
-
 import exceptions.RSVIERException;
 import model.Artikel;
 

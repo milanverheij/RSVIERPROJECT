@@ -96,8 +96,8 @@ public class Artikel implements Comparable{
 
 	@Override
 	public String toString(){
-		return "artikel " + artikelId + " " + artikelNaam + " $" + artikelPrijs.toPlainString() 
-				+ " prijs id " + prijsId + " " + datumAanmaak + " " + verwachteLevertijd + " "
+		return "artikel " + artikelId + "\t " + artikelNaam + "\t $" + artikelPrijs.toPlainString() 
+				+ "\t prijs id " + prijsId + "\t " + datumAanmaak + "\t " + verwachteLevertijd + "\t "
 				+ inAssortiment;
 	}
 
