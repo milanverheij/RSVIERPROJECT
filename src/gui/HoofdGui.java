@@ -1,15 +1,12 @@
 package gui;
+import java.util.LinkedHashMap;
 
 import exceptions.GeneriekeFoutmelding;
-import factories.DAOFactory;
-import interfaces.AdresDAO;
-import interfaces.ArtikelDAO;
-import interfaces.BestellingDAO;
-import interfaces.KlantDAO;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
@@ -17,28 +14,21 @@ import javafx.scene.image.Image;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import model.Artikel;
+import model.Bestelling;
 import model.GuiPojo;
 import mysql.GuiBewerkingenMySQL;
 
-public class HoofdGui extends Application {
-	private final Insets INSET = new Insets(4);
+public class HoofdGui extends Application{
+	private final Insets INSET = new Insets(6);
 
 	ErrorBox errorBox = new ErrorBox();
 
 	GuiBewerkingenMySQL guiBewerkingen = new GuiBewerkingenMySQL();
-	DAOFactory factory = DAOFactory.getDAOFactory("MySQL");
-try
-
-	{
-		BestellingDAO bestelDAO = factory.getBestellingDAO();
-		KlantDAO klantDAO = factory.getKlantDAO();
-		AdresDAO adresDAO = factory.getAdresDAO();
-		ArtikelDAO artikelDAO = factory.getArtikelDAO();
-	} catch (GeneriekeFoutmelding ex) {
-
-	}
 
 	TextField klantIdField;
 	TextField voorNaamField;
@@ -47,33 +37,40 @@ try
 	TextField emailField;
 	ListView<String> klantListView;
 
+	TextField straatnaamField;
+	TextField huisnummerField;
+	TextField toevoegingField;
+	TextField postcodeField;
+	TextField woonplaatsField;
+	
 	TextField bestellingIdField;
 	ListView<Long> bestellingListView;
 
-	TextField artikelIdField;
-	TextField artikelNaamField;
-	TextField artikelPrijsField;
 	ListView<String> artikelListView;
+	
+	CheckBox actieveItems;
 
 	Label errorLabel = new Label();
 
 	GridPane zoekGrid;
 	GridPane displayGrid;
 
-	Button zoekKlantButton;
+	Button zoekButton;
 	Button leegButton;
-
 	Button updateBestellingButton;
 	Button nieuweBestellingButton;
 	Button verwijderBestelling;
-
 	Button updateArtikelButton;
-
 	Button nieuweKlantButton;
 	Button updateKlantButton;
 
+	public static void main(String[] args){
+		launch();
+	}
+	
 	@Override
 	public void start(Stage stage) throws Exception {
+		guiBewerkingen.setDAOs("MySQL", "HikariCP");
 		maakListViewsAan();
 		maakTextFieldsAan();
 		maakButtonsEnSetOnAction();
@@ -86,7 +83,7 @@ try
 		gridBox.setSpacing(5);
 
 		HBox knoppenBox = new HBox();
-		knoppenBox.getChildren().addAll(zoekKlantButton,
+		knoppenBox.getChildren().addAll(zoekButton,
 				new Label("  "), leegButton,
 				new Label("  "), updateArtikelButton,
 				new Label("  "), nieuweBestellingButton, updateBestellingButton, verwijderBestelling,
@@ -124,16 +121,18 @@ try
 		tussenVoegselField = new TextField();
 		emailField = new TextField();
 
-		artikelIdField = new TextField();
-		artikelNaamField = new TextField();
-		artikelPrijsField = new TextField();
-		artikelIdField.setEditable(false);
-
 		bestellingIdField = new TextField();
+		
+		straatnaamField = new TextField();
+		huisnummerField = new TextField();
+		toevoegingField = new TextField();
+		straatnaamField = new TextField();
+		postcodeField = new TextField();
+		woonplaatsField = new TextField();
 	}
 
 	private void maakButtonsEnSetOnAction() throws GeneriekeFoutmelding, Exception{
-		zoekKlantButton = new Button("Zoeken");
+		zoekButton = new Button("Zoeken");
 		leegButton = new Button("Leeg velden");
 
 		updateBestellingButton = new Button("Update bestelling");
@@ -144,13 +143,12 @@ try
 		nieuweKlantButton = new Button("Nieuwe klant");
 		updateKlantButton = new Button("Update klant");
 
-		zoekKlantButton.setOnAction(e -> zoekKlantKnopKlik());
+		zoekButton.setOnAction(e -> zoekKnopKlik());
 		leegButton.setOnAction(E -> leegAlles());
 
 		updateBestellingButton.setOnAction(e -> updateBestelling());
 		nieuweBestellingButton.setOnAction(e -> nieuweBestelling());
 		verwijderBestelling.setOnAction(e -> verwijderBestelling());
-		updateArtikelButton.setOnAction(e -> updateArtikel());
 
 		nieuweKlantButton.setOnAction(e -> nieuweKlant());
 		updateKlantButton.setOnAction(e -> updateKlant());
@@ -161,35 +159,55 @@ try
 		GuiPojo.bestellingLijst.remove(GuiPojo.bestelling.getBestelling_id());
 		guiBewerkingen.verwijderEnkeleBestelling();
 		bestellingListView.getItems().clear();
-		guiBewerkingen.populateBestellingListView(bestellingListView);
+		try {
+			guiBewerkingen.populateBestellingListView(bestellingListView);
+		} catch (GeneriekeFoutmelding e) {
+			errorBox.setMessageAndStart(e.getMessage());
+		}
 	}
 
 	//zoekGrid bevat alle velden met info waarop gezocht kan worden
 	private void populateZoekGrid(){
 		zoekGrid = new GridPane();
-		zoekGrid.add(new Label("Zoeken op"), 0, 0);
+		
+		Text zoekOp = new Text("Zoeken op");
+		zoekOp.setFont(Font.font(Font.getDefault().getName(), FontWeight.BOLD, Font.getDefault().getSize()));
+		
+		actieveItems = new CheckBox("Alleen actieve items tonen");
+		actieveItems.setSelected(true);
+		
+		zoekGrid.add(zoekOp, 0, 0);
 		zoekGrid.add(new Label("Klant ID"), 0, 1);
 		zoekGrid.add(new Label("Voornaam"), 0, 2);
 		zoekGrid.add(new Label("Tussenvoegsel"), 0, 3);
 		zoekGrid.add(new Label("Achternaam"), 0, 4);
 		zoekGrid.add(new Label("E-mail"), 0, 5);
-		zoekGrid.add(new Label("Bestelling Id"), 0, 6);
-		zoekGrid.add(new Label(" "), 0, 7);
-		zoekGrid.add(new Label("Artikel details"), 0, 8);
-		zoekGrid.add(new Label("Naam"), 0, 9);
-		zoekGrid.add(new Label("Prijs"), 0, 10);
-		zoekGrid.add(new Label("Artikel id"), 0, 11);
+		zoekGrid.add(new Label(" "), 0, 6);
+		zoekGrid.add(new Label("Bestelling Id"), 0, 7);
+		zoekGrid.add(new Label(" "), 0, 8);
+		zoekGrid.add(new Label("Straatnaam"), 0, 9);
+		zoekGrid.add(new Label("Huisnummer"), 0, 10);
+		zoekGrid.add(new Label("toevoeging"), 0, 11);
+		zoekGrid.add(new Label("Postcode"), 0, 12);
+		zoekGrid.add(new Label("Woonplaats"), 0, 13);
+		zoekGrid.add(new Label(" "), 0, 14);
 
 		zoekGrid.add(klantIdField, 1, 1);
 		zoekGrid.add(voorNaamField, 1, 2);
 		zoekGrid.add(tussenVoegselField, 1, 3);
 		zoekGrid.add(achterNaamField, 1, 4);
 		zoekGrid.add(emailField, 1, 5);
-		zoekGrid.add(bestellingIdField, 1, 6);
-		zoekGrid.add(artikelNaamField, 1, 9);
-		zoekGrid.add(artikelPrijsField, 1, 10);
-		zoekGrid.add(artikelIdField, 1, 11);
+		
+		zoekGrid.add(bestellingIdField, 1, 7);
 
+		zoekGrid.add(straatnaamField, 1, 9);
+		zoekGrid.add(huisnummerField, 1, 10);
+		zoekGrid.add(toevoegingField, 1, 11);
+		zoekGrid.add(postcodeField, 1, 12);
+		zoekGrid.add(woonplaatsField, 1, 13);
+
+		zoekGrid.add(actieveItems, 0, 15);
+		
 		zoekGrid.setHgap(5);
 		zoekGrid.setVgap(2);
 	}
@@ -197,9 +215,9 @@ try
 	//displayGrid bevat de ListViews voor de klantenlijst, de bestellinglijst, en de artikellijst
 	private void populateDisplayGrid(){
 		displayGrid = new GridPane();
-		displayGrid.add(new Label("Klanten lijst"), 0, 0);
-		displayGrid.add(new Label("Bestellingen lijst"), 1, 0);
-		displayGrid.add(new Label("Artikel lijst"), 2, 0);
+		displayGrid.add(new Label("Klantenlijst"), 0, 0);
+		displayGrid.add(new Label("Bestellingenlijst"), 1, 0);
+		displayGrid.add(new Label("Artikellijst"), 2, 0);
 		displayGrid.add(klantListView, 0, 1);
 		displayGrid.add(bestellingListView, 1, 1);
 		displayGrid.add(artikelListView, 2, 1);
@@ -208,8 +226,8 @@ try
 		displayGrid.setVgap(2);
 	}
 
-	//Zoekt alle klanten op aan de hand van de ingevulde klantgegevens
-	private void zoekKlantKnopKlik(){
+	//Zoekt alle klanten op aan de hand van de ingevulde gegevens
+	private void zoekKnopKlik(){
 		leegViews();
 
 		if(bestellingIdField.getText().equals(""))
@@ -225,7 +243,7 @@ try
 	 */
 	private void zoekBestelling(){
 		String bron = bestellingIdField.getText().equals("") ? "klantId" : "bestellingId";
-		guiBewerkingen.zoekBestelling(bron, bestellingListView, klantIdField.getText(), bestellingIdField.getText());
+		guiBewerkingen.zoekBestelling(bron, bestellingListView, klantIdField.getText(), bestellingIdField.getText(), actieveItems.isSelected());
 	}
 
 	/* Leegt de TextField van klantgegevens */
@@ -236,13 +254,12 @@ try
 		tussenVoegselField.setText("");
 		emailField.setText("");
 		bestellingIdField.setText("");
-	}
-
-	/* Leegt de TextField van artikelgegevens */
-	private void leegArtikelVelden(){
-		artikelIdField.setText("");
-		artikelNaamField.setText("");
-		artikelPrijsField.setText("");
+		
+		straatnaamField.setText("");
+		huisnummerField.setText("");
+		toevoegingField.setText("");
+		postcodeField.setText("");
+		woonplaatsField.setText("");
 	}
 
 	//Leegt alle ListViews en reset de variabelen waarmee ze opgebouwd
@@ -256,8 +273,19 @@ try
 
 	//Leegt alle TextFields in de HoofdGui
 	private void leegAlleVelden(){
-		leegArtikelVelden();
 		leegKlantVelden();
+		leegAdresVelden();
+		GuiPojo.bestelling = new Bestelling();
+		GuiPojo.bestellingLijst = new LinkedHashMap<Long, Bestelling>();
+	}
+
+	private void leegAdresVelden() {
+		straatnaamField.clear();
+		huisnummerField.clear();
+		toevoegingField.clear();
+		straatnaamField.clear();
+		postcodeField.clear();
+		woonplaatsField.clear();
 	}
 
 	//Haalt alle TextFields en ListViews leeg
@@ -298,7 +326,6 @@ try
 			long selectedItem = bestellingListView.getSelectionModel().getSelectedItem();
 			if(selectedItem >= 0){
 				guiBewerkingen.getItemVanBestellingLijst(selectedItem);
-				leegArtikelVelden();
 			}
 			setArtikelListView();
 		}
@@ -316,8 +343,8 @@ try
 			guiBewerkingen.setArtikelLijst();
 
 			for(Artikel artikel : GuiPojo.artikelLijst){
-				artikelListView.getItems().add("Naam: " + artikel.getArtikel_naam() + "\nPrijs: " + artikel.getArtikel_prijs() +
-						"\nAantal: " + artikel.getAantal());
+				artikelListView.getItems().add("Naam: " + artikel.getArtikelNaam() + "\nPrijs: " + artikel.getArtikelPrijs() +
+						"\nAantal: " + artikel.getAantalBesteld());
 			}
 			if(klantIdField.getText().isEmpty())
 				guiBewerkingen.zoekKlant(klantListView, klantIdField.getText(), voorNaamField.getText(),
@@ -333,26 +360,6 @@ try
 
 		if(index >= 0){
 			guiBewerkingen.getItemVanArtikelLijst(index);
-
-			if(GuiPojo.artikel != null)
-				setArtikelFields(GuiPojo.artikel);
-		}
-	}
-
-	//Set de waarden van een Artikel-object in de relevante TextField
-	private void setArtikelFields(Artikel artikel){
-		artikelNaamField.setText(artikel.getArtikel_naam());
-		artikelPrijsField.setText("" + artikel.getArtikel_prijs());
-		artikelIdField.setText("" + artikel.getArtikel_id());
-	}
-
-	//Update een artikel in de database aan de hand van de info
-	//in de artikel TextFields
-	private void updateArtikel(){
-		if(!artikelIdField.getText().isEmpty()){
-			Artikel nieuwArtikel = new Artikel(Integer.parseInt(artikelIdField.getText()), artikelNaamField.getText(), Double.parseDouble(artikelPrijsField.getText()));
-			guiBewerkingen.updateArtikel(nieuwArtikel);
-			setArtikelListView();
 		}
 	}
 
@@ -373,6 +380,7 @@ try
 			errorBox.setMessageAndStart("Selecteer eerst een bestelling");
 		}
 	}
+
 	/* Lanceert een nieuw Stage waar een nieuwe bestelling gemaakt kan worden
 	 * klantId blijft gelijk, alleen artikelen kunnen worden toegevoegd
 	 * veranderen. Een bestaande klant moet geselecteerd zijn
@@ -381,7 +389,7 @@ try
 		if(!klantIdField.getText().isEmpty()){
 			GuiVoorBestellingBewerkingen bestellingBewerken = new GuiVoorBestellingBewerkingen();
 			try {
-				bestellingBewerken.setKlantIdAndRun(GuiPojo.bestelling.getKlant_id(), bestellingListView);
+				bestellingBewerken.setAndRun(GuiPojo.bestelling.getKlant_id(), bestellingListView, GuiPojo.bestelDAO, GuiPojo.artikelDAO);
 			} catch (Exception e) {
 				errorBox.setMessageAndStart(e.getMessage());
 			}
@@ -419,5 +427,9 @@ try
 			errorBox.setMessageAndStart(e.getMessage());
 		}
 
+	}
+
+	public void setConnection(String databaseSelected, String connectionSelected) {
+		guiBewerkingen.setDAOs(databaseSelected, connectionSelected);
 	}
 }

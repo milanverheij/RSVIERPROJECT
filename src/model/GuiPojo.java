@@ -3,7 +3,19 @@ package model;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
+import gui.ErrorBox;
+import interfaces.AdresDAO;
+import interfaces.ArtikelDAO;
+import interfaces.BestellingDAO;
+import interfaces.KlantDAO;
+
 public class GuiPojo {
+	public static BestellingDAO bestelDAO;
+	public static ArtikelDAO artikelDAO;
+	public static KlantDAO klantDAO;
+	public static AdresDAO adresDAO;
+	public static ErrorBox errorBox = new ErrorBox();
+	
 	public static long klantId;
 
 	public static Bestelling bestelling = new Bestelling();

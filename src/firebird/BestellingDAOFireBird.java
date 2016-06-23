@@ -54,20 +54,22 @@ public class BestellingDAOFireBird extends AbstractDAOFireBird implements Bestel
 	}
 
 	@Override
-	public Iterator<Bestelling> getBestellingOpKlantId(long klantId) throws GeneriekeFoutmelding {
+	public Iterator<Bestelling> getBestellingOpKlantId(long klantId, boolean bestellingActief) throws GeneriekeFoutmelding{
 		try(Connection con = connPool.verkrijgConnectie();
 				PreparedStatement statement = con.prepareStatement(
-						"SELECT BESTELLING.klant_id, BESTELLING.bestelling_id, ARTIKEL.artikel_id, ARTIKEL.omschrijving, BESTELLING_HEEFT_ARTIKEL.aantal, "
-								+ "BESTELLING_HEEFT_ARTIKEL.prijs_id_prijs, PRIJS.prijs, BESTELLING.datumAanmaak"
+						"SELECT `BESTELLING`.klant_id, `BESTELLING`.bestelling_id, `ARTIKEL`.artikel_id, `ARTIKEL`.omschrijving, `BESTELLING_HEEFT_ARTIKEL`.aantal, "
+								+ "`BESTELLING_HEEFT_ARTIKEL`.prijs_id_prijs, `PRIJS`.prijs, `BESTELLING`.datumAanmaak"
 
-							+ " FROM BESTELLING_HEEFT_ARTIKEL, ARTIKEL, BESTELLING, PRIJS"
+							+ " FROM `BESTELLING_HEEFT_ARTIKEL`, `ARTIKEL`, `BESTELLING`, `PRIJS`"
 
-							+ " WHERE BESTELLING.klant_id = ?"
-							+ " AND BESTELLING_HEEFT_ARTIKEL.prijs_id_prijs = PRIJS.prijs_id"
-							+ " AND BESTELLING_HEEFT_ARTIKEL.bestelling_id_best = BESTELLING.bestelling_id"
-							+ " AND BESTELLING_HEEFT_ARTIKEL.artikel_id_art = ARTIKEL.artikel_id;");){
+							+ " WHERE `BESTELLING`.klant_id = ? AND `BESTELLING`.bestellingActief LIKE ?"
+//							+ " AND BESTELLING_HEEFT_ARTIKEL.prijs_id_prijs = PRIJS.prijs_id"
+//							+ " AND BESTELLING_HEEFT_ARTIKEL.bestelling_id_best = BESTELLING.bestelling_id"
+//							+ " AND BESTELLING_HEEFT_ARTIKEL.artikel_id_art = ARTIKEL.artikel_id;"
+							);){
 
 			statement.setLong(1, klantId);
+			statement.setString(2, (bestellingActief ? "1" : "%"));
 
 			return verwerkResultSetGetBestelling(statement).iterator();
 		}catch(SQLException e){
@@ -76,7 +78,7 @@ public class BestellingDAOFireBird extends AbstractDAOFireBird implements Bestel
 	}
 
 	@Override
-	public Iterator<Bestelling> getBestellingOpBestellingId(long bestellingId) throws GeneriekeFoutmelding {
+	public Iterator<Bestelling> getBestellingOpBestellingId(long bestellingId, boolean bestellingActief) throws GeneriekeFoutmelding{
 		try(Connection con = connPool.verkrijgConnectie();
 				PreparedStatement statement = con.prepareStatement(
 						"SELECT BESTELLING.klant_id, BESTELLING.bestelling_id, ARTIKEL.artikel_id, "
@@ -86,12 +88,14 @@ public class BestellingDAOFireBird extends AbstractDAOFireBird implements Bestel
 
 						+ " FROM BESTELLING_HEEFT_ARTIKEL, ARTIKEL, BESTELLING, PRIJS"
 
-						+ " WHERE BESTELLING.bestelling_id = ?"
-						+ " AND BESTELLING_HEEFT_ARTIKEL.prijs_id_prijs = PRIJS.prijs_id"
-						+ " AND BESTELLING_HEEFT_ARTIKEL.bestelling_id_best = BESTELLING.bestelling_id"
-						+ " AND BESTELLING_HEEFT_ARTIKEL.artikel_id_art = ARTIKEL.artikel_id;");){
+						+ " WHERE `BESTELLING`.klant_id = ? AND `BESTELLING`.bestellingActief LIKE ?"
+//						+ " AND BESTELLING_HEEFT_ARTIKEL.prijs_id_prijs = PRIJS.prijs_id"
+//						+ " AND BESTELLING_HEEFT_ARTIKEL.bestelling_id_best = BESTELLING.bestelling_id"
+//						+ " AND BESTELLING_HEEFT_ARTIKEL.artikel_id_art = ARTIKEL.artikel_id;"
+						);){
 
 			statement.setLong(1, bestellingId);
+			statement.setString(2, (bestellingActief ? "1" : "%"));
 
 			return verwerkResultSetGetBestelling(statement).iterator();
 		}catch(SQLException e){
@@ -100,13 +104,24 @@ public class BestellingDAOFireBird extends AbstractDAOFireBird implements Bestel
 	}
 
 	@Override
-	public void updateBestelling(Bestelling bestelling) throws SQLException, GeneriekeFoutmelding {
-		// TODO Auto-generated method stub
+	public void updateBestelling(Bestelling bestelling) throws GeneriekeFoutmelding{
+		try(Connection con = connPool.verkrijgConnectie();
+				PreparedStatement deleteStatement = con.prepareStatement("DELETE * FROM `BESTELLING_HEEFT_ARTIKEL` WHERE bestelling_id = ?);")){
 
+			con.setAutoCommit(false);
+			// Verwijder alle oude artikelen van de bestelling uit BESTELLING_HEEFT_ARTIKEL
+			deleteStatement.setLong(1, bestelling.getBestelling_id());
+
+			// Schrijf alle nieuwe artikelen naar BESTELLING_HEEFT_ARTIKEL
+			schrijfAlleArtikelenNaarDeDatabase(con, bestelling.getBestelling_id(), bestelling.getArtikelLijst());
+			con.commit();
+		}catch (SQLException e){
+			throw new GeneriekeFoutmelding("Error in: " + this.getClass() + ": updateBestelling: " + e.getMessage());
+		}
 	}
 
 	@Override
-	public void verwijderAlleBestellingenKlant(long klantId) throws GeneriekeFoutmelding {
+	public void verwijderAlleBestellingenKlant(long klantId) throws GeneriekeFoutmelding{
 		try(Connection con = connPool.verkrijgConnectie();
 				PreparedStatement updateStatement = con.prepareStatement(
 						"UPDATE BESTELLING "
@@ -156,7 +171,7 @@ public class BestellingDAOFireBird extends AbstractDAOFireBird implements Bestel
 	 */
 
 	@Override
-	public void verwijderEnkeleBestelling(long bestellingId) throws GeneriekeFoutmelding, SQLException {
+	public void verwijderEnkeleBestelling(long bestellingId) throws GeneriekeFoutmelding {
 		try(Connection con = connPool.verkrijgConnectie();
 			PreparedStatement statement = con.prepareStatement(
 					"UPDATE BESTELLING SET bestellingActief = 0 WHERE bestelling_id = ?")){
@@ -202,17 +217,35 @@ public class BestellingDAOFireBird extends AbstractDAOFireBird implements Bestel
 				statementBestelHeeftArtikelTabel.setLong(2, artikel.getArtikelId());
 				statementBestelHeeftArtikelTabel.setLong(3, 1);
 				statementBestelHeeftArtikelTabel.setLong(4, 1);
-				statementBestelHeeftArtikelTabel.setLong(3, artikel.getArtikel_prijs_id());
-				statementBestelHeeftArtikelTabel.setLong(4, artikel.getAantal());
+				statementBestelHeeftArtikelTabel.setLong(3, artikel.getPrijsId());
+				statementBestelHeeftArtikelTabel.setLong(4, artikel.getAantalBesteld());
 				statementBestelHeeftArtikelTabel.executeUpdate();
 			}
 		}catch(SQLException e){
 			throw new GeneriekeFoutmelding("Error in: " + this.getClass() + ": schrijfAlleArtikelenNaarDeDatabase " + e.getMessage());
 		}
-
 	}
 
-	private LinkedHashSet<Bestelling> verwerkResultSetGetBestelling(PreparedStatement statement) throws SQLException{
+	private void schrijfAlleArtikelenNaarDeDatabase(Connection con, long bestellingId, List<Artikel> artikelList) throws GeneriekeFoutmelding{
+		try(PreparedStatement statementBestelHeeftArtikelTabel = con.prepareStatement(
+				"INSERT INTO `BESTELLING_HEEFT_ARTIKEL` (bestelling_id_best, artikel_id_art, prijs_id_prijs, aantal)"
+						+ " VALUES (?, ?, ?, ?)");){
+
+			// Nieuw aangemaakte bestellingId ophalen
+			for(Artikel artikel : artikelList){
+				statementBestelHeeftArtikelTabel.setLong(1, bestellingId);
+				statementBestelHeeftArtikelTabel.setLong(2, artikel.getArtikelId());
+				statementBestelHeeftArtikelTabel.setLong(3, artikel.getPrijsId());
+				statementBestelHeeftArtikelTabel.setLong(4, artikel.getAantalBesteld());
+				statementBestelHeeftArtikelTabel.executeUpdate();
+			}
+		} catch (SQLException e) {
+			throw new GeneriekeFoutmelding("Error in: " + this.getClass() + ": schrijfAlleArtikelenNaarDeDatabase(con, bestellingId: " + e.getMessage());
+		}
+	}
+
+	
+	private LinkedHashSet<Bestelling> verwerkResultSetGetBestelling(PreparedStatement statement) throws GeneriekeFoutmelding{
 		try(ResultSet rs = statement.executeQuery();){
 			LinkedHashSet<Bestelling> bestellingSet = new LinkedHashSet<Bestelling>();
 

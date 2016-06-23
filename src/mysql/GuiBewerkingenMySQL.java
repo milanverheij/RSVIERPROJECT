@@ -1,108 +1,104 @@
 package mysql;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.Iterator;
 import exceptions.GeneriekeFoutmelding;
-import gui.ErrorBox;
-import interfaces.ArtikelDAO;
+import factories.DAOFactory;
 import javafx.scene.control.ListView;
-import model.Adres;
+import logger.DeLogger;
 import model.Artikel;
 import model.Bestelling;
 import model.GuiPojo;
 import model.Klant;
 
 public class GuiBewerkingenMySQL extends AbstractGuiBewerkingen{
-	BestellingDAOMySQL bestelDAO = new BestellingDAOMySQL();
-	ArtikelDAO artikelDAO = new ArtikelDAOMySQL();
-	ErrorBox errorBox = new ErrorBox();
-
 	public void resetArtikelVariabelen(){
 		GuiPojo.artikelLijst.clear();
 	}
 
 	public void zoekKlant(ListView<String> klantListView, String klantId, String voorNaam, String achterNaam, String tussenVoegsel, String email){
 		klantListView.getItems().clear();
+		Klant klant = new Klant(!klantId.equals("") ? Long.parseLong(klantId) : 0, voorNaam, achterNaam, tussenVoegsel, email, null);
 
-		try (Connection con = MySQLConnectieLeverancier.getConnection();
-			PreparedStatement preparedStatement = con.prepareStatement("SELECT * FROM `KLANT` WHERE klant_id LIKE ? AND voornaam LIKE ? AND achternaam LIKE ? "
-				+ "AND tussenvoegsel LIKE ? AND email LIKE ?");){
-
-			preparedStatement.setString(1, klantId.equals("") ? "%" : klantId);
-			preparedStatement.setString(2, voorNaam.equals("") |  voorNaam == null? "%" : voorNaam);
-			preparedStatement.setString(3, achterNaam.equals("") ? "%" : achterNaam);
-			preparedStatement.setString(4, tussenVoegsel.equals("") ? "%" : tussenVoegsel);
-			preparedStatement.setString(5, email.equals("") ? "%" : email);
-
-			try(ResultSet rs = preparedStatement.executeQuery();){
-				verwerkKlantResultSet(rs, klantListView);
-			}
-		} catch (NumberFormatException | SQLException | GeneriekeFoutmelding e) {
+		try {
+			Iterator<Klant> klantIterator = GuiPojo.klantDAO.getKlantOpKlant(klant);
+			verwerkKlantResultSet(klantIterator, klantListView);
+		} catch (GeneriekeFoutmelding e) {
+			e.printStackTrace();
 			errorBox.setMessageAndStart(e.getMessage());
+		}catch(Exception e){
+			e.printStackTrace();
 		}
 	}
 
-	public void zoekBestelling(String bron, ListView<Long> bestellingListView, String klantIdField, String bestellingIdField){
-		try {
-			Iterator<Bestelling> it = bron.equals("klantId") ? bestelDAO.getBestellingOpKlantId(Long.parseLong(klantIdField)) : bestelDAO.getBestellingOpBestellingId(Long.parseLong(bestellingIdField));
+	public void zoekBestelling(String bron, ListView<Long> bestellingListView, String klantIdField, String bestellingIdField, boolean actieveItems){
+		try{
+			Iterator<Bestelling> it = bron.equals("klantId") ? GuiPojo.bestelDAO.getBestellingOpKlantId(Long.parseLong(klantIdField), actieveItems) : GuiPojo.bestelDAO.getBestellingOpBestellingId(Long.parseLong(bestellingIdField), actieveItems);
+
 			populateBestellingListView(bestellingListView, it);
-		}catch(NumberFormatException | GeneriekeFoutmelding | NullPointerException | SQLException e){
+		}catch(NumberFormatException | GeneriekeFoutmelding | NullPointerException e){
 			errorBox.setMessageAndStart(e.getMessage());
 		}
 	}
 
-	public void verwerkKlantResultSet(ResultSet rs, ListView<String> klantListView) throws GeneriekeFoutmelding{
-		Klant klant;
-		String gegevens;
-		try {
-			while(rs.next()){
-				Adres adres = new Adres();
-				adres.setStraatnaam(rs.getString("straatnaam"));
-				adres.setPostcode(rs.getString("postcode"));
-				adres.setToevoeging(rs.getString("toevoeging"));
-				adres.setHuisnummer(rs.getInt("huisnummer"));
-				adres.setWoonplaats(rs.getString("woonplaats"));
-				klant = new Klant(rs.getLong("klant_id"), rs.getString("voornaam"), rs.getString("achternaam"),
-						rs.getString("tussenvoegsel"), rs.getString("email"), adres);
+	public void verwerkKlantResultSet(Iterator<Klant> klantIterator, ListView<String> klantListView) throws GeneriekeFoutmelding{
+		try{
+			Klant klant;
+			String gegevens;
+			while(klantIterator.hasNext()){
+				klant = klantIterator.next();
 				gegevens = klant.getTussenvoegsel().equals("") ? klant.getKlant_id() + ": " + klant.getVoornaam() + " " + klant.getAchternaam() : klant.getKlant_id() + ": " + klant.getVoornaam() + " " + klant.getTussenvoegsel() + " " + klant.getAchternaam();
 				if(!klantListView.getItems().contains(gegevens))
 					klantListView.getItems().add(gegevens);
 				GuiPojo.klantenLijst.put(klant.getKlant_id(), klant);
 			}
-		} catch (SQLException e) {
-			throw new GeneriekeFoutmelding("Fout in verwerkKlantresultSet" + e.getMessage());
+		}catch(Exception e){
+			e.printStackTrace();
+			throw new GeneriekeFoutmelding("error");
 		}
 	}
 
 	public void updateArtikel(Artikel nieuwArtikel){
 		setArtikelLijst();
-		try {
-			artikelDAO.updateArtikelen(nieuwArtikel);
-			GuiPojo.artikel.setArtikel_naam(nieuwArtikel.getArtikel_naam());
-			GuiPojo.artikel.setArtikel_prijs(nieuwArtikel.getArtikel_prijs());
+		try{
+			GuiPojo.artikelDAO.updateArtikel(nieuwArtikel.getArtikelId(), nieuwArtikel);
+			GuiPojo.artikel.setArtikelNaam(nieuwArtikel.getArtikelNaam());
+			GuiPojo.artikel.setArtikelPrijs(nieuwArtikel.getArtikelPrijs());
 			setArtikelLijst();
-		} catch (NumberFormatException | GeneriekeFoutmelding e) {
+		}catch (NumberFormatException | GeneriekeFoutmelding e){
 			errorBox.setMessageAndStart(e.getMessage());
 		}
 	}
 
 	public void updateBestelling(){
-		try {
-			bestelDAO.updateBestelling(GuiPojo.bestelling);
-		} catch (SQLException | GeneriekeFoutmelding e) {
+		try{
+			GuiPojo.bestelDAO.updateBestelling(GuiPojo.bestelling);
+		}catch (GeneriekeFoutmelding e){
 			errorBox.setMessageAndStart(e.getMessage());
 		}
 	}
 
 	public void verwijderEnkeleBestelling(){
-		try {
-			bestelDAO.verwijderEnkeleBestelling(GuiPojo.bestelling.getBestelling_id());
-		} catch (GeneriekeFoutmelding | SQLException e) {
+		try{
+			GuiPojo.bestelDAO.verwijderEnkeleBestelling(GuiPojo.bestelling.getBestelling_id());
+		}catch (GeneriekeFoutmelding e){
 			errorBox.setMessageAndStart(e.getMessage());
 		}
 		GuiPojo.bestelling = new Bestelling();
 	}
+
+	public void setDAOs(String databaseSelected, String connectionSelected) {
+		try {
+			DAOFactory factory = DAOFactory.getDAOFactory(databaseSelected, connectionSelected);
+			GuiPojo.bestelDAO = factory.getBestellingDAO();
+			GuiPojo.artikelDAO = factory.getArtikelDAO();
+			GuiPojo.klantDAO = factory.getKlantDAO();
+			GuiPojo.adresDAO = factory.getAdresDAO();
+			DeLogger.getLogger().info("Database: " + databaseSelected + " Connection pool: " + connectionSelected);
+		}catch (GeneriekeFoutmelding e){
+			DeLogger.getLogger().error(e.getMessage());
+			e.printStackTrace();
+		}
+	}
+
+
 }

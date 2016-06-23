@@ -17,7 +17,7 @@ public class BestellingDAOMySQL extends AbstractDAOMySQL implements BestellingDA
 	public static boolean bestellingWordGetest = false; //Kijken of een JUnit test loopt
 	public static Bestelling aangeroepenBestellingInTest; //TODO nieuwe bestelling voor test maken
 
-	public long nieuweBestelling(Bestelling bestelling) throws GeneriekeFoutmelding {
+	public long nieuweBestelling(Bestelling bestelling) throws GeneriekeFoutmelding{
 		long bestellingId = 0;
 
 		try (Connection con = connPool.verkrijgConnectie();
@@ -39,14 +39,14 @@ public class BestellingDAOMySQL extends AbstractDAOMySQL implements BestellingDA
 		return bestellingId;
 	}
 
-	public long nieuweBestelling(long klantId, List<Artikel> artikelList) throws GeneriekeFoutmelding {
+	public long nieuweBestelling(long klantId, List<Artikel> artikelList) throws GeneriekeFoutmelding{
 
 		// De eerste try haalt het id van de nieuwe bestelling op, in de tweede try word de lijst met artikelen verwerkt
 		try (Connection con = connPool.verkrijgConnectie();
 				PreparedStatement statementBestelTabel = con.prepareStatement(
 						"INSERT INTO `BESTELLING` (klant_id) VALUES (?)",
 						PreparedStatement.RETURN_GENERATED_KEYS);){
-
+			
 			// Auto-commit uit om alles tegelijk door te voeren, voorkomt fouten in de database wanneer
 			// de bestelling en de artikellijst niet beide goed gaan
 			con.setAutoCommit(false);
@@ -65,7 +65,7 @@ public class BestellingDAOMySQL extends AbstractDAOMySQL implements BestellingDA
 	}
 
 	@Override
-	public Iterator<Bestelling> getBestellingOpKlantId(long klantId) throws GeneriekeFoutmelding {
+	public Iterator<Bestelling> getBestellingOpKlantId(long klantId, boolean bestellingActief) throws GeneriekeFoutmelding{
 		try(Connection con = connPool.verkrijgConnectie();
 				PreparedStatement statement = con.prepareStatement(
 						"SELECT `BESTELLING`.klant_id, `BESTELLING`.bestelling_id, `ARTIKEL`.artikel_id, `ARTIKEL`.omschrijving, `BESTELLING_HEEFT_ARTIKEL`.aantal, "
@@ -73,12 +73,14 @@ public class BestellingDAOMySQL extends AbstractDAOMySQL implements BestellingDA
 
 							+ " FROM `BESTELLING_HEEFT_ARTIKEL`, `ARTIKEL`, `BESTELLING`, `PRIJS`"
 
-							+ " WHERE `BESTELLING`.klant_id = ?"
-							+ " AND `BESTELLING_HEEFT_ARTIKEL`.prijs_id_prijs = `PRIJS`.prijs_id"
-							+ " AND `BESTELLING_HEEFT_ARTIKEL`.bestelling_id_best = `BESTELLING`.bestelling_id"
-							+ " AND `BESTELLING_HEEFT_ARTIKEL`.artikel_id_art = `ARTIKEL`.artikel_id;");){
+							+ " WHERE `BESTELLING`.klant_id = ? AND `BESTELLING`.bestellingActief LIKE ?"
+//							+ " AND `BESTELLING_HEEFT_ARTIKEL`.prijs_id_prijs = `PRIJS`.prijs_id"
+//							+ " AND `BESTELLING_HEEFT_ARTIKEL`.bestelling_id_best = `BESTELLING`.bestelling_id"
+//							+ " AND `BESTELLING_HEEFT_ARTIKEL`.artikel_id_art = `ARTIKEL`.artikel_id;"
+						);){
 
 			statement.setLong(1, klantId);
+			statement.setString(2, (bestellingActief ? "1" : "%"));
 
 			return verwerkResultSetGetBestelling(statement).iterator();
 		}catch (SQLException e){
@@ -87,7 +89,7 @@ public class BestellingDAOMySQL extends AbstractDAOMySQL implements BestellingDA
 	}
 
 	@Override
-	public Iterator<Bestelling> getBestellingOpBestellingId(long bestellingId) throws GeneriekeFoutmelding {
+	public Iterator<Bestelling> getBestellingOpBestellingId(long bestellingId, boolean bestellingActief) throws GeneriekeFoutmelding{
 		try(Connection con = connPool.verkrijgConnectie();
 				PreparedStatement statement = con.prepareStatement(
 						"SELECT `BESTELLING`.klant_id, `BESTELLING`.bestelling_id, `ARTIKEL`.artikel_id, "
@@ -97,12 +99,14 @@ public class BestellingDAOMySQL extends AbstractDAOMySQL implements BestellingDA
 
 						+ " FROM `BESTELLING_HEEFT_ARTIKEL`, `ARTIKEL`, `BESTELLING`, `PRIJS`"
 
-						+ " WHERE `BESTELLING`.bestelling_id = ?"
-						+ " AND `BESTELLING_HEEFT_ARTIKEL`.prijs_id_prijs = `PRIJS`.prijs_id"
-						+ " AND `BESTELLING_HEEFT_ARTIKEL`.bestelling_id_best = `BESTELLING`.bestelling_id"
-						+ " AND `BESTELLING_HEEFT_ARTIKEL`.artikel_id_art = `ARTIKEL`.artikel_id;");){
+						+ " WHERE `BESTELLING`.bestelling_id = ? AND `BESTELLING`.bestellingActief LIKE ?"
+//						+ " AND `BESTELLING_HEEFT_ARTIKEL`.prijs_id_prijs = `PRIJS`.prijs_id"
+//						+ " AND `BESTELLING_HEEFT_ARTIKEL`.bestelling_id_best = `BESTELLING`.bestelling_id"
+//						+ " AND `BESTELLING_HEEFT_ARTIKEL`.artikel_id_art = `ARTIKEL`.artikel_id;"
+						);){
 
 			statement.setLong(1, bestellingId);
+			statement.setString(2, (bestellingActief ? "1" : "%"));
 
 			return verwerkResultSetGetBestelling(statement).iterator();
 		}catch (SQLException e){
@@ -111,7 +115,7 @@ public class BestellingDAOMySQL extends AbstractDAOMySQL implements BestellingDA
 	}
 
 	@Override
-	public void updateBestelling(Bestelling bestelling) throws GeneriekeFoutmelding {
+	public void updateBestelling(Bestelling bestelling) throws GeneriekeFoutmelding{
 		try(Connection con = connPool.verkrijgConnectie();
 				PreparedStatement deleteStatement = con.prepareStatement("DELETE * FROM `BESTELLING_HEEFT_ARTIKEL` WHERE bestelling_id = ?);")){
 
@@ -128,7 +132,7 @@ public class BestellingDAOMySQL extends AbstractDAOMySQL implements BestellingDA
 	}
 
 	@Override
-	public void verwijderAlleBestellingenKlant(long klantId) throws GeneriekeFoutmelding {
+	public void verwijderAlleBestellingenKlant(long klantId) throws GeneriekeFoutmelding{
 		try(Connection con = connPool.verkrijgConnectie();
 				PreparedStatement updateStatement = con.prepareStatement(
 						"UPDATE `BESTELLING` "
@@ -178,7 +182,7 @@ public class BestellingDAOMySQL extends AbstractDAOMySQL implements BestellingDA
 	 */
 
 	@Override
-	public void verwijderEnkeleBestelling(long bestellingId) throws GeneriekeFoutmelding {
+	public void verwijderEnkeleBestelling(long bestellingId) throws GeneriekeFoutmelding{
 		try(Connection con = connPool.verkrijgConnectie();
 				PreparedStatement statement = con.prepareStatement(
 						"UPDATE `BESTELLING` SET bestellingActief = 0 WHERE bestelling_id = ?")){
@@ -209,7 +213,7 @@ public class BestellingDAOMySQL extends AbstractDAOMySQL implements BestellingDA
 	}
 	 * */
 
-	private void schrijfAlleArtikelenNaarDeDatabase(Connection con, long bestellingId, List<Artikel> artikelList) throws GeneriekeFoutmelding {
+	private void schrijfAlleArtikelenNaarDeDatabase(Connection con, long bestellingId, List<Artikel> artikelList) throws GeneriekeFoutmelding{
 		try(PreparedStatement statementBestelHeeftArtikelTabel = con.prepareStatement(
 				"INSERT INTO `BESTELLING_HEEFT_ARTIKEL` (bestelling_id_best, artikel_id_art, prijs_id_prijs, aantal)"
 						+ " VALUES (?, ?, ?, ?)");){
@@ -219,13 +223,15 @@ public class BestellingDAOMySQL extends AbstractDAOMySQL implements BestellingDA
 				statementBestelHeeftArtikelTabel.setLong(1, bestellingId);
 				statementBestelHeeftArtikelTabel.setLong(2, artikel.getArtikelId());
 				statementBestelHeeftArtikelTabel.setLong(3, artikel.getPrijsId());
-				statementBestelHeeftArtikelTabel.setLong(4, artikel.getAantal());
+				statementBestelHeeftArtikelTabel.setLong(4, artikel.getAantalBesteld());
 				statementBestelHeeftArtikelTabel.executeUpdate();
 			}
+		} catch (SQLException e) {
+			throw new GeneriekeFoutmelding("Error in: " + this.getClass() + ": schrijfAlleArtikelenNaarDeDatabase(con, bestellingId: " + e.getMessage());
 		}
 	}
 
-	private void schrijfAlleArtikelenNaarDeDatabase(Connection con, PreparedStatement statement, List<Artikel> artikelList) throws GeneriekeFoutmelding {
+	private void schrijfAlleArtikelenNaarDeDatabase(Connection con, PreparedStatement statement, List<Artikel> artikelList) throws GeneriekeFoutmelding{
 		try(ResultSet rs = statement.getGeneratedKeys();
 				PreparedStatement statementBestelHeeftArtikelTabel = con.prepareStatement(
 						"INSERT INTO `BESTELLING_HEEFT_ARTIKEL` (bestelling_id_best, artikel_id_art, prijs_id_prijs, aantal)"
@@ -239,13 +245,15 @@ public class BestellingDAOMySQL extends AbstractDAOMySQL implements BestellingDA
 				statementBestelHeeftArtikelTabel.setLong(1, bestellingId);
 				statementBestelHeeftArtikelTabel.setLong(2, artikel.getArtikelId());
 				statementBestelHeeftArtikelTabel.setLong(3, artikel.getPrijsId());
-				statementBestelHeeftArtikelTabel.setLong(4, artikel.getAantal());
+				statementBestelHeeftArtikelTabel.setLong(4, artikel.getAantalBesteld());
 				statementBestelHeeftArtikelTabel.executeUpdate();
 			}
+		} catch (SQLException e) {
+			throw new GeneriekeFoutmelding("Error in: " + this.getClass() + ": schrijfAlleArtikelenNaarDeDatabase(con, statement, artikelList: " + e.getMessage());
 		}
 	}
 
-	private LinkedHashSet<Bestelling> verwerkResultSetGetBestelling(PreparedStatement statement) throws GeneriekeFoutmelding {
+	private LinkedHashSet<Bestelling> verwerkResultSetGetBestelling(PreparedStatement statement) throws GeneriekeFoutmelding{
 		try(ResultSet rs = statement.executeQuery();){
 			LinkedHashSet<Bestelling> bestellingSet = new LinkedHashSet<Bestelling>();
 
@@ -285,16 +293,17 @@ public class BestellingDAOMySQL extends AbstractDAOMySQL implements BestellingDA
 			bestellingSet.add(best);
 
 			return bestellingSet;
+		} catch (SQLException e) {
+			throw new GeneriekeFoutmelding("Error in: " + this.getClass() + ": verwerkResultSetGetBestelling(con, statement, artikelList: " + e.getMessage());
 		}
 	}
 
-	private void setBestellingGegevens(ResultSet rs, Bestelling best) throws GeneriekeFoutmelding {
+	private void setBestellingGegevens(ResultSet rs, Bestelling best) throws GeneriekeFoutmelding{
 		try{
 			best.setBestelling_id(rs.getLong("bestelling_id"));
 			best.setKlant_id(rs.getLong("klant_id"));
 			best.setDatumAanmaak(rs.getString("datumAanmaak"));
 		}catch (SQLException e){
-			
 			throw new GeneriekeFoutmelding("Error in: " + this.getClass() + ": setBestellingGegevens: " + e.getMessage());
 		}
 		

@@ -14,9 +14,13 @@ import javafx.scene.image.Image;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 import model.Adres;
+import model.Bestelling;
 import model.Klant;
 
+
 public class GuiVoorKlantBewerkingen extends Application{
+	KlantDAO klantDAO;
+
 	TextField voorNaam = new TextField();
 	TextField tussenVoegsel = new TextField();
 	TextField achterNaam = new TextField();
@@ -114,14 +118,17 @@ public class GuiVoorKlantBewerkingen extends Application{
 	}
 
 	private void maakKlantAan(Stage klantStage){
-		KlantDAO klantDAO = DAOFactory.getDAOFactory("MySQL").getKlantDAO(); //TODO: Connection pool meegeven
 		Adres adres = new Adres(straatNaam.getText(), postcode.getText(), toevoeging.getText(),
 				Integer.parseInt(huisNummer.getText()), woonplaats.getText());
 		try {
-			if(klant == null)
-				klantDAO.nieuweKlant(voorNaam.getText(), achterNaam.getText(),
-						tussenVoegsel.getText(), email.getText(), adres, null); // TODO: 0 voor adres voor nieuw adres
-			else
+			if(klant == null){
+				nieuweKlant(voorNaam.getText(),
+	                     achterNaam.getText(),
+	                     tussenVoegsel.getText(),
+	                     email.getText(),
+	                     adres_id
+	                     ); // TODO: 0 voor adres voor nieuw adres
+			}else
 				klantDAO.updateKlant(klant.getKlant_id(), voorNaam.getText(), achterNaam.getText(),
 						tussenVoegsel.getText(), email.getText(), adres);
 			klantStage.close();
@@ -132,7 +139,6 @@ public class GuiVoorKlantBewerkingen extends Application{
 
 	public void setKlant(Klant klant){
 		this.klant = klant;
-
 	}
 
 }
