@@ -1,6 +1,6 @@
 package factories;
 
-import exceptions.RSVIERException;
+import exceptions.GeneriekeFoutmelding;
 import firebird.AbstractDAOFireBird;
 import mysql.AbstractDAOMySQL;
 
@@ -19,7 +19,7 @@ public abstract class DAOFactory {
 	 * @param s De keuze van het databasetype in String formaat.
 	 * @return Geeft een concrete DAO fabriek terug.
 	 */
-	public static DAOFactory getDAOFactory(String s, String connPoolKeuze) throws RSVIERException {
+	public static DAOFactory getDAOFactory(String s, String connPoolKeuze) throws GeneriekeFoutmelding {
 		if(s.equals("MySQL")) {
 			AbstractDAOMySQL.setConnPool(ConnectionPoolFactory.getConnectionPool(connPoolKeuze, "MySQL"));
 			return new DAOFactoryMySQL();
@@ -38,7 +38,7 @@ public abstract class DAOFactory {
 	 *
 	 * @return Een KlantDAO van het eerder gekozen database-type.
 	 */
-	public abstract interfaces.KlantDAO getKlantDAO() throws RSVIERException;
+	public abstract interfaces.KlantDAO getKlantDAO() throws GeneriekeFoutmelding;
 
 	/**
 	 * De methode die geimplementeerd dient te worden door de concrete fabriek
@@ -46,7 +46,7 @@ public abstract class DAOFactory {
 	 *
 	 * @return Een AdresDAO van het eerder gekozen database-type.
 	 */
-	public abstract interfaces.AdresDAO getAdresDAO() throws RSVIERException;
+	public abstract interfaces.AdresDAO getAdresDAO() throws GeneriekeFoutmelding;
 
 	/**
 	 * De methode die geimplementeerd dient te worden door de concrete fabriek
@@ -54,7 +54,7 @@ public abstract class DAOFactory {
 	 *
 	 * @return Een BestellingDAO van het eerder gekozen database-type.
 	 */
-	public abstract interfaces.BestellingDAO getBestellingDAO() throws RSVIERException;
+	public abstract interfaces.BestellingDAO getBestellingDAO() throws GeneriekeFoutmelding;
 
 	/**
 	 * De methode die geimplementeerd dient te worden door de concrete fabriek
@@ -62,7 +62,7 @@ public abstract class DAOFactory {
 	 *
 	 * @return Een ArtikelDAO van het eerder gekozen database-type.
 	 */
-	public abstract interfaces.ArtikelDAO getArtikelDAO() throws RSVIERException;
+	public abstract interfaces.ArtikelDAO getArtikelDAO() throws GeneriekeFoutmelding;
 
 
 }

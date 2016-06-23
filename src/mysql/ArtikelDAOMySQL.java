@@ -5,7 +5,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import exceptions.RSVIERException;
+
+import exceptions.GeneriekeFoutmelding;
 import model.Artikel;
 
 /* Author @Douwe Jongeneel
@@ -28,7 +29,7 @@ public class ArtikelDAOMySQL extends AbstractDAOMySQL implements interfaces.Arti
 	//Create
 
 	@Override 
-	public int nieuwArtikel(Artikel aNieuw) throws RSVIERException {
+	public int nieuwArtikel(Artikel aNieuw) throws GeneriekeFoutmelding {
 		int prijsId = 0;
 		int artikelId = 0;
 		String queryPrijs = "INSERT INTO PRIJS (prijs_id, prijs, artikel_id) VALUES (?, ?, ?);";
@@ -84,10 +85,10 @@ public class ArtikelDAOMySQL extends AbstractDAOMySQL implements interfaces.Arti
 		}
 		catch (SQLException ex) {
 			ex.printStackTrace();
-			throw new RSVIERException("Niew artikel aanmaken kan niet");
+			throw new GeneriekeFoutmelding("Niew artikel aanmaken kan niet");
 		}
 	}
-	public int nieuwePrijs(Artikel a) throws RSVIERException { // Prijs_id mag van mij wel een long worden. Stel dat er heel veel prijswijzigingen plaatsvinden?
+	public int nieuwePrijs(Artikel a) throws GeneriekeFoutmelding { // Prijs_id mag van mij wel een long worden. Stel dat er heel veel prijswijzigingen plaatsvinden?
 		int prijs_id = 0;
 		query = "INSERT INTO PRIJS (prijs, artikel_id) VALUES (?, ?);";
 		
@@ -110,25 +111,25 @@ public class ArtikelDAOMySQL extends AbstractDAOMySQL implements interfaces.Arti
 		}
 		catch (SQLException ex) {
 			ex.printStackTrace();
-			throw new RSVIERException("SQL fout tijdens instellen nieuwe prijs");
+			throw new GeneriekeFoutmelding("SQL fout tijdens instellen nieuwe prijs");
 		}
 	}
 	
 	//Read
 	@Override
-	public Artikel getArtikel(int artikel_id) throws RSVIERException {
+	public Artikel getArtikel(int artikel_id) throws GeneriekeFoutmelding {
 		// TODO Auto-generated method stub
 		return null;
 	}
 	//Update
 	@Override
-	public void updateArtikel(int artikel_id, Artikel aNieuw) throws RSVIERException {
+	public void updateArtikel(int artikel_id, Artikel aNieuw) throws GeneriekeFoutmelding {
 		// TODO Auto-generated method stub
 		
 	}
 	//Delete
 	@Override
-	public void verwijderArtikel(int artikel_id) throws RSVIERException {
+	public void verwijderArtikel(int artikel_id) throws GeneriekeFoutmelding {
 		// TODO Auto-generated method stub
 		
 	}

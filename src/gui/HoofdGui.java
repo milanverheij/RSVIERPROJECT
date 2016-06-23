@@ -1,7 +1,6 @@
 package gui;
-import java.sql.SQLException;
 
-import exceptions.RSVIERException;
+import exceptions.GeneriekeFoutmelding;
 import factories.DAOFactory;
 import interfaces.AdresDAO;
 import interfaces.ArtikelDAO;
@@ -23,18 +22,23 @@ import model.Artikel;
 import model.GuiPojo;
 import mysql.GuiBewerkingenMySQL;
 
-public class HoofdGui extends Application{
+public class HoofdGui extends Application {
 	private final Insets INSET = new Insets(4);
 
 	ErrorBox errorBox = new ErrorBox();
 
 	GuiBewerkingenMySQL guiBewerkingen = new GuiBewerkingenMySQL();
 	DAOFactory factory = DAOFactory.getDAOFactory("MySQL");
+try
 
-	BestellingDAO bestelDAO = factory.getBestellingDAO();
-	KlantDAO klantDAO = factory.getKlantDAO();
-	AdresDAO adresDAO = factory.getAdresDAO();
-	ArtikelDAO artikelDAO = factory.getArtikelDAO();
+	{
+		BestellingDAO bestelDAO = factory.getBestellingDAO();
+		KlantDAO klantDAO = factory.getKlantDAO();
+		AdresDAO adresDAO = factory.getAdresDAO();
+		ArtikelDAO artikelDAO = factory.getArtikelDAO();
+	} catch (GeneriekeFoutmelding ex) {
+
+	}
 
 	TextField klantIdField;
 	TextField voorNaamField;
@@ -128,7 +132,7 @@ public class HoofdGui extends Application{
 		bestellingIdField = new TextField();
 	}
 
-	private void maakButtonsEnSetOnAction() throws RSVIERException, Exception{
+	private void maakButtonsEnSetOnAction() throws GeneriekeFoutmelding, Exception{
 		zoekKlantButton = new Button("Zoeken");
 		leegButton = new Button("Leeg velden");
 
@@ -393,11 +397,11 @@ public class HoofdGui extends Application{
 	private void updateKlant(){
 		try {
 			if(GuiPojo.klant.getKlant_id() == 0)
-				throw new RSVIERException("Selecteer eerst een klant");
+				throw new GeneriekeFoutmelding("Selecteer eerst een klant");
 			GuiVoorKlantBewerkingen nieuweKlant = new GuiVoorKlantBewerkingen();
 			nieuweKlant.setKlant(GuiPojo.klant);
 			nieuweKlant.start(new Stage());
-		}catch(RSVIERException e){
+		}catch(GeneriekeFoutmelding e){
 			errorBox.setMessageAndStart(e.getMessage());
 		}catch(NullPointerException e){
 			e.printStackTrace();

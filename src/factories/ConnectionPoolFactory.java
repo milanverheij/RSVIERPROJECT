@@ -3,7 +3,7 @@ package factories;
 import connection_pools.C3POAdapter;
 import connection_pools.HikariCPAdapter;
 import connection_pools.OudeMySQLConnectorAdapter;
-import exceptions.RSVIERException;
+import exceptions.GeneriekeFoutmelding;
 import interfaces.VerkrijgConnectie;
 
 /**
@@ -24,9 +24,9 @@ public class ConnectionPoolFactory {
      * @param connectionPoolKeuze Keuze voor de connection pool (zie keuzes hierboven).
      * @param DBKeuze Keuze voor type database (zie keuzes hierboven).
      * @return Adapter behorend bij bovenstaande keuzes.
-     * @throws RSVIERException Foutmelding met omschrijving.
+     * @throws GeneriekeFoutmelding Foutmelding met omschrijving.
      */
-    public static VerkrijgConnectie getConnectionPool(String connectionPoolKeuze, String DBKeuze) throws RSVIERException {
+    public static VerkrijgConnectie getConnectionPool(String connectionPoolKeuze, String DBKeuze) throws GeneriekeFoutmelding {
 
         if (connectionPoolKeuze.equals("c3po"))
             return new C3POAdapter(DBKeuze);

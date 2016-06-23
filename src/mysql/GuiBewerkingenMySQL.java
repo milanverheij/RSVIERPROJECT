@@ -5,7 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Iterator;
-import exceptions.RSVIERException;
+import exceptions.GeneriekeFoutmelding;
 import gui.ErrorBox;
 import interfaces.ArtikelDAO;
 import javafx.scene.control.ListView;
@@ -40,7 +40,7 @@ public class GuiBewerkingenMySQL extends AbstractGuiBewerkingen{
 			try(ResultSet rs = preparedStatement.executeQuery();){
 				verwerkKlantResultSet(rs, klantListView);
 			}
-		} catch (NumberFormatException | SQLException | RSVIERException e) {
+		} catch (NumberFormatException | SQLException | GeneriekeFoutmelding e) {
 			errorBox.setMessageAndStart(e.getMessage());
 		}
 	}
@@ -49,12 +49,12 @@ public class GuiBewerkingenMySQL extends AbstractGuiBewerkingen{
 		try {
 			Iterator<Bestelling> it = bron.equals("klantId") ? bestelDAO.getBestellingOpKlantId(Long.parseLong(klantIdField)) : bestelDAO.getBestellingOpBestellingId(Long.parseLong(bestellingIdField));
 			populateBestellingListView(bestellingListView, it);
-		}catch(NumberFormatException | RSVIERException | NullPointerException | SQLException e){
+		}catch(NumberFormatException | GeneriekeFoutmelding | NullPointerException | SQLException e){
 			errorBox.setMessageAndStart(e.getMessage());
 		}
 	}
 
-	public void verwerkKlantResultSet(ResultSet rs, ListView<String> klantListView) throws RSVIERException{
+	public void verwerkKlantResultSet(ResultSet rs, ListView<String> klantListView) throws GeneriekeFoutmelding{
 		Klant klant;
 		String gegevens;
 		try {
@@ -73,7 +73,7 @@ public class GuiBewerkingenMySQL extends AbstractGuiBewerkingen{
 				GuiPojo.klantenLijst.put(klant.getKlant_id(), klant);
 			}
 		} catch (SQLException e) {
-			throw new RSVIERException("Fout in verwerkKlantresultSet" + e.getMessage());
+			throw new GeneriekeFoutmelding("Fout in verwerkKlantresultSet" + e.getMessage());
 		}
 	}
 
@@ -84,7 +84,7 @@ public class GuiBewerkingenMySQL extends AbstractGuiBewerkingen{
 			GuiPojo.artikel.setArtikel_naam(nieuwArtikel.getArtikel_naam());
 			GuiPojo.artikel.setArtikel_prijs(nieuwArtikel.getArtikel_prijs());
 			setArtikelLijst();
-		} catch (NumberFormatException | RSVIERException e) {
+		} catch (NumberFormatException | GeneriekeFoutmelding e) {
 			errorBox.setMessageAndStart(e.getMessage());
 		}
 	}
@@ -92,7 +92,7 @@ public class GuiBewerkingenMySQL extends AbstractGuiBewerkingen{
 	public void updateBestelling(){
 		try {
 			bestelDAO.updateBestelling(GuiPojo.bestelling);
-		} catch (SQLException | RSVIERException e) {
+		} catch (SQLException | GeneriekeFoutmelding e) {
 			errorBox.setMessageAndStart(e.getMessage());
 		}
 	}
@@ -100,7 +100,7 @@ public class GuiBewerkingenMySQL extends AbstractGuiBewerkingen{
 	public void verwijderEnkeleBestelling(){
 		try {
 			bestelDAO.verwijderEnkeleBestelling(GuiPojo.bestelling.getBestelling_id());
-		} catch (RSVIERException | SQLException e) {
+		} catch (GeneriekeFoutmelding | SQLException e) {
 			errorBox.setMessageAndStart(e.getMessage());
 		}
 		GuiPojo.bestelling = new Bestelling();

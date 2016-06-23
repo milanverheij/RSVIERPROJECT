@@ -1,6 +1,6 @@
 package firebird;
 
-import exceptions.RSVIERException;
+import exceptions.GeneriekeFoutmelding;
 import interfaces.AdresDAO;
 import model.Adres;
 
@@ -30,11 +30,11 @@ public class AdresDAOFireBird extends AbstractDAOFireBird implements AdresDAO {
      *
      * @param adres_id Het adres_id om up te daten.
      * @param adresgegevens De adresgegevens om te updaten in Adres object formaat
-     * @throws RSVIERException Als er een fout is wordt deze doorgestuurd naar de RSVIERException met de message van
+     * @throws GeneriekeFoutmelding Als er een fout is wordt deze doorgestuurd naar de GeneriekeFoutmelding met de message van
      * de exception.
      */
     @Override
-    public void updateAdres(long adres_id, Adres adresgegevens) throws RSVIERException {
+    public void updateAdres(long adres_id, Adres adresgegevens) throws GeneriekeFoutmelding {
         // TODO: Een check op juiste invoer van gegevens.
 
         // Als er null wordt meegegeven als Adres wordt er een standaard leeg-adres geschrevne.
@@ -68,7 +68,7 @@ public class AdresDAOFireBird extends AbstractDAOFireBird implements AdresDAO {
             statement.execute();
 
         }  catch (SQLException ex) {
-            throw new RSVIERException("AdresDAOMySQL: FOUT TIJDENS UPDATEN VAN EEN ADRES: " + ex.getMessage());
+            throw new GeneriekeFoutmelding("AdresDAOMySQL: FOUT TIJDENS UPDATEN VAN EEN ADRES: " + ex.getMessage());
         }
     }
 
@@ -77,11 +77,11 @@ public class AdresDAOFireBird extends AbstractDAOFireBird implements AdresDAO {
      *
      * @param klant_id Het klant_id waaraan een adres gekoppeld dient te worden
      * @param adres_id Het adres_id van het te koppelen adres.
-     * @throws RSVIERException Als er een fout is wordt deze doorgestuurd naar de RSVIERException met de message van
+     * @throws GeneriekeFoutmelding Als er een fout is wordt deze doorgestuurd naar de GeneriekeFoutmelding met de message van
      * de exception.
      */
     @Override
-    public void koppelAdresAanKlant(long klant_id, long adres_id) throws RSVIERException {
+    public void koppelAdresAanKlant(long klant_id, long adres_id) throws GeneriekeFoutmelding {
         String query = "INSERT INTO " +
                 "KLANT_HEEFT_ADRES " +
                 "(klant_id_klant, adres_id_adres) " +
@@ -99,9 +99,9 @@ public class AdresDAOFireBird extends AbstractDAOFireBird implements AdresDAO {
 
         } catch (SQLException ex) {
             if (ex.getMessage().contains("Duplicate entry"))
-                throw new RSVIERException("AdresDAOMySQL: DIT ADRES IS REEDS GEKOPPELD AAN DEZE KLANT");
+                throw new GeneriekeFoutmelding("AdresDAOMySQL: DIT ADRES IS REEDS GEKOPPELD AAN DEZE KLANT");
             else
-                throw new RSVIERException("AdresDAOMySQL: SQL FOUT TIJDENS KOPPELEN PERSOON AAN BESTAAND ADRES: " +
+                throw new GeneriekeFoutmelding("AdresDAOMySQL: SQL FOUT TIJDENS KOPPELEN PERSOON AAN BESTAAND ADRES: " +
                         ex.getMessage());
         }
     }
@@ -112,11 +112,11 @@ public class AdresDAOFireBird extends AbstractDAOFireBird implements AdresDAO {
      * @param klant_id Klant_id behorende bij het adres.
      * @param adresgegevens De adresgegevens die nieuw in de database dienen te worden opgenomen.
      * @return Het adres_id van het nieuw aangemaakte adres.
-     * @throws RSVIERException Als er een fout is wordt deze doorgestuurd naar de RSVIERException met de message van
+     * @throws GeneriekeFoutmelding Als er een fout is wordt deze doorgestuurd naar de GeneriekeFoutmelding met de message van
      * de exception.
      */
     @Override
-    public long nieuwAdres(long klant_id, Adres adresgegevens) throws RSVIERException {
+    public long nieuwAdres(long klant_id, Adres adresgegevens) throws GeneriekeFoutmelding {
         String queryNieuwAdres = "INSERT INTO ADRES " +
                 "(straatnaam, postcode, toevoeging, huisnummer, woonplaats) " +
                 "VALUES " +
@@ -160,10 +160,10 @@ public class AdresDAOFireBird extends AbstractDAOFireBird implements AdresDAO {
             return nieuw_adres_id;
         } catch (SQLException ex) {
             if (ex.getMessage().contains("Duplicate entry"))
-                throw new RSVIERException("AdresDAOMySQL: DIT ADRES BESTAAT AL IN DE DATABASE MET ID: " +
+                throw new GeneriekeFoutmelding("AdresDAOMySQL: DIT ADRES BESTAAT AL IN DE DATABASE MET ID: " +
                         getAdresID(adresgegevens.getPostcode(), adresgegevens.getHuisnummer(), adresgegevens.getToevoeging()));
             else
-                throw new RSVIERException("AdresDAOMySQL: SQL FOUT TIJDENS AANMAKEN ADRES: " + ex.getMessage());
+                throw new GeneriekeFoutmelding("AdresDAOMySQL: SQL FOUT TIJDENS AANMAKEN ADRES: " + ex.getMessage());
         }
     }
 
@@ -175,11 +175,11 @@ public class AdresDAOFireBird extends AbstractDAOFireBird implements AdresDAO {
      * @param huisnummer Huisnummer om op te zoeken.
      * @param toevoeging Toevoeging van adres om op te zoeken.
      * @return Het adres_id behorend bij dit adres.
-     * @throws RSVIERException Als er een fout is wordt deze doorgestuurd naar de RSVIERException met de message van
+     * @throws GeneriekeFoutmelding Als er een fout is wordt deze doorgestuurd naar de GeneriekeFoutmelding met de message van
      * de exception.
      */
     @Override
-    public long getAdresID(String postcode, int huisnummer, String toevoeging) throws RSVIERException {
+    public long getAdresID(String postcode, int huisnummer, String toevoeging) throws GeneriekeFoutmelding {
         String query = "SELECT adres_id " +
                 "FROM ADRES " +
                 "WHERE " +
@@ -200,13 +200,13 @@ public class AdresDAOFireBird extends AbstractDAOFireBird implements AdresDAO {
             ) {
 
                 if (!rs.next())
-                    throw new RSVIERException("AdresDAOMySQL: ADRES NIET GEVONDEN");
+                    throw new GeneriekeFoutmelding("AdresDAOMySQL: ADRES NIET GEVONDEN");
                 else {
                     return rs.getLong(1); // Door if-statement is rs al bij next()
                 }
             }
         } catch (SQLException ex) {
-            throw new RSVIERException("AdresDAOMySQL: SQL FOUT TIJDENS ZOEKEN ADRES: " + ex.getMessage());
+            throw new GeneriekeFoutmelding("AdresDAOMySQL: SQL FOUT TIJDENS ZOEKEN ADRES: " + ex.getMessage());
         }
     }
 
@@ -215,11 +215,11 @@ public class AdresDAOFireBird extends AbstractDAOFireBird implements AdresDAO {
      *
      * @param klant_id Klant_id van de klant waarvan de adressen opgezocht dienen te worden.
      * @return Een ListIterator van de ArrayList met daarin Klant objecten.
-     * @throws RSVIERException Als er een fout is wordt deze doorgestuurd naar de RSVIERException met de message van
+     * @throws GeneriekeFoutmelding Als er een fout is wordt deze doorgestuurd naar de GeneriekeFoutmelding met de message van
      * de exception.
      */
     @Override
-    public ListIterator<Adres> getAdresOpKlantID(long klant_id) throws RSVIERException {
+    public ListIterator<Adres> getAdresOpKlantID(long klant_id) throws GeneriekeFoutmelding {
         String query = "SELECT ADRES.* " +
                 "FROM ADRES, KLANT_HEEFT_ADRES " +
                 "WHERE " +
@@ -261,7 +261,7 @@ public class AdresDAOFireBird extends AbstractDAOFireBird implements AdresDAO {
                 return adresLijst.listIterator();
             }
         } catch (SQLException ex) {
-            throw new RSVIERException("FOUT TIJDENS GETADRES: " + ex.getMessage());
+            throw new GeneriekeFoutmelding("FOUT TIJDENS GETADRES: " + ex.getMessage());
         }
     }
 
@@ -270,11 +270,11 @@ public class AdresDAOFireBird extends AbstractDAOFireBird implements AdresDAO {
      *
      * @param adres_id Het adres_id van het adres dat geschakeld dient te worden.
      * @param status De nieuwe gewenste status van het adres.
-     * @throws RSVIERException Als er een fout is wordt deze doorgestuurd naar de RSVIERException met de message van
+     * @throws GeneriekeFoutmelding Als er een fout is wordt deze doorgestuurd naar de GeneriekeFoutmelding met de message van
      * de exception.
      */
     @Override
-    public void schakelStatusAdres(long adres_id, int status) throws RSVIERException {
+    public void schakelStatusAdres(long adres_id, int status) throws GeneriekeFoutmelding {
         String query =
                 "UPDATE ADRES " +
                         "SET " +
@@ -291,7 +291,7 @@ public class AdresDAOFireBird extends AbstractDAOFireBird implements AdresDAO {
             statement.execute();
 
         } catch (SQLException ex) {
-            throw new RSVIERException("AdresDAOMySQL: SQL FOUT TIJDENS ADRES OP ID INACTIEF ZETTEN" + ex.getMessage());
+            throw new GeneriekeFoutmelding("AdresDAOMySQL: SQL FOUT TIJDENS ADRES OP ID INACTIEF ZETTEN" + ex.getMessage());
         }
     }
 }

@@ -1,6 +1,6 @@
 package connection_pools;
 
-import exceptions.RSVIERException;
+import exceptions.GeneriekeFoutmelding;
 import interfaces.VerkrijgConnectie;
 
 import java.sql.Connection;
@@ -32,14 +32,14 @@ public class HikariCPAdapter implements VerkrijgConnectie {
      * connection pools welke deze interface implementeren.
      *
      * @return Een connection object van een van de connection pools.
-     * @throws RSVIERException Gooit een fout terug met de bijbehorende message.
+     * @throws GeneriekeFoutmelding Gooit een fout terug met de bijbehorende message.
      */
     @Override
-    public Connection verkrijgConnectie() throws RSVIERException {
+    public Connection verkrijgConnectie() throws GeneriekeFoutmelding {
         try {
             return HikariCPConnectionPool.getInstance(DBKeuze).getConnection();
         } catch (SQLException ex) {
-            throw new RSVIERException("C3POAdapter SQL Exception" + ex.getMessage());
+            throw new GeneriekeFoutmelding("C3POAdapter SQL Exception" + ex.getMessage());
         }
     }
 }
