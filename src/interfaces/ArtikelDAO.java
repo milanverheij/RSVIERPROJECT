@@ -3,6 +3,7 @@ package interfaces;
 
 
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.Map.Entry;
 
 import exceptions.RSVIERException;
@@ -17,12 +18,13 @@ public interface ArtikelDAO {
 	public int nieuwArtikel(Artikel aNieuw) throws RSVIERException;
 
 	//Read
-	public Artikel getArtikel(int artikel_id) throws RSVIERException;
+	public Artikel getArtikel(int artikelId) throws RSVIERException;
+	public LinkedHashSet<Artikel> getAlleArtikelen(int artikelActief) throws RSVIERException;
 
 	//Update
-	public void updateArtikel(int artikel_id, Artikel aNieuw) throws RSVIERException;
+	public void updateArtikel(int artikelId, Artikel aNieuw) throws RSVIERException;
 	
 	//Delete
-	public void verwijderArtikel(int artikel_id) throws RSVIERException;
+	public void verwijderArtikel(Artikel artikel) throws RSVIERException;
 	
 }

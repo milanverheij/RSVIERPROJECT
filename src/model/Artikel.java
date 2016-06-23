@@ -96,7 +96,9 @@ public class Artikel implements Comparable{
 
 	@Override
 	public String toString(){
-		return "" + artikelId + " " + artikelNaam + " $" + artikelPrijs.toPlainString(); //To string methode met BigDecimal nog testen!!
+		return "artikel " + artikelId + " " + artikelNaam + " $" + artikelPrijs.toPlainString() 
+				+ " prijs id " + prijsId + " " + datumAanmaak + " " + verwachteLevertijd + " "
+				+ inAssortiment;
 	}
 
 	@Override
