@@ -23,7 +23,7 @@ import model.Artikel;
 public class ArtikelDAOMySQL extends AbstractDAOMySQL implements interfaces.ArtikelDAO{
 	private String artikelQuery = "";
 	private String prijsQuery = "";
-	private Artikel artikel = null;
+	private Artikel artikel = new Artikel();
 
 
 	public ArtikelDAOMySQL() {
@@ -75,7 +75,7 @@ public class ArtikelDAOMySQL extends AbstractDAOMySQL implements interfaces.Arti
 				}
 			}
 
-			//Zet prijs_id in ARTIKEL tabel
+			//Zet artikel_id in PRIJS tabel
 			statementUpdate.setInt(1, aNieuw.getArtikelId());
 			statementUpdate.setInt(2, aNieuw.getPrijsId());
 			statementUpdate.executeUpdate();
