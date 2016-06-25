@@ -123,11 +123,9 @@ public class GuiVoorKlantBewerkingen extends Application{
 		try {
 			if(klant == null){
 				nieuweKlant(voorNaam.getText(),
-	                     achterNaam.getText(),
-	                     tussenVoegsel.getText(),
-	                     email.getText(),
-	                     adres_id
-	                     ); // TODO: 0 voor adres voor nieuw adres
+						achterNaam.getText(),
+						tussenVoegsel.getText(),
+						email.getText()); // TODO: 0 voor adres voor nieuw adres
 			}else
 				klantDAO.updateKlant(klant.getKlant_id(), voorNaam.getText(), achterNaam.getText(),
 						tussenVoegsel.getText(), email.getText(), adres);
