@@ -10,7 +10,7 @@ import model.Bestelling;
 public interface BestellingDAO {
 	//Create
 	public long nieuweBestelling(Bestelling bestelling) throws GeneriekeFoutmelding;
-	public long nieuweBestelling(long klantId, List<Artikel> artikelLijst) throws GeneriekeFoutmelding;
+	public long nieuweBestelling(long klantId, List<Artikel> artikelLijst, boolean isActief) throws GeneriekeFoutmelding;
 
 	//Read
 	public Iterator<Bestelling> getBestellingOpKlantId(long klantId, boolean bestellingActief) throws GeneriekeFoutmelding;
@@ -22,5 +22,7 @@ public interface BestellingDAO {
 	//Delete
 	public void verwijderAlleBestellingenKlant(long klantId) throws GeneriekeFoutmelding;
 	public void verwijderEnkeleBestelling(long bestellingId) throws GeneriekeFoutmelding;
+	public void setAlsInactiefAlleBestellingenKlant(long klantId) throws GeneriekeFoutmelding;
+	public void setEnkeleBestellingInactief(long bestellingId) throws GeneriekeFoutmelding;
 
 }

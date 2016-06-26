@@ -12,13 +12,13 @@ import org.junit.Before;
 import org.junit.Test;
 
 import factories.DAOFactoryMySQL;
+import firebird.ArtikelDAOFireBird;
 import model.Artikel;
-import mysql.ArtikelDAOMySQL;
 
-public class ArtikelDAOMySQLTest {
+public class ArtikelDAOTestFireBird {
 
 	//De klasse die getest wordt
-	ArtikelDAOMySQL artikelDao;
+	ArtikelDAOFireBird artikelDao;
 
 	// Data
 	int id1;
@@ -37,8 +37,7 @@ public class ArtikelDAOMySQLTest {
 	@Before
 	public void setUp() throws Exception {
 		if(artikelDao == null)
-			artikelDao = (ArtikelDAOMySQL) DAOFactoryMySQL.getDAOFactory("MySQL", "HikariCP").getArtikelDAO();
-
+			artikelDao = (ArtikelDAOFireBird) DAOFactoryMySQL.getDAOFactory("FireBird", "HikariCP").getArtikelDAO();
 
 		//		String huidigeDatum = "2016-06-24";
 
@@ -64,9 +63,9 @@ public class ArtikelDAOMySQLTest {
 
 	@After
 	public void tearDown() throws Exception{
-		artikelDao.verWijderVoorHetEchie(id1);
-		artikelDao.verWijderVoorHetEchie(id2);
-		artikelDao.verWijderVoorHetEchie(id3);
+		artikelDao.verwijderVoorHetEchie(id1);
+		artikelDao.verwijderVoorHetEchie(id2);
+		artikelDao.verwijderVoorHetEchie(id3);
 	}
 
 	@Test
@@ -83,8 +82,8 @@ public class ArtikelDAOMySQLTest {
 
 	@Test
 	public void getAlleArtikelen() throws Exception {
-		LinkedHashSet<Artikel> alleArtikelenLijst = artikelDao.getAlleArtikelen(false);
-		LinkedHashSet<Artikel> actieveArtikelenLijst = artikelDao.getAlleArtikelen(true);
+		LinkedHashSet<Artikel> alleArtikelenLijst = artikelDao.getAlleArtikelen(true);
+		LinkedHashSet<Artikel> actieveArtikelenLijst = artikelDao.getAlleArtikelen(false);
 
 		assertThat(actieveArtikelenLijst.size() <= alleArtikelenLijst.size(), is(true));
 
@@ -123,7 +122,6 @@ public class ArtikelDAOMySQLTest {
 
 	// Utility methodes
 	public void testOfBeideArtikelenGelijkZijn(Artikel aGeretouneerd, Artikel a) {
-
 		assertThat(aGeretouneerd.getArtikelId(), is(equalTo(id1)));
 		assertThat(aGeretouneerd.getArtikelNaam(),is(equalTo(a.getArtikelNaam())));
 		assertThat(aGeretouneerd.getArtikelPrijs().compareTo(a.getArtikelPrijs()), is(equalTo(0)));
