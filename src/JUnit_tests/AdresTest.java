@@ -9,6 +9,7 @@ import static org.junit.Assert.*;
 
 /**
  * Created by Milan_Verheij on 10-06-16.
+ * Updated by Milan Verheij on 20-06-16 (nieuw DB-model).
  *
  * J-Unit testklasse om de Adres_POJO te testen
  *
@@ -20,13 +21,17 @@ public class AdresTest {
     private final String TOEVOEGING = "ABCDEF"; // max 6 karakters
     private final int HUISNUMMER = 9999; // meer is onmogelijk in Nederland
     private final String WOONPLAATS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"; // Max 26 karakters
+    private final String DATUMAANMAAK = "TEST DATUM AANMAAK";
+    private final String DATUMGEWIJZIGD = "TEST DATUM GEWIJZIGD";
+    private final String ADRESACTIEF = "TEST ADRES ACTIEF";
     private Adres testAdres;
     private String nieuweWaarde; // Wordt in de set tests gebruikt
 
     @Before
     public void setUp() throws Exception {
         testAdres = new Adres(STRAATNAAM, POSTCODE, TOEVOEGING,
-                HUISNUMMER, WOONPLAATS);
+                HUISNUMMER, WOONPLAATS, DATUMAANMAAK, DATUMGEWIJZIGD,
+                ADRESACTIEF);
     }
 
     @After
@@ -60,8 +65,22 @@ public class AdresTest {
     }
 
     @Test
+    public void getDatumAanmaak() throws Exception {
+        assertTrue(DATUMAANMAAK == testAdres.getDatumAanmaak());
+    }
+
+    @Test
+    public void getDatumGewijzigd() throws Exception {
+        assertTrue(DATUMGEWIJZIGD == testAdres.getDatumGewijzigd());
+    }
+
+    @Test
+    public void getKlantActief() throws Exception {
+        assertTrue(ADRESACTIEF == testAdres.getAdresActief());
+    }
+
+    @Test
     public void setStraatnaam() throws Exception {
-        // TODO: Kan met double de getmethode omzeilen? Maar is dat niet onhandig qua versies
         nieuweWaarde = "Nieuwe Straatnaam";
         testAdres.setStraatnaam(nieuweWaarde);
         assertEquals(nieuweWaarde, testAdres.getStraatnaam());
@@ -96,6 +115,27 @@ public class AdresTest {
     }
 
     @Test
+    public void setDatumAanmaak() throws Exception {
+        nieuweWaarde = "NIEUWE DATUM AANMAAK";
+        testAdres.setDatumAanmaak(nieuweWaarde);
+        assertTrue(nieuweWaarde == testAdres.getDatumAanmaak());
+    }
+
+    @Test
+    public void setDatumGewijzigd() throws Exception {
+        nieuweWaarde = "NIEUWE DATUM GEWIJZIGD";
+        testAdres.setDatumGewijzigd(nieuweWaarde);
+        assertTrue(nieuweWaarde == testAdres.getDatumGewijzigd());
+    }
+
+    @Test
+    public void setKlantActief() throws Exception {
+        nieuweWaarde = "NIEUWE KLANT ACTIEF";
+        testAdres.setAdresActief(nieuweWaarde);
+        assertTrue(nieuweWaarde == testAdres.getAdresActief());
+    }
+
+    @Test
     public void equalsTrue() throws Exception {
         testAdres = new Adres(STRAATNAAM, POSTCODE, TOEVOEGING, HUISNUMMER, WOONPLAATS);
         Adres testAdres2 = new Adres(STRAATNAAM, POSTCODE, TOEVOEGING, HUISNUMMER, WOONPLAATS);
@@ -108,6 +148,4 @@ public class AdresTest {
         Adres testAdres2 = new Adres(STRAATNAAM, POSTCODE, TOEVOEGING, 4321, WOONPLAATS);
         assertFalse(testAdres.equals(testAdres2));
     }
-
-    //TODO: ToString method testen
 }

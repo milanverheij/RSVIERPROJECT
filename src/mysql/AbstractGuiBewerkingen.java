@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 
-import exceptions.RSVIERException;
+import exceptions.GeneriekeFoutmelding;
 import gui.ErrorBox;
 import interfaces.GuiBewerkingen;
 import javafx.scene.control.ListView;
@@ -105,7 +105,7 @@ public abstract class AbstractGuiBewerkingen implements GuiBewerkingen{
 
 	public abstract void zoekBestelling(String bron, ListView<Long> bestellingListView, String klantIdField, String bestellingIdField) throws SQLException;
 
-	public abstract void updateBestelling() throws SQLException, RSVIERException;
+	public abstract void updateBestelling() throws SQLException, GeneriekeFoutmelding;
 
-	public abstract void verwijderEnkeleBestelling() throws RSVIERException, SQLException;
+	public abstract void verwijderEnkeleBestelling() throws GeneriekeFoutmelding, SQLException;
 }

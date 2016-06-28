@@ -1,7 +1,6 @@
 package firebird;
 
-import com.mysql.jdbc.Statement;
-import exceptions.RSVIERException;
+import exceptions.GeneriekeFoutmelding;
 import interfaces.KlantDAO;
 import model.Adres;
 import model.Bestelling;
@@ -50,7 +49,7 @@ public class KlantDAOFireBird extends AbstractDAOFireBird implements KlantDAO {
      * @param email Emailadres van de klant (max 80 karakters).
      * @param adresgegevens Adresgegevens van de klant in een Klant object (zie Klant).
      * @param bestelGegevens Bestelgegevens van de klant in een Bestel object (zie Bestelling).
-     * @throws RSVIERException Foutmelding bij SQLException, info wordt meegegeven.
+     * @throws GeneriekeFoutmelding Foutmelding bij SQLException, info wordt meegegeven.
      */
 
     @Override
@@ -60,7 +59,7 @@ public class KlantDAOFireBird extends AbstractDAOFireBird implements KlantDAO {
                             String email,
                             long adres_id,
                             Adres adresgegevens,
-                            Bestelling bestelGegevens) throws RSVIERException {
+                            Bestelling bestelGegevens) throws GeneriekeFoutmelding {
 
         query = "INSERT INTO KLANT " +
                 "(voornaam, achternaam, tussenvoegsel, email) " +
@@ -121,10 +120,10 @@ public class KlantDAOFireBird extends AbstractDAOFireBird implements KlantDAO {
 
         } catch (SQLException ex) {
             if (ex.getMessage().contains("Duplicate entry"))
-                throw new RSVIERException("KlantDAOMySQL: DEZE KLANT BESTAAT AL IN DE DATABASE MET ID: " +
+                throw new GeneriekeFoutmelding("KlantDAOMySQL: DEZE KLANT BESTAAT AL IN DE DATABASE MET ID: " +
                         getKlantID(voornaam, achternaam, email));
             else
-                throw new RSVIERException("KlantDAOMySQL: SQL FOUT TIJDENS AANMAKEN KLANT: " + ex.getMessage());
+                throw new GeneriekeFoutmelding("KlantDAOMySQL: SQL FOUT TIJDENS AANMAKEN KLANT: " + ex.getMessage());
         }
     }
 
@@ -139,10 +138,10 @@ public class KlantDAOFireBird extends AbstractDAOFireBird implements KlantDAO {
      * @param nieuweKlant Klantobject van de klant die gemaakt dient te worden.
      * @param adres_id Er kan een adres_id worden meegegeven om een bestaand adres te koppelen.
      * @return klant_id van de nieuwe klant.
-     * @throws RSVIERException
+     * @throws GeneriekeFoutmelding
      */
     @Override
-    public long nieuweKlant(Klant nieuweKlant, long adres_id) throws RSVIERException {
+    public long nieuweKlant(Klant nieuweKlant, long adres_id) throws GeneriekeFoutmelding {
 
         // Als er geen klant wordt meegegeven wordt een fout gegooid.
         if (nieuweKlant != null) {
@@ -152,7 +151,7 @@ public class KlantDAOFireBird extends AbstractDAOFireBird implements KlantDAO {
             return nieuwId;
         }
         else {
-            throw new RSVIERException("KlantDAOMySQL: KAN GEEN KLANT AANMAKEN MET NULL OBJECT");
+            throw new GeneriekeFoutmelding("KlantDAOMySQL: KAN GEEN KLANT AANMAKEN MET NULL OBJECT");
         }
     }
 
@@ -163,12 +162,12 @@ public class KlantDAOFireBird extends AbstractDAOFireBird implements KlantDAO {
      * @param voornaam De voornaam van de klant (max 50 karakters).
      * @param achternaam De achternaam van de klant (max 51 karakters).
      * @param adresgegevens De adresgegevens van de klant in een Adres object (Adres).
-     * @throws RSVIERException Foutmelding bij SQLException, info wordt meegegeven.
+     * @throws GeneriekeFoutmelding Foutmelding bij SQLException, info wordt meegegeven.
      */
     @Override
     public long nieuweKlant(String voornaam,
                             String achternaam,
-                            Adres adresgegevens) throws RSVIERException {
+                            Adres adresgegevens) throws GeneriekeFoutmelding {
         long nieuwID = nieuweKlant(voornaam, achternaam, "", "", 0, adresgegevens, null);
         return nieuwID;
     }
@@ -184,7 +183,7 @@ public class KlantDAOFireBird extends AbstractDAOFireBird implements KlantDAO {
      */
     @Override
     public long nieuweKlant(String voornaam,
-                            String achternaam) throws RSVIERException {
+                            String achternaam) throws GeneriekeFoutmelding {
         long nieuwID = nieuweKlant(voornaam, achternaam, null);
         return nieuwID;
     }
@@ -201,7 +200,7 @@ public class KlantDAOFireBird extends AbstractDAOFireBird implements KlantDAO {
      * @return Het klant_id van de klant
      */
     @Override
-    public long getKlantID(String voornaam, String achternaam, String email) throws RSVIERException {
+    public long getKlantID(String voornaam, String achternaam, String email) throws GeneriekeFoutmelding {
         String query = "SELECT klant_id " +
                 "FROM KLANT " +
                 "WHERE " +
@@ -222,13 +221,13 @@ public class KlantDAOFireBird extends AbstractDAOFireBird implements KlantDAO {
             ) {
                 // Als er een resultaat gevonden is bestaat de klant niet en wordt er een foutmelding gegooid.
                 if (!rs.next())
-                    throw new RSVIERException("KlantDAOMySQL: KLANT NIET GEVONDEN");
+                    throw new GeneriekeFoutmelding("KlantDAOMySQL: KLANT NIET GEVONDEN");
                 else {
                     return rs.getLong(1); // Door if-statement is rs al bij next()
                 }
             }
         } catch (SQLException ex) {
-            throw new RSVIERException("KlantDAOMySQL: SQL FOUT TIJDENS OPZOEKEN KLANT ID: " + ex.getMessage());
+            throw new GeneriekeFoutmelding("KlantDAOMySQL: SQL FOUT TIJDENS OPZOEKEN KLANT ID: " + ex.getMessage());
         }
     }
 
@@ -236,10 +235,10 @@ public class KlantDAOFireBird extends AbstractDAOFireBird implements KlantDAO {
      * Deze method haalt alle klanten op uit de database en stopt ze in een ArrayList waarna, zie @return.
      *
      * @return een ListIterator wordt teruggegeven van de ArrayList met daarin Klant-objecten.
-     * @throws RSVIERException Foutmelding bij SQLException, info wordt meegegeven.
+     * @throws GeneriekeFoutmelding Foutmelding bij SQLException, info wordt meegegeven.
      */
     @Override
-    public ListIterator<Klant> getAlleKlanten() throws RSVIERException {
+    public ListIterator<Klant> getAlleKlanten() throws GeneriekeFoutmelding {
         String query = "SELECT * FROM KLANT";
         try (
                 Connection connection = connPool.verkrijgConnectie();
@@ -255,7 +254,7 @@ public class KlantDAOFireBird extends AbstractDAOFireBird implements KlantDAO {
             }
 
         } catch (SQLException ex) {
-            throw new RSVIERException("KlantDAOMySQL: SQL FOUT TIJDEN OPHALEN KLANTEN");
+            throw new GeneriekeFoutmelding("KlantDAOMySQL: SQL FOUT TIJDEN OPHALEN KLANTEN");
         }
     }
 
@@ -267,10 +266,10 @@ public class KlantDAOFireBird extends AbstractDAOFireBird implements KlantDAO {
      *
      * @param klant De klantgegevens in een Klant-Object dat opgezocht dient te worden.
      * @return een ListIterator wordt teruggegeven van de ArrayList met daarin Klant-objecten.
-     * @throws RSVIERException
+     * @throws GeneriekeFoutmelding
      */
     @Override
-    public ListIterator<Klant> getKlantOpKlant(Klant klant) throws RSVIERException {
+    public ListIterator<Klant> getKlantOpKlant(Klant klant) throws GeneriekeFoutmelding {
         if (klant != null && klant.getKlant_id() != -1 ) {
             String query = "SELECT * FROM " +
                     "KLANT WHERE " +
@@ -297,10 +296,10 @@ public class KlantDAOFireBird extends AbstractDAOFireBird implements KlantDAO {
                     return klantenLijst.listIterator();
                 }
             } catch (SQLException ex) {
-                throw new RSVIERException("KlantDAOMySQL: SQL FOUT TIJDENS OPZOEKEN KLANT " + ex.getMessage());
+                throw new GeneriekeFoutmelding("KlantDAOMySQL: SQL FOUT TIJDENS OPZOEKEN KLANT " + ex.getMessage());
             }
         } else {
-            throw new RSVIERException("KlantDAOMySQL: ER DIENT EEN GEVULD KLANTOBJECT MEEGEGEVEN TE WORDEN OM EEN KLANT TE ZOEKEN");
+            throw new GeneriekeFoutmelding("KlantDAOMySQL: ER DIENT EEN GEVULD KLANTOBJECT MEEGEGEVEN TE WORDEN OM EEN KLANT TE ZOEKEN");
         }
     }
 
@@ -310,10 +309,10 @@ public class KlantDAOFireBird extends AbstractDAOFireBird implements KlantDAO {
      *
      * @param klantId Het klantId van de op te zoeken klant.
      * @return een ListIterator wordt teruggegeven van de ArrayList met daarin Klant-objecten.
-     * @throws RSVIERException Foutmelding bij SQLException, info wordt meegegeven.
+     * @throws GeneriekeFoutmelding Foutmelding bij SQLException, info wordt meegegeven.
      */
     @Override
-    public ListIterator<Klant> getKlantOpKlant(long klantId) throws RSVIERException {
+    public ListIterator<Klant> getKlantOpKlant(long klantId) throws GeneriekeFoutmelding {
         return getKlantOpKlant(new Klant(klantId, "", "", "", "", null));
     }
 
@@ -323,10 +322,10 @@ public class KlantDAOFireBird extends AbstractDAOFireBird implements KlantDAO {
      *
      * @param voornaam Voornaam van de te zoeken klant(en).
      * @return een ListIterator wordt teruggegeven van de ArrayList met daarin Klant-objecten.
-     * @throws RSVIERException Foutmelding bij SQLException, info wordt meegegeven.
+     * @throws GeneriekeFoutmelding Foutmelding bij SQLException, info wordt meegegeven.
      */
     @Override
-    public ListIterator<Klant> getKlantOpKlant(String voornaam) throws RSVIERException {
+    public ListIterator<Klant> getKlantOpKlant(String voornaam) throws GeneriekeFoutmelding {
         return getKlantOpKlant(new Klant(0, voornaam, "", "", "", null));
     }
 
@@ -337,11 +336,11 @@ public class KlantDAOFireBird extends AbstractDAOFireBird implements KlantDAO {
      * @param voornaam Voornaam van de te zoeken klant(en).
      * @param achternaam Achternaam van de te zoeken klant(en).
      * @return een ListIterator wordt teruggegeven van de ArrayList met daarin Klant-objecten.
-     * @throws RSVIERException Foutmelding bij SQLException, info wordt meegegeven.
+     * @throws GeneriekeFoutmelding Foutmelding bij SQLException, info wordt meegegeven.
      */
     @Override
     public ListIterator<Klant> getKlantOpKlant(String voornaam,
-                                               String achternaam) throws RSVIERException {
+                                               String achternaam) throws GeneriekeFoutmelding {
         return getKlantOpKlant(new Klant(0, voornaam, achternaam, "", "", null));
     }
 
@@ -353,11 +352,11 @@ public class KlantDAOFireBird extends AbstractDAOFireBird implements KlantDAO {
      *
      * @param adresgegevens Een Adres-object van de te zoeken klant(en).
      * @return een ListIterator wordt teruggegeven van de ArrayList met daarin Klant-objecten.
-     * @throws RSVIERException Foutmelding bij SQLException, info wordt meegegeven.
+     * @throws GeneriekeFoutmelding Foutmelding bij SQLException, info wordt meegegeven.
      */
     @Override
-    public ListIterator<Klant> getKlantOpAdres(Adres adresgegevens) throws RSVIERException {
-        String query = "SELECT KLANT.* " +
+    public ListIterator<Klant> getKlantOpAdres(Adres adresgegevens) throws GeneriekeFoutmelding {
+        String query = "SELECT DISTINCT KLANT.* " +
                 "FROM " +
                 "KLANT_HEEFT_ADRES, ADRES, KLANT " +
                 "WHERE " +
@@ -368,9 +367,7 @@ public class KlantDAOFireBird extends AbstractDAOFireBird implements KlantDAO {
                 "woonplaats LIKE ? " +
                 "AND " +
                 "KLANT_HEEFT_ADRES.adres_id_adres = ADRES.ADRES_id AND " +
-                "KLANT_HEEFT_ADRES.klant_id_klant = KLANT.KLANT_ID " +
-                "GROUP BY klant_id " +
-                "ORDER BY klant_id;";
+                "KLANT_HEEFT_ADRES.klant_id_klant = KLANT.KLANT_ID; ";
         try (
                 Connection connection = connPool.verkrijgConnectie();
                 PreparedStatement statement = connection.prepareStatement(query);
@@ -389,7 +386,7 @@ public class KlantDAOFireBird extends AbstractDAOFireBird implements KlantDAO {
             }
 
         } catch (SQLException ex) {
-            throw new RSVIERException("KlantDAOMySQL: SQL FOUT TIJDENS OPZOEKEN KLANT OP VOLLE ADRES");
+            throw new GeneriekeFoutmelding("KlantDAOMySQL: SQL FOUT TIJDENS OPZOEKEN KLANT OP VOLLE ADRES: " + ex.getMessage());
         }
     }
 
@@ -399,11 +396,11 @@ public class KlantDAOFireBird extends AbstractDAOFireBird implements KlantDAO {
      *
      * @param straatnaam Straatnaam van de te zoeken klant(en).
      * @return een ListIterator wordt teruggegeven van de ArrayList met daarin Klant-objecten.
-     * @throws RSVIERException Foutmelding bij SQLException, info wordt meegegeven.
+     * @throws GeneriekeFoutmelding Foutmelding bij SQLException, info wordt meegegeven.
      */
 
     @Override
-    public ListIterator<Klant> getKlantOpAdres(String straatnaam) throws RSVIERException {
+    public ListIterator<Klant> getKlantOpAdres(String straatnaam) throws GeneriekeFoutmelding {
         return getKlantOpAdres(new Adres(straatnaam, "", "", 0, ""));
     }
 
@@ -414,11 +411,11 @@ public class KlantDAOFireBird extends AbstractDAOFireBird implements KlantDAO {
      * @param postcode De postcode van de te zoeken klant(en).
      * @param huisnummer Het huisnummer van de te zoeken klant(en).
      * @return een ListIterator wordt teruggegeven van de ArrayList met daarin Klant-objecten.
-     * @throws RSVIERException Foutmelding bij SQLException, info wordt meegegeven.
+     * @throws GeneriekeFoutmelding Foutmelding bij SQLException, info wordt meegegeven.
      */
     @Override
     public ListIterator<Klant> getKlantOpAdres(String postcode,
-                                               int huisnummer) throws RSVIERException {
+                                               int huisnummer) throws GeneriekeFoutmelding {
         return getKlantOpAdres(new Adres("", postcode, "", huisnummer, ""));
     }
 
@@ -428,10 +425,10 @@ public class KlantDAOFireBird extends AbstractDAOFireBird implements KlantDAO {
      *
      * @param bestellingId Het bestelId van de te zoeken klant(en).
      * @return een ListIterator wordt teruggegeven van de ArrayList met daarin Klant-objecten.
-     * @throws RSVIERException Foutmelding bij SQLException, info wordt meegegeven.
+     * @throws GeneriekeFoutmelding Foutmelding bij SQLException, info wordt meegegeven.
      */
     @Override
-    public ListIterator<Klant> getKlantOpBestelling(long bestellingId) throws RSVIERException {
+    public ListIterator<Klant> getKlantOpBestelling(long bestellingId) throws GeneriekeFoutmelding {
         String query = "SELECT klant_id FROM " +
                 "BESTELLING WHERE " +
                 "bestelling_id = ? " +
@@ -450,7 +447,7 @@ public class KlantDAOFireBird extends AbstractDAOFireBird implements KlantDAO {
                 }
             }
         } catch (SQLException ex) {
-            throw new RSVIERException("KlantDAOMySQL: SQL FOUT TIJDENS OPZOEKEN KLANT OP BESTELLINGID: " +
+            throw new GeneriekeFoutmelding("KlantDAOMySQL: SQL FOUT TIJDENS OPZOEKEN KLANT OP BESTELLINGID: " +
                     ex.getMessage());
         }
         return null;
@@ -466,14 +463,14 @@ public class KlantDAOFireBird extends AbstractDAOFireBird implements KlantDAO {
      * @param achternaam De 'gewijzigde' achternaam van de klant.
      * @param tussenvoegsel Het 'gewijzigde' tussenvoegsel van de klant.
      * @param email Het gewijzigde emailadres van de klant.
-     * @throws RSVIERException Foutmelding bij SQLException, info wordt meegegeven.
+     * @throws GeneriekeFoutmelding Foutmelding bij SQLException, info wordt meegegeven.
      */
     @Override
     public void updateKlant(Long KlantId,
                             String voornaam,
                             String achternaam,
                             String tussenvoegsel,
-                            String email) throws RSVIERException {
+                            String email) throws GeneriekeFoutmelding {
         String query = "UPDATE KLANT " +
                 "SET " +
                 "voornaam = ?, " +
@@ -494,7 +491,7 @@ public class KlantDAOFireBird extends AbstractDAOFireBird implements KlantDAO {
             statement.execute();
 
         } catch (SQLException ex) {
-            throw new RSVIERException("KlantDAOMySQL: SQL FOUT TIJDENS UPDATEN KLANT");
+            throw new GeneriekeFoutmelding("KlantDAOMySQL: SQL FOUT TIJDENS UPDATEN KLANT");
         }
     }
 
@@ -508,7 +505,7 @@ public class KlantDAOFireBird extends AbstractDAOFireBird implements KlantDAO {
      * @param tussenvoegsel Het 'gewijzigde' tussenvoegsel van de klant.
      * @param email Het 'gewijzigde' emailadres van de klant.
      * @param adresgegevens De 'gewijzigde' adresgegevens van de klant in Klantobject.
-     * @throws RSVIERException Foutmelding bij SQLException, info wordt meegegeven.
+     * @throws GeneriekeFoutmelding Foutmelding bij SQLException, info wordt meegegeven.
      */
     @Override
     public void updateKlant(long KlantId, String voornaam,
@@ -516,7 +513,7 @@ public class KlantDAOFireBird extends AbstractDAOFireBird implements KlantDAO {
                             String tussenvoegsel,
                             String email,
                             long adres_id,
-                            Adres adresgegevens) throws RSVIERException {
+                            Adres adresgegevens) throws GeneriekeFoutmelding {
         updateKlant(KlantId, voornaam, achternaam, tussenvoegsel, email);
         adresDAO = new AdresDAOFireBird();
         adresDAO.updateAdres(adres_id, adresgegevens);
@@ -529,11 +526,11 @@ public class KlantDAOFireBird extends AbstractDAOFireBird implements KlantDAO {
      * tevens ook op non-actief gezet.
      *
      * @param klantId Klant_id van de te verwijderen klant.
-     * @throws RSVIERException Foutmelding bij SQLException, info wordt meegegeven.
+     * @throws GeneriekeFoutmelding Foutmelding bij SQLException, info wordt meegegeven.
      */
 
     @Override
-    public long schakelStatusKlant(long klantId, int status) throws RSVIERException {
+    public long schakelStatusKlant(long klantId, int status) throws GeneriekeFoutmelding {
         String query =
                 "UPDATE KLANT " +
                         "SET " +
@@ -556,18 +553,18 @@ public class KlantDAOFireBird extends AbstractDAOFireBird implements KlantDAO {
 
             return verwijderdID;
         } catch (SQLException ex) {
-            throw new RSVIERException("KlantDAOMySQL: SQL FOUT TIJDENS KLANT OP ID INACTIEF ZETTEN" + ex.getMessage());
+            throw new GeneriekeFoutmelding("KlantDAOMySQL: SQL FOUT TIJDENS KLANT OP ID INACTIEF ZETTEN" + ex.getMessage());
         }
     }
 
     @Override
-    public void schakelStatusKlant(String voornaam, String achternaam) throws RSVIERException {
+    public void schakelStatusKlant(String voornaam, String achternaam) throws GeneriekeFoutmelding {
         /**
          * Methode om een klant zijn/haar status te switchen op basis van alleen voor- en achternaam;
          *
          * @param voornaam Voornaam van de te verwijderen
          * @param achternaam Achternaam van de te verwijderen klant
-         * @throws RSVIERException Foutmelding bij SQLException, info wordt meegegeven.
+         * @throws GeneriekeFoutmelding Foutmelding bij SQLException, info wordt meegegeven.
          */
 
         ListIterator<Klant> klantListIterator = getKlantOpKlant(voornaam, achternaam);
@@ -586,12 +583,12 @@ public class KlantDAOFireBird extends AbstractDAOFireBird implements KlantDAO {
      * @param voornaam De voornaam van de te verwijderen klant.
      * @param achternaam De achternaam van de te verwijderen klant.
      * @param tussenvoegsel Het tussenvoegsel van de te verwijderen klant.
-     * @throws RSVIERException Foutmelding bij SQLException, info wordt meegegeven.
+     * @throws GeneriekeFoutmelding Foutmelding bij SQLException, info wordt meegegeven.
      */
     @Override
     public void schakelStatusKlant(String voornaam,
                                    String achternaam,
-                                   String tussenvoegsel) throws RSVIERException {
+                                   String tussenvoegsel) throws GeneriekeFoutmelding {
         ListIterator<Klant> klantListIterator =
                 getKlantOpKlant(new Klant(0, voornaam, achternaam, tussenvoegsel, "", null));
 
@@ -607,10 +604,10 @@ public class KlantDAOFireBird extends AbstractDAOFireBird implements KlantDAO {
      * Methode om een klant te verwijderen op basis van een bestelnummer.
      *
      * @param bestellingId Bestel-ID van de te verwijderen klant.
-     * @throws RSVIERException Foutmelding bij SQLException, info wordt meegegeven.
+     * @throws GeneriekeFoutmelding Foutmelding bij SQLException, info wordt meegegeven.
      */
     @Override
-    public long verwijderKlantOpBestellingId(long bestellingId) throws RSVIERException {
+    public long verwijderKlantOpBestellingId(long bestellingId) throws GeneriekeFoutmelding {
 
         //TODO: Aanpassen als bestelling weer klaar is
         // Klant wordt opgehaald uit de database om op basis van BestelID het klantID te vinden.
@@ -636,9 +633,9 @@ public class KlantDAOFireBird extends AbstractDAOFireBird implements KlantDAO {
      *
      * @param resultSet De resultset met klantrijen.
      * @return Een ArrayList met Klant objecten.
-     * @throws RSVIERException Foutmelding bij SQLException, info wordt meegegeven.
+     * @throws GeneriekeFoutmelding Foutmelding bij SQLException, info wordt meegegeven.
      */
-    private ArrayList<Klant> voegResultSetInLijst(ResultSet resultSet) throws RSVIERException {
+    private ArrayList<Klant> voegResultSetInLijst(ResultSet resultSet) throws GeneriekeFoutmelding {
         try {
             klantenLijst = new ArrayList<>();
             int klantenTeller = 0;
@@ -661,12 +658,12 @@ public class KlantDAOFireBird extends AbstractDAOFireBird implements KlantDAO {
 
             return klantenLijst;
         } catch (SQLException ex) {
-            throw new RSVIERException("KlantDAOMySQL: FOUT TIJDENS RESULTSET VOEGEN IN LIJST");
+            throw new GeneriekeFoutmelding("KlantDAOMySQL: FOUT TIJDENS RESULTSET VOEGEN IN LIJST");
         }
     }
 
     // TODO: Tijdelijk om naar console te printen, aangezien later naar GUI gaat deze methode er weer uit
-    public void printKlantenInConsole(ListIterator<Klant> klantenIterator) throws RSVIERException {
+    public void printKlantenInConsole(ListIterator<Klant> klantenIterator) throws GeneriekeFoutmelding {
 
         // Per klant een print, per klant alle adressen
         while (klantenIterator.hasNext()) {

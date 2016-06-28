@@ -63,7 +63,7 @@ SET TERM ; ^
 -- Table `RSVIERPROJECTDEEL2`.`KLANT_HEEFT_ADRES`
 -- -----------------------------------------------------
 RECREATE TABLE KLANT_HEEFT_ADRES (
-  klant_id_klant INT NOT NULL PRIMARY KEY,
+  klant_id_klant INT NOT NULL,
   adres_id_adres INT NOT NULL,
   CONSTRAINT klant_id_pa
     FOREIGN KEY (klant_id_klant)
@@ -77,7 +77,7 @@ RECREATE TABLE KLANT_HEEFT_ADRES (
     ON UPDATE NO ACTION);
 
 CREATE INDEX adres_id_idx ON KLANT_HEEFT_ADRES (adres_id_adres);
-
+CREATE UNIQUE INDEX uniekeCombi ON KLANT_HEEFT_ADRES (klant_id_klant, adres_id_adres);
 
 -- -----------------------------------------------------
 -- Table `RSVIERPROJECTDEEL2`.`BESTELLING`
@@ -122,6 +122,19 @@ RECREATE TABLE PRIJS (
 
 CREATE INDEX artikel_id_pr_idx ON PRIJS (artikel_id);
 
+CREATE GENERATOR gen_prijs_id;
+SET GENERATOR gen_prijs_id TO 0;
+
+SET TERM ^ ;
+CREATE TRIGGER trigger_prijs_id FOR prijs
+ACTIVE BEFORE INSERT POSITION 0
+AS
+BEGIN
+IF (NEW."PRIJS_ID" IS NULL)
+THEN NEW."PRIJS_ID" = GEN_ID(gen_prijs_id, 1);
+END^
+SET TERM ; ^
+
 -- -----------------------------------------------------
 -- Table `RSVIERPROJECTDEEL2`.`ARTIKEL`
 -- -----------------------------------------------------
@@ -129,8 +142,7 @@ CREATE INDEX artikel_id_pr_idx ON PRIJS (artikel_id);
 RECREATE TABLE ARTIKEL (
   artikel_id INT NOT NULL PRIMARY KEY,
   omschrijving VARCHAR(45) NOT NULL,
-  prijs VARCHAR(10) NOT NULL,
-  prijsId INT NOT NULL,
+  prijsId INT DEFAULT 0,
   datumAanmaak TIMESTAMP DEFAULT 'NOW' NOT NULL,
   verwachteLevertijd VARCHAR(10) DEFAULT NULL,
   inAssortisement CHAR(1) DEFAULT 1,

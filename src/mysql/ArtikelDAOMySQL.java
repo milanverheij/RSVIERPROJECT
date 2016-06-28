@@ -6,8 +6,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.LinkedHashSet;
-
-import exceptions.RSVIERException;
+import exceptions.GeneriekeFoutmelding;
 import logger.DeLogger;
 import model.Artikel;
 
@@ -33,7 +32,7 @@ public class ArtikelDAOMySQL extends AbstractDAOMySQL implements interfaces.Arti
 	// Onderstaande methode maakt een nieuw artikel aan in de ARTIKEL tabel, zet de prijs gegevens van het artikel in de PRIJS
 	// tabel en zorgt ervoor dat de ARTIKEL tabel het juiste prijs_id heeft.
 	@Override 
-	public int nieuwArtikel(Artikel aNieuw) throws RSVIERException {
+	public int nieuwArtikel(Artikel aNieuw) throws GeneriekeFoutmelding {
 
 		prijsQuery = "INSERT INTO PRIJS (prijs) VALUES (?);";
 		artikelQuery = "INSERT INTO ARTIKEL (omschrijving, prijs_id, verwachteLevertijd, inAssortiment)"
@@ -86,14 +85,14 @@ public class ArtikelDAOMySQL extends AbstractDAOMySQL implements interfaces.Arti
 		}
 		catch (SQLException ex) {
 			DeLogger.getLogger().error("SQL fout tijdens invoeren nieuw artikel");
-			throw new RSVIERException("Niew artikel aanmaken kan niet");
+			throw new GeneriekeFoutmelding("Niew artikel aanmaken kan niet");
 		}
 	}
 
 
 	//Read
 	@Override
-	public Artikel getArtikel(int artikelId) throws RSVIERException {
+	public Artikel getArtikel(int artikelId) throws GeneriekeFoutmelding {
 
 		artikelQuery = "SELECT * FROM ARTIKEL WHERE artikel_id = ? ;";
 		prijsQuery	= "SELECT prijs FROM PRIJS WHERE prijs_id = ? ;";
@@ -136,7 +135,7 @@ public class ArtikelDAOMySQL extends AbstractDAOMySQL implements interfaces.Arti
 		}
 		catch (SQLException ex) {
 			DeLogger.getLogger().error("TODO");
-			throw new RSVIERException("TODO");
+			throw new GeneriekeFoutmelding("TODO");
 		}
 	}
 
@@ -145,7 +144,7 @@ public class ArtikelDAOMySQL extends AbstractDAOMySQL implements interfaces.Arti
 	// artikelActief = 0 vraagt zowel de actieve als inactieve artikelen op.
 	// artikelActief = 1 vraagt alleen de actieve artikelen op.
 	@Override
-	public LinkedHashSet<Artikel> getAlleArtikelen(int artikelActief) throws RSVIERException {
+	public LinkedHashSet<Artikel> getAlleArtikelen(int artikelActief) throws GeneriekeFoutmelding {
 
 		// Alle artikelen worden in een Set opgeslagen
 		LinkedHashSet<Artikel> artikelSet = new LinkedHashSet<>()	;
@@ -182,7 +181,7 @@ public class ArtikelDAOMySQL extends AbstractDAOMySQL implements interfaces.Arti
 		}
 		catch (SQLException ex) {
 			DeLogger.getLogger().error("SQL fout tijdens opvragen van alle " + ((artikelActief == 0) ? "artikelen " : "actieve artikelen "));
-			throw new RSVIERException("SQL fout tijdens opvragen van alle " + ((artikelActief == 0) ? "artikelen " : "actieve artikelen "));
+			throw new GeneriekeFoutmelding("SQL fout tijdens opvragen van alle " + ((artikelActief == 0) ? "artikelen " : "actieve artikelen "));
 		}
 	}
 
@@ -194,7 +193,7 @@ public class ArtikelDAOMySQL extends AbstractDAOMySQL implements interfaces.Arti
 
 	//Update
 	@Override
-	public void updateArtikel(int artikelId, Artikel aNieuw) throws RSVIERException {
+	public void updateArtikel(int artikelId, Artikel aNieuw) throws GeneriekeFoutmelding {
 
 		boolean dePrijsIsVerandert = false;
 		int prijsIdUitDataBase = 0;
@@ -287,14 +286,14 @@ public class ArtikelDAOMySQL extends AbstractDAOMySQL implements interfaces.Arti
 		}
 		catch (SQLException ex) {
 			DeLogger.getLogger().error("SQL fout tijdens updaten van artikel met artikel_id " + artikelId);
-			throw new RSVIERException("SQL fout tijdens updaten van artikel met artikel_id " + artikelId);
+			throw new GeneriekeFoutmelding("SQL fout tijdens updaten van artikel met artikel_id " + artikelId);
 		}
 
 	}
 
 	//Delete
 	@Override
-	public void verwijderArtikel(Artikel a) throws RSVIERException {
+	public void verwijderArtikel(Artikel a) throws GeneriekeFoutmelding {
 
 		artikelQuery = "UPDATE ARTIKEL SET inAssortiment = 0 WHERE artikel_id = ?;";
 
@@ -309,7 +308,7 @@ public class ArtikelDAOMySQL extends AbstractDAOMySQL implements interfaces.Arti
 		}
 		catch (SQLException ex) {
 			DeLogger.getLogger().error("SQL fout tijdens het verwijderen van artikel met id " + a.getArtikelId());
-			throw new RSVIERException("SQL fout tijdens het verwijderen van artikel met id " + a.getArtikelId());
+			throw new GeneriekeFoutmelding("SQL fout tijdens het verwijderen van artikel met id " + a.getArtikelId());
 		}
 
 
@@ -331,9 +330,8 @@ public class ArtikelDAOMySQL extends AbstractDAOMySQL implements interfaces.Arti
 			connection.commit();
 		}
 		catch (SQLException ex) {
-			ex.printStackTrace();
 			DeLogger.getLogger().error("SQL fout tijdens het verwijderen van artikel met id " + a.getArtikelId());
-			throw new RSVIERException("SQL fout tijdens het verwijderen van artikel met id " + a.getArtikelId());
+			throw new GeneriekeFoutmelding("SQL fout tijdens het verwijderen van artikel met id " + a.getArtikelId());
 		}
 		 */
 	}

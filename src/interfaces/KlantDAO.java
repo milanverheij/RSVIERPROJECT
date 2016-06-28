@@ -1,6 +1,6 @@
 package interfaces;
 
-import exceptions.RSVIERException;
+import exceptions.GeneriekeFoutmelding;
 import model.Adres;
 import model.Bestelling;
 import model.Klant;
@@ -34,7 +34,7 @@ public interface KlantDAO {
      * @param email Emailadres van de klant (max 80 karakters).
      * @param adresgegevens Adresgegevens van de klant in een Klant object (zie Klant).
      * @param bestelGegevens Bestelgegevens van de klant in een Bestel object (zie Bestelling).
-     * @throws RSVIERException Foutmelding bij SQLException, info wordt meegegeven.
+     * @throws GeneriekeFoutmelding Foutmelding bij SQLException, info wordt meegegeven.
      */
     long nieuweKlant(String voornaam,
                      String achternaam,
@@ -42,7 +42,7 @@ public interface KlantDAO {
                      String email,
                      long adres_id,
                      Adres adresgegevens,
-                     Bestelling bestelGegevens) throws RSVIERException;
+                     Bestelling bestelGegevens) throws GeneriekeFoutmelding;
 
     /**
      * Deze methode kan een Klant-object ontvangen en maakt op basis daarvan een nieuwe
@@ -55,9 +55,9 @@ public interface KlantDAO {
      * @param nieuweKlant Klantobject van de klant die gemaakt dient te worden.
      * @param adres_id Er kan een adres_id worden meegegeven om een bestaand adres te koppelen.
      * @return klant_id van de nieuwe klant.
-     * @throws RSVIERException
+     * @throws GeneriekeFoutmelding
      */
-    long nieuweKlant(Klant nieuweKlant, long adres_id) throws RSVIERException;
+    long nieuweKlant(Klant nieuweKlant, long adres_id) throws GeneriekeFoutmelding;
 
     /**
      * Maakt een nieuwe klant aan in de database met voornaam, achternaam en adresgegevens.
@@ -66,11 +66,11 @@ public interface KlantDAO {
      * @param voornaam De voornaam van de klant (max 50 karakters).
      * @param achternaam De achternaam van de klant (max 51 karakters).
      * @param adresgegevens De adresgegevens van de klant in een Adres object (Adres).
-     * @throws RSVIERException Foutmelding bij SQLException, info wordt meegegeven.
+     * @throws GeneriekeFoutmelding Foutmelding bij SQLException, info wordt meegegeven.
      */
     long nieuweKlant(String voornaam,
                      String achternaam,
-                     Adres adresgegevens) throws RSVIERException;
+                     Adres adresgegevens) throws GeneriekeFoutmelding;
 
     /**
      * Maakt een nieuwe klant aan in de database met voor- en achternaam.
@@ -82,7 +82,7 @@ public interface KlantDAO {
      * @param achternaam De achternaam van de klant (max 51 karakters).
      */
     long nieuweKlant(String voornaam,
-                     String achternaam) throws RSVIERException;
+                     String achternaam) throws GeneriekeFoutmelding;
 
     /** READ METHODS */
 
@@ -96,14 +96,14 @@ public interface KlantDAO {
      */
     long getKlantID(String voornaam,
                     String achternaam,
-                    String email) throws RSVIERException;
+                    String email) throws GeneriekeFoutmelding;
     /**
      * Deze method haalt alle klanten op uit de database en stopt ze in een ArrayList waarna, zie @return.
      *
      * @return een ListIterator wordt teruggegeven van de ArrayList met daarin Klant-objecten.
-     * @throws RSVIERException Foutmelding bij SQLException, info wordt meegegeven.
+     * @throws GeneriekeFoutmelding Foutmelding bij SQLException, info wordt meegegeven.
      */
-    ListIterator<Klant> getAlleKlanten() throws RSVIERException;
+    ListIterator<Klant> getAlleKlanten() throws GeneriekeFoutmelding;
 
     /**
      * HOOFD READ METHODE.
@@ -113,9 +113,9 @@ public interface KlantDAO {
      *
      * @param klant De klantgegevens in een Klant-Object dat opgezocht dient te worden.
      * @return een ListIterator wordt teruggegeven van de ArrayList met daarin Klant-objecten.
-     * @throws RSVIERException
+     * @throws GeneriekeFoutmelding
      */
-    ListIterator<Klant> getKlantOpKlant(Klant klant) throws RSVIERException;
+    ListIterator<Klant> getKlantOpKlant(Klant klant) throws GeneriekeFoutmelding;
 
     /**
      * Deze methode haalt op basis van klantId klanten (als het goed is 1) op uit de database en geeft dit
@@ -123,9 +123,9 @@ public interface KlantDAO {
      *
      * @param klantId Het klantId van de op te zoeken klant.
      * @return een ListIterator wordt teruggegeven van de ArrayList met daarin Klant-objecten.
-     * @throws RSVIERException Foutmelding bij SQLException, info wordt meegegeven.
+     * @throws GeneriekeFoutmelding Foutmelding bij SQLException, info wordt meegegeven.
      */
-    ListIterator<Klant> getKlantOpKlant(long klantId) throws RSVIERException;
+    ListIterator<Klant> getKlantOpKlant(long klantId) throws GeneriekeFoutmelding;
 
     /**
      * Deze methode haalt op basis van de voornaam van een klant informatie uit de database en geeft dit
@@ -133,9 +133,9 @@ public interface KlantDAO {
      *
      * @param voornaam Voornaam van de te zoeken klant(en).
      * @return een ListIterator wordt teruggegeven van de ArrayList met daarin Klant-objecten.
-     * @throws RSVIERException Foutmelding bij SQLException, info wordt meegegeven.
+     * @throws GeneriekeFoutmelding Foutmelding bij SQLException, info wordt meegegeven.
      */
-    ListIterator<Klant> getKlantOpKlant(String voornaam) throws RSVIERException;
+    ListIterator<Klant> getKlantOpKlant(String voornaam) throws GeneriekeFoutmelding;
 
     /**
      * Deze methode haalt op basis van de voor- en achternaam an een klant informatie uit de database en geeft dit
@@ -144,10 +144,10 @@ public interface KlantDAO {
      * @param voornaam Voornaam van de te zoeken klant(en).
      * @param achternaam Achternaam van de te zoeken klant(en).
      * @return een ListIterator wordt teruggegeven van de ArrayList met daarin Klant-objecten.
-     * @throws RSVIERException Foutmelding bij SQLException, info wordt meegegeven.
+     * @throws GeneriekeFoutmelding Foutmelding bij SQLException, info wordt meegegeven.
      */
     ListIterator<Klant> getKlantOpKlant(String voornaam,
-                                        String achternaam) throws RSVIERException;
+                                        String achternaam) throws GeneriekeFoutmelding;
 
     /**
      * Deze methode haalt op basis van adresgegevens klanten op uit de database en geeft dit
@@ -155,9 +155,9 @@ public interface KlantDAO {
      *
      * @param adresgegevens Een Adres-object van de te zoeken klant(en).
      * @return een ListIterator wordt teruggegeven van de ArrayList met daarin Klant-objecten.
-     * @throws RSVIERException Foutmelding bij SQLException, info wordt meegegeven.
+     * @throws GeneriekeFoutmelding Foutmelding bij SQLException, info wordt meegegeven.
      */
-    ListIterator<Klant> getKlantOpAdres(Adres adresgegevens) throws RSVIERException;
+    ListIterator<Klant> getKlantOpAdres(Adres adresgegevens) throws GeneriekeFoutmelding;
 
     /**
      * Deze methode haalt op basis van adresgegevens klanten op uit de database en geeft dit
@@ -165,9 +165,9 @@ public interface KlantDAO {
      *
      * @param straatnaam Straatnaam van de te zoeken klant(en).
      * @return een ListIterator wordt teruggegeven van de ArrayList met daarin Klant-objecten.
-     * @throws RSVIERException Foutmelding bij SQLException, info wordt meegegeven.
+     * @throws GeneriekeFoutmelding Foutmelding bij SQLException, info wordt meegegeven.
      */
-    ListIterator<Klant> getKlantOpAdres(String straatnaam) throws RSVIERException;
+    ListIterator<Klant> getKlantOpAdres(String straatnaam) throws GeneriekeFoutmelding;
 
     /**
      * Deze methode haalt op basis van een postcode en huisnummer klanten op uit de database en geeft dit
@@ -176,10 +176,10 @@ public interface KlantDAO {
      * @param postcode De postcode van de te zoeken klant(en).
      * @param huisnummer Het huisnummer van de te zoeken klant(en).
      * @return een ListIterator wordt teruggegeven van de ArrayList met daarin Klant-objecten.
-     * @throws RSVIERException Foutmelding bij SQLException, info wordt meegegeven.
+     * @throws GeneriekeFoutmelding Foutmelding bij SQLException, info wordt meegegeven.
      */
     ListIterator<Klant> getKlantOpAdres(String postcode,
-                                        int huisnummer) throws RSVIERException;
+                                        int huisnummer) throws GeneriekeFoutmelding;
 
     /**
      * Deze methode haalt op basis van bestelId klanten op uit de database en geeft dit
@@ -187,9 +187,9 @@ public interface KlantDAO {
      *
      * @param bestellingId Het bestelId van de te zoeken klant(en).
      * @return een ListIterator wordt teruggegeven van de ArrayList met daarin Klant-objecten.
-     * @throws RSVIERException Foutmelding bij SQLException, info wordt meegegeven.
+     * @throws GeneriekeFoutmelding Foutmelding bij SQLException, info wordt meegegeven.
      */
-    ListIterator<Klant> getKlantOpBestelling(long bestellingId) throws RSVIERException;
+    ListIterator<Klant> getKlantOpBestelling(long bestellingId) throws GeneriekeFoutmelding;
 
     /** UPDATE METHODS */
 
@@ -201,13 +201,13 @@ public interface KlantDAO {
      * @param achternaam De 'gewijzigde' achternaam van de klant.
      * @param tussenvoegsel Het 'gewijzigde' tussenvoegsel van de klant.
      * @param email Het gewijzigde emailadres van de klant.
-     * @throws RSVIERException Foutmelding bij SQLException, info wordt meegegeven.
+     * @throws GeneriekeFoutmelding Foutmelding bij SQLException, info wordt meegegeven.
      */
     void updateKlant(Long klantId,
                      String voornaam,
                      String achternaam,
                      String tussenvoegsel,
-                     String email) throws RSVIERException;
+                     String email) throws GeneriekeFoutmelding;
 
     /**
      * Methode om een klant met een bepaald klant_id zijn naam en tevens
@@ -219,7 +219,7 @@ public interface KlantDAO {
      * @param tussenvoegsel Het 'gewijzigde' tussenvoegsel van de klant.
      * @param email Het 'gewijzigde' emailadres van de klant.
      * @param adresgegevens De 'gewijzigde' adresgegevens van de klant in Klantobject.
-     * @throws RSVIERException Foutmelding bij SQLException, info wordt meegegeven.
+     * @throws GeneriekeFoutmelding Foutmelding bij SQLException, info wordt meegegeven.
      */
     void updateKlant(long KlantId,
                      String voornaam,
@@ -227,7 +227,7 @@ public interface KlantDAO {
                      String tussenvoegsel,
                      String email,
                      long adres_id,
-                     Adres adresgegevens) throws RSVIERException;
+                     Adres adresgegevens) throws GeneriekeFoutmelding;
 
     /** DELETE METHODS */
 
@@ -236,19 +236,19 @@ public interface KlantDAO {
      * tevens ook verwijderd.
      *
      * @param klantId Klant_id van de te verwijderen klant.
-     * @throws RSVIERException Foutmelding bij SQLException, info wordt meegegeven.
+     * @throws GeneriekeFoutmelding Foutmelding bij SQLException, info wordt meegegeven.
      */
-    long schakelStatusKlant(long klantId, int status) throws RSVIERException;
+    long schakelStatusKlant(long klantId, int status) throws GeneriekeFoutmelding;
 
     /**
      * Methode om een klant te verwijderen op basis van alleen voor- en achternaam;
      *
      * @param voornaam Voornaam van de te verwijderen
      * @param achternaam Achternaam van de te verwijderen klant
-     * @throws RSVIERException Foutmelding bij SQLException, info wordt meegegeven.
+     * @throws GeneriekeFoutmelding Foutmelding bij SQLException, info wordt meegegeven.
      */
     void schakelStatusKlant(String voornaam,
-                            String achternaam) throws RSVIERException;
+                            String achternaam) throws GeneriekeFoutmelding;
 
     /**
      * Methode om een klant te verwijderen op basis van naamgegevens. Alle bestellingen van de klant worden
@@ -257,20 +257,20 @@ public interface KlantDAO {
      * @param voornaam De voornaam van de te verwijderen klant.
      * @param achternaam De achternaam van de te verwijderen klant.
      * @param tussenvoegsel Het tussenvoegsel van de te verwijderen klant.
-     * @throws RSVIERException Foutmelding bij SQLException, info wordt meegegeven.
+     * @throws GeneriekeFoutmelding Foutmelding bij SQLException, info wordt meegegeven.
      */
     void schakelStatusKlant(String voornaam,
                             String achternaam,
-                            String tussenvoegsel) throws RSVIERException;
+                            String tussenvoegsel) throws GeneriekeFoutmelding;
 
     /**
      * Methode om een klant te verwijderen op basis van een bestelnummer.
      *
      * @param bestellingId Bestel-ID van de te verwijderen klant.
-     * @throws RSVIERException Foutmelding bij SQLException, info wordt meegegeven.
+     * @throws GeneriekeFoutmelding Foutmelding bij SQLException, info wordt meegegeven.
      */
-    long verwijderKlantOpBestellingId(long bestellingId) throws RSVIERException;
+    long verwijderKlantOpBestellingId(long bestellingId) throws GeneriekeFoutmelding;
 
     // TODO: Tijdelijk om naar console te printen, aangezien later naar GUI gaat
-    public void printKlantenInConsole(ListIterator<Klant> klantenIterator) throws RSVIERException;
+    public void printKlantenInConsole(ListIterator<Klant> klantenIterator) throws GeneriekeFoutmelding;
 }

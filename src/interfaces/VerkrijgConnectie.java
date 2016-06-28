@@ -1,6 +1,6 @@
 package interfaces;
 
-import exceptions.RSVIERException;
+import exceptions.GeneriekeFoutmelding;
 
 import java.sql.Connection;
 
@@ -19,7 +19,7 @@ public interface VerkrijgConnectie {
      * connection pools welke deze interface implementeren.
      *
      * @return Een connection object van een van de connection pools.
-     * @throws RSVIERException Gooit een fout terug met de bijbehorende message.
+     * @throws GeneriekeFoutmelding Gooit een fout terug met de bijbehorende message.
      */
-   Connection verkrijgConnectie() throws RSVIERException ;
+   Connection verkrijgConnectie() throws GeneriekeFoutmelding;
 }

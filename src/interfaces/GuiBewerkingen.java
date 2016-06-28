@@ -4,7 +4,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Iterator;
 
-import exceptions.RSVIERException;
+import exceptions.GeneriekeFoutmelding;
 import javafx.scene.control.ListView;
 import model.Artikel;
 import model.Bestelling;
@@ -22,7 +22,7 @@ public interface GuiBewerkingen {
 
 	void populateBestellingListView(ListView<Long> bestellingListView);
 
-	void verwerkKlantResultSet(ResultSet rs, ListView<String> klantListView) throws SQLException, RSVIERException;
+	void verwerkKlantResultSet(ResultSet rs, ListView<String> klantListView) throws SQLException, GeneriekeFoutmelding;
 
 	void getItemVanKlantenLijst(ListView<String> klantListView);
 
@@ -34,7 +34,7 @@ public interface GuiBewerkingen {
 
 	void getItemVanArtikelLijst(int index);
 
-	void updateBestelling() throws SQLException, RSVIERException;
+	void updateBestelling() throws SQLException, GeneriekeFoutmelding;
 
-	void verwijderEnkeleBestelling() throws RSVIERException, SQLException;
+	void verwijderEnkeleBestelling() throws GeneriekeFoutmelding, SQLException;
 }

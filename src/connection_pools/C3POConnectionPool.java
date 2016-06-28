@@ -1,7 +1,7 @@
 package connection_pools;
 
 import com.mchange.v2.c3p0.*;
-import exceptions.RSVIERException;
+import exceptions.GeneriekeFoutmelding;
 
 import java.beans.PropertyVetoException;
 import java.sql.Connection;
@@ -39,10 +39,10 @@ public class C3POConnectionPool {
      * Stelt de C3PO configuratie in op het gekozen DataBase type.
      *
      * @param DBKeuze Keuze voor het type database (1 = MySQL, 2 = FireBird);
-     * @throws RSVIERException Foutmelding met gegevens.
+     * @throws GeneriekeFoutmelding Foutmelding met gegevens.
      */
-    private C3POConnectionPool(int DBKeuze) throws RSVIERException {
-        if (DBKeuze == 1) {
+    private C3POConnectionPool(String DBKeuze) throws GeneriekeFoutmelding {
+        if (DBKeuze.equals("MySQL")) {
             try {
                 cpds = new ComboPooledDataSource();
 
@@ -52,10 +52,10 @@ public class C3POConnectionPool {
                 cpds.setPassword(MYSQL_PASSWORD);
 
             } catch (PropertyVetoException ex) {
-                throw new RSVIERException("PropertyVetoExcepton in C3PO connection pool");
+                throw new GeneriekeFoutmelding("PropertyVetoExcepton in C3PO connection pool");
             }
         }
-        else if (DBKeuze == 2) {
+        else if (DBKeuze.equals("FireBird")) {
             try {
                 cpds = new ComboPooledDataSource();
 
@@ -68,7 +68,7 @@ public class C3POConnectionPool {
                 cpds.setPassword(FIREBIRD_PASSWORD);
 
             } catch (PropertyVetoException ex) {
-                throw new RSVIERException("PropertyVetoExcepton in C3PO connection pool");
+                throw new GeneriekeFoutmelding("PropertyVetoExcepton in C3PO connection pool");
             }
         }
     }
@@ -78,9 +78,9 @@ public class C3POConnectionPool {
      *
      * @param DBKeuze Keuze voor het type database (1 = MySQL, 2 = FireBird);
      * @return C3PO Connection pool.
-     * @throws RSVIERException Foutmelding met gegevens.
+     * @throws GeneriekeFoutmelding Foutmelding met gegevens.
      */
-    public static C3POConnectionPool getInstance(int DBKeuze) throws RSVIERException {
+    public static C3POConnectionPool getInstance(String DBKeuze) throws GeneriekeFoutmelding {
         if (C3POConnectionPool == null) {
             C3POConnectionPool = new C3POConnectionPool(DBKeuze);
             return C3POConnectionPool;
