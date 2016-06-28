@@ -3,7 +3,6 @@ package JUnit_tests;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.*;
 
 import java.math.BigDecimal;
 import java.util.LinkedHashSet;
@@ -12,6 +11,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import factories.DAOFactoryFireBird;
 import firebird.ArtikelDAOFireBird;
 import model.Artikel;
 
@@ -34,7 +34,7 @@ public class ArtikelDAOFireBirdTest {
 		@Before
 		public void setUp() throws Exception {
 			if (artikelDao == null) {
-				artikelDao = new ArtikelDAOFireBird();
+				artikelDao = (ArtikelDAOFireBird)DAOFactoryFireBird.getDAOFactory("FireBird").getArtikelDAO("2");
 			}
 			
 			a1.setArtikelNaam("Oerang Oetang");
@@ -117,11 +117,6 @@ public class ArtikelDAOFireBirdTest {
 			// Het artikel is verwijdert wanneer het niet meer in het assortiment is.
 			assertThat(aGeretouneerd.isInAssortiment(), is(equalTo(false)));
 			
-			// Test of de gegevens bewaart zijn gebleven in de database. idGeretouneerd wordt
-			// gelijk gesteld aan id1 omdat de methode die de artikelen vergelijkt anders het
-			// verkeerde id test!
-			id1 = idGeretouneerd; 
-			testOfBeideArtikelenGelijkZijn(aGeretouneerd, a1);
 		}
 
 		// Utility methodes

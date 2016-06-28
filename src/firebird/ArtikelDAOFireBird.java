@@ -4,7 +4,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.LinkedHashSet;
 
 import exceptions.RSVIERException;
@@ -37,14 +36,14 @@ public class ArtikelDAOFireBird extends AbstractDAOFireBird implements interface
 	@Override 
 	public int nieuwArtikel(Artikel aNieuw) throws RSVIERException {
 
-		prijsQuery = "INSERT INTO PRIJS (prijs) VALUES (?);";
+		prijsQuery = "INSERT INTO PRIJS (prijs) VALUES (?) RETURNING prijs_id;";
 		artikelQuery = "INSERT INTO ARTIKEL (omschrijving, prijs_id, verwachteLevertijd, inAssortiment)"
-				+ "VALUES (?, ?, ?, ?);";
+				+ "VALUES (?, ?, ?, ?) RETURNING artikel_id;";
 		String queryUpdate = "UPDATE PRIJS SET artikel_id = ? WHERE prijs_id = ?;";
 
 		try (Connection connection = connPool.verkrijgConnectie();
-				PreparedStatement prijsStatement = connection.prepareStatement(prijsQuery, Statement.RETURN_GENERATED_KEYS);
-				PreparedStatement artikelStatement = connection.prepareStatement(artikelQuery, Statement.RETURN_GENERATED_KEYS);
+				PreparedStatement prijsStatement = connection.prepareStatement(prijsQuery);
+				PreparedStatement artikelStatement = connection.prepareStatement(artikelQuery);
 				PreparedStatement updateStatement = connection.prepareStatement(queryUpdate)){
 
 			connection.setAutoCommit(false);
@@ -54,11 +53,10 @@ public class ArtikelDAOFireBird extends AbstractDAOFireBird implements interface
 
 			//Zet de prijs gegevens in de PRIJS tabel
 			prijsStatement.setBigDecimal(1, aNieuw.getArtikelPrijs());
-			prijsStatement.executeUpdate();
 
-			try (ResultSet generatedPrijsId = prijsStatement.getGeneratedKeys()) {
+			try (ResultSet generatedPrijsId = prijsStatement.executeQuery()) {
 				if (generatedPrijsId.next()) {
-					aNieuw.setPrijsId(generatedPrijsId.getInt(1));
+					aNieuw.setPrijsId(generatedPrijsId.getInt("prijs_id"));
 				}
 			}
 
@@ -66,12 +64,13 @@ public class ArtikelDAOFireBird extends AbstractDAOFireBird implements interface
 			artikelStatement.setString(1, aNieuw.getArtikelNaam());
 			artikelStatement.setInt(2, aNieuw.getPrijsId());
 			artikelStatement.setInt(3, aNieuw.getVerwachteLevertijd());
-			artikelStatement.setBoolean(4, aNieuw.isInAssortiment());
-			artikelStatement.executeUpdate();
+			// De ternery operator hieronder vertaalt een boolean in een character omdat
+			// Firebird geen boolean bevat."1" = true, "0" = false.
+			artikelStatement.setString(4, ((aNieuw.isInAssortiment())? "1" : "0"));
 
-			try (ResultSet generatedArtikelId = artikelStatement.getGeneratedKeys()) {
+			try (ResultSet generatedArtikelId = artikelStatement.executeQuery()) {
 				if (generatedArtikelId.next()) {
-					aNieuw.setArtikelId(generatedArtikelId.getInt(1));
+					aNieuw.setArtikelId(generatedArtikelId.getInt("artikel_id"));
 				}
 			}
 
@@ -87,6 +86,7 @@ public class ArtikelDAOFireBird extends AbstractDAOFireBird implements interface
 			return aNieuw.getArtikelId();
 		}
 		catch (SQLException ex) {
+			ex.printStackTrace();
 			DeLogger.getLogger().error("SQL fout tijdens invoeren nieuw artikel");
 			throw new RSVIERException("Niew artikel aanmaken kan niet");
 		}
@@ -116,7 +116,9 @@ public class ArtikelDAOFireBird extends AbstractDAOFireBird implements interface
 					artikel.setPrijsId(artikelRset.getInt(3));
 					artikel.setDatumAanmaak(artikelRset.getString(4));
 					artikel.setVerwachteLevertijd(artikelRset.getInt(5));
-					artikel.setInAssortiment(artikelRset.getBoolean(6));
+					// Omdat Firebird geen booleans bevat wordt de ternary operator gebruikt om de 
+					// waarde uit de firebird database om te zetten in een boolean.
+					artikel.setInAssortiment(artikelRset.getString(6).contains("1") ? true : false);
 
 					// Vraag de prijs gegevens op
 					prijsStatement.setInt(1, artikel.getPrijsId());
@@ -174,7 +176,9 @@ public class ArtikelDAOFireBird extends AbstractDAOFireBird implements interface
 					artikel.setArtikelPrijs(artikelRset.getBigDecimal(4));
 					artikel.setDatumAanmaak(artikelRset.getString(5));
 					artikel.setVerwachteLevertijd(artikelRset.getInt(6));
-					artikel.setInAssortiment(artikelRset.getBoolean(7));
+					// Omdat Firebird geen booleans bevat wordt de ternary operator gebruikt om de 
+					// waarde uit de firebird database om te zetten in een boolean.
+					artikel.setInAssortiment(artikelRset.getString(6).contains("1") ? true : false);
 					artikelSet.add(artikel);
 				}
 			}
@@ -216,7 +220,7 @@ public class ArtikelDAOFireBird extends AbstractDAOFireBird implements interface
 				+ "WHERE ARTIKEL.artikel_id = ? ;";
 
 		String nieuwePrijsQuery = "INSERT INTO PRIJS (prijs, artikel_id) "
-				+ "VALUES (?, ?);";
+				+ "VALUES (?, ?) RETURNING prijs_id;";
 
 		try (Connection connection = connPool.verkrijgConnectie();
 				PreparedStatement artikelStatement = connection.prepareStatement(artikelQuery);
@@ -260,15 +264,14 @@ public class ArtikelDAOFireBird extends AbstractDAOFireBird implements interface
 				// Wanneer de prijs van het artikel verandert is dan wordt hier de nieuwe 
 				// prijs in de database gezet.
 				try (PreparedStatement nieuwePrijsStatement = connection.prepareStatement(
-						nieuwePrijsQuery, Statement.RETURN_GENERATED_KEYS)) {
+						nieuwePrijsQuery)) {
 
 					nieuwePrijsStatement.setBigDecimal(1, aNieuw.getArtikelPrijs());
 					nieuwePrijsStatement.setInt(2, artikelId);
-					nieuwePrijsStatement.executeUpdate();
 
-					try (ResultSet prijsIdRset = nieuwePrijsStatement.getGeneratedKeys()) {
+					try (ResultSet prijsIdRset = nieuwePrijsStatement.executeQuery()) {
 						if (prijsIdRset.next()) {
-							aNieuw.setPrijsId(prijsIdRset.getInt(1));
+							aNieuw.setPrijsId(prijsIdRset.getInt("prijs_id"));
 						}
 					}
 				}
@@ -278,7 +281,9 @@ public class ArtikelDAOFireBird extends AbstractDAOFireBird implements interface
 			artikelStatement.setString(1, aNieuw.getArtikelNaam());
 			artikelStatement.setInt(2, aNieuw.getPrijsId());
 			artikelStatement.setInt(3, aNieuw.getVerwachteLevertijd());
-			artikelStatement.setBoolean(4, aNieuw.isInAssortiment());
+			// De ternery operator hieronder vertaalt een boolean in een character omdat
+			// Firebird geen boolean bevat."1" = true, "0" = false.
+			artikelStatement.setString(4, ((aNieuw.isInAssortiment())? "1" : "0"));
 			artikelStatement.executeUpdate();
 
 			//Execute transaction
@@ -298,13 +303,14 @@ public class ArtikelDAOFireBird extends AbstractDAOFireBird implements interface
 	@Override
 	public void verwijderArtikel(Artikel a) throws RSVIERException {
 
-		artikelQuery = "UPDATE ARTIKEL SET inAssortiment = 0 WHERE artikel_id = ?;";
+		artikelQuery = "UPDATE ARTIKEL SET inAssortiment = ? WHERE artikel_id = ?;";
 
 		try(Connection connection = connPool.verkrijgConnectie();
 				PreparedStatement artikelStatement = connection.prepareStatement(artikelQuery)) {
 
 			connection.setAutoCommit(false);
-			artikelStatement.setInt(1, a.getArtikelId());
+			artikelStatement.setString(1, "0"); // Omdat firebird geen boolean accepteerd
+			artikelStatement.setInt(2, a.getArtikelId());
 			artikelStatement.executeUpdate();
 			connection.commit();
 
