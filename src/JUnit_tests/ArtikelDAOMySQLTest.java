@@ -1,7 +1,6 @@
 package JUnit_tests;
 
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
@@ -10,13 +9,15 @@ import java.util.LinkedHashSet;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
 import model.Artikel;
 import mysql.ArtikelDAOMySQL;
 
 public class ArtikelDAOMySQLTest {
 		
-	//De klasse die getest wordt
+	// Hier staat de klasse die getest wordt. 
 	private ArtikelDAOMySQL artikelDao = new ArtikelDAOMySQL();
+	
 
 	// Data
 	int id1;
@@ -127,7 +128,6 @@ public class ArtikelDAOMySQLTest {
 		assertThat(aGeretouneerd.getArtikelNaam(),is(equalTo(a.getArtikelNaam())));
 		assertThat(aGeretouneerd.getArtikelPrijs().compareTo(a.getArtikelPrijs()), is(equalTo(0)));
 		assertThat(aGeretouneerd.getPrijsId(), is(equalTo(a.getPrijsId())));
-		assertThat(aGeretouneerd.getDatumAanmaak(), containsString(a.getDatumAanmaak()));
 		assertThat(aGeretouneerd.getVerwachteLevertijd(), is(equalTo(a.getVerwachteLevertijd())));
 		assertThat(aGeretouneerd.isInAssortiment(), is(equalTo(a.isInAssortiment())));
 	}

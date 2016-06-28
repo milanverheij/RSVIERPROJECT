@@ -1,4 +1,4 @@
-package mysql;
+package firebird;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -19,13 +19,15 @@ import model.Artikel;
  * bestelling kunnen verschillen.
  *
  */
-public class ArtikelDAOMySQL extends AbstractDAOMySQL implements interfaces.ArtikelDAO{
+
+public class ArtikelDAOFireBird extends AbstractDAOFireBird implements interfaces.ArtikelDAO{
+
 	private String artikelQuery = "";
 	private String prijsQuery = "";
 	private Artikel artikel = new Artikel();
 
 
-	public ArtikelDAOMySQL() {
+	public ArtikelDAOFireBird() {
 	}
 
 	//Create
@@ -104,7 +106,7 @@ public class ArtikelDAOMySQL extends AbstractDAOMySQL implements interfaces.Arti
 
 			connection.setAutoCommit(false);
 			artikelStatement.setInt(1, artikelId);
-
+			
 			// Vraag de artikel gegevens op
 			try (ResultSet artikelRset = artikelStatement.executeQuery()) {
 
@@ -316,28 +318,25 @@ public class ArtikelDAOMySQL extends AbstractDAOMySQL implements interfaces.Arti
 		/* Onderstaande methode is er voor display purposes en toont aan dat artikelen en prijzen 
 		 * verwijdert kunnen worden
 
-		artikelQuery = "DELETE FROM ARTIKEL WHERE artikel_id = ?;";
-		prijsQuery = "DELETE FROM PRIJS WHERE prijs_id = ?;";
+			artikelQuery = "DELETE FROM ARTIKEL WHERE artikel_id = ?;";
+			prijsQuery = "DELETE FROM PRIJS WHERE prijs_id = ?;";
 
-		try (Connection connection = connPool.verkrijgConnectie();
-				PreparedStatement verwijderArtikelStatement = connection.prepareStatement(artikelQuery);
-				PreparedStatement verwijderPrijsStatement = connection.prepareStatement(prijsQuery)) {
+			try (Connection connection = connPool.verkrijgConnectie();
+					PreparedStatement verwijderArtikelStatement = connection.prepareStatement(artikelQuery);
+					PreparedStatement verwijderPrijsStatement = connection.prepareStatement(prijsQuery)) {
 
-			connection.setAutoCommit(false);
-			verwijderArtikelStatement.setInt(1, a.getArtikelId());
-			verwijderArtikelStatement.executeUpdate();
-			verwijderPrijsStatement.setInt(1, a.getPrijsId());
-			verwijderPrijsStatement.executeUpdate();
-			connection.commit();
-		}
-		catch (SQLException ex) {
-			ex.printStackTrace();
-			DeLogger.getLogger().error("SQL fout tijdens het verwijderen van artikel met id " + a.getArtikelId());
-			throw new RSVIERException("SQL fout tijdens het verwijderen van artikel met id " + a.getArtikelId());
-		}
+				connection.setAutoCommit(false);
+				verwijderArtikelStatement.setInt(1, a.getArtikelId());
+				verwijderArtikelStatement.executeUpdate();
+				verwijderPrijsStatement.setInt(1, a.getPrijsId());
+				verwijderPrijsStatement.executeUpdate();
+				connection.commit();
+			}
+			catch (SQLException ex) {
+				ex.printStackTrace();
+				DeLogger.getLogger().error("SQL fout tijdens het verwijderen van artikel met id " + a.getArtikelId());
+				throw new RSVIERException("SQL fout tijdens het verwijderen van artikel met id " + a.getArtikelId());
+			}
 		 */
 	}
 }
-
-
-
