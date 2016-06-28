@@ -34,7 +34,7 @@ public class ArtikelDAOFireBirdTest {
 		@Before
 		public void setUp() throws Exception {
 			if (artikelDao == null) {
-				artikelDao = (ArtikelDAOFireBird)DAOFactoryFireBird.getDAOFactory("FireBird").getArtikelDAO("2");
+				artikelDao = (ArtikelDAOFireBird)DAOFactoryFireBird.getDAOFactory("FireBird", "HikariCP").getArtikelDAO();
 			}
 			
 			a1.setArtikelNaam("Oerang Oetang");

@@ -21,6 +21,6 @@ public interface ArtikelDAO {
 	public void updateArtikel(int artikel_id, Artikel aNieuw) throws GeneriekeFoutmelding;
 	
 	//Delete
-	public void verwijderArtikel(int artikel_id) throws GeneriekeFoutmelding;
+	public void verwijderArtikel(Artikel a) throws GeneriekeFoutmelding;
 	
 }
