@@ -85,6 +85,7 @@ public class ArtikelDAOMySQL extends AbstractDAOMySQL implements interfaces.Arti
 			return aNieuw.getArtikelId();
 		}
 		catch (SQLException ex) {
+			ex.printStackTrace();
 			DeLogger.getLogger().error("SQL fout tijdens invoeren nieuw artikel");
 			throw new GeneriekeFoutmelding("Niew artikel aanmaken kan niet");
 		}

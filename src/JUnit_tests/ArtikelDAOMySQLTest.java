@@ -17,7 +17,7 @@ import mysql.ArtikelDAOMySQL;
 public class ArtikelDAOMySQLTest {
 		
 	// Hier staat de klasse die getest wordt. 
-	private ArtikelDAOMySQL artikelDao = new ArtikelDAOMySQL();
+	private ArtikelDAOMySQL artikelDao;
 
 	// Data
 	int id1;
@@ -124,12 +124,6 @@ public class ArtikelDAOMySQLTest {
 
 		// Het artikel is verwijdert wanneer het niet meer in het assortiment is.
 		assertThat(aGeretouneerd.isInAssortiment(), is(equalTo(false)));
-		
-		// Test of de gegevens bewaart zijn gebleven in de database. idGeretouneerd wordt
-		// gelijk gesteld aan id1 omdat de methode die de artikelen vergelijkt anders het
-		// verkeerde id test!
-		id1 = idGeretouneerd; 
-		testOfBeideArtikelenGelijkZijn(aGeretouneerd, a1);
 	}
 
 	// Utility methodes
