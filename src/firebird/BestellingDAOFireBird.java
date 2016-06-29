@@ -131,7 +131,9 @@ public class BestellingDAOFireBird extends AbstractDAOFireBird implements Bestel
 	@Override
 	public void updateBestelling(Bestelling bestelling) throws GeneriekeFoutmelding{
 		try(Connection con = connPool.verkrijgConnectie();
-				PreparedStatement deleteStatement = con.prepareStatement("DELETE FROM BESTELLING_HEEFT_ARTIKEL WHERE bestelling_id_best = ?;")){
+				PreparedStatement deleteStatement = con.prepareStatement("DELETE FROM BESTELLING_HEEFT_ARTIKEL WHERE bestelling_id_best = ?;");
+				PreparedStatement setActiefStatement = con.prepareStatement("UPDATE BESTELLING SET bestellingActief= true WHERE bestelling_id = ?;")){
+
 
 			con.setAutoCommit(false);
 
@@ -139,6 +141,10 @@ public class BestellingDAOFireBird extends AbstractDAOFireBird implements Bestel
 			deleteStatement.setLong(1, bestelling.getBestelling_id());
 			deleteStatement.executeUpdate();
 
+			// Zet de bestelling als actief, je gaat geen inactieve bestellingen updaten
+			setActiefStatement.setLong(1, bestelling.getBestelling_id());
+			setActiefStatement.executeUpdate();
+			
 			// Schrijf alle nieuwe artikelen naar BESTELLING_HEEFT_ARTIKEL
 			schrijfAlleArtikelenNaarDeDatabase(con, bestelling.getBestelling_id(), bestelling.getArtikelLijst());
 			con.commit();
@@ -199,17 +205,6 @@ public class BestellingDAOFireBird extends AbstractDAOFireBird implements Bestel
 			e.printStackTrace();
 			throw new GeneriekeFoutmelding(e.getMessage());
 		}
-	}
-
-	private ArrayList<Long> krijgBestelIds(PreparedStatement selectStatement) throws SQLException {
-		ArrayList<Long> list = new ArrayList<Long>();
-		try(ResultSet rs = selectStatement.executeQuery();){
-			while(rs.next()){
-				list.add(rs.getLong(1));
-			}
-		}
-		return list;
-
 	}
 
 	@Override
@@ -357,6 +352,18 @@ public class BestellingDAOFireBird extends AbstractDAOFireBird implements Bestel
 
 	}
 
+	private ArrayList<Long> krijgBestelIds(PreparedStatement selectStatement) throws SQLException { // Firebird snapt DELETE met JOIN niet dus los alle meuk ophalen
+		ArrayList<Long> list = new ArrayList<Long>();
+		try(ResultSet rs = selectStatement.executeQuery();){
+			while(rs.next()){
+				list.add(rs.getLong(1));
+			}
+		}
+		return list;
+	}
+	
+	
+	// Meuk om firebird uit te lezen
 	public void alles(){
 
 		Connection con = null;

@@ -9,7 +9,6 @@ import exceptions.GeneriekeFoutmelding;
 import gui.ErrorBox;
 import interfaces.GuiBewerkingen;
 import javafx.scene.control.ListView;
-import logger.DeLogger;
 import model.Adres;
 import model.Artikel;
 import model.Bestelling;
@@ -31,7 +30,7 @@ public abstract class AbstractGuiBewerkingen implements GuiBewerkingen{
 	}
 
 	public void resetArtikelVariabelen(){
-		GuiPojo.artikelLijst.clear();
+		GuiPojo.artikelLijst = new ArrayList<Artikel>();
 		GuiPojo.artikel = new Artikel();
 	}
 
