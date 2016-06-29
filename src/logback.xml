@@ -9,7 +9,7 @@
   <file>log.log</file>
 
     <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-    <pattern>%-5level %class [%thread]: %Line %message%n</pattern>
+    <pattern>%-5level %class [%thread]: %L %message%n</pattern>
   </encoder>
   </appender>
 

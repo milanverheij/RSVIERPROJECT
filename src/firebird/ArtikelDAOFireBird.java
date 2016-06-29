@@ -47,9 +47,6 @@ public class ArtikelDAOFireBird extends AbstractDAOFireBird implements interface
 
 			connection.setAutoCommit(false);
 
-			//TODO - Controleer of het artikel al in de database staat!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-
 			//Zet de prijs gegevens in de PRIJS tabel
 			prijsStatement.setBigDecimal(1, aNieuw.getArtikelPrijs());
 
@@ -105,7 +102,7 @@ public class ArtikelDAOFireBird extends AbstractDAOFireBird implements interface
 
 			connection.setAutoCommit(false);
 			artikelStatement.setInt(1, artikelId);
-			
+
 			// Vraag de artikel gegevens op
 			try (ResultSet artikelRset = artikelStatement.executeQuery()) {
 
@@ -138,8 +135,8 @@ public class ArtikelDAOFireBird extends AbstractDAOFireBird implements interface
 			return artikel;
 		}
 		catch (SQLException ex) {
-			DeLogger.getLogger().error("TODO");
-			throw new GeneriekeFoutmelding("TODO");
+			DeLogger.getLogger().error("SQL fout tijdens het verkrijgen van het artikel met artikelId {}", artikelId);
+			throw new GeneriekeFoutmelding("SQL fout tijdens het verkrijgen van het artikel met artikelId " + artikelId);
 		}
 	}
 
@@ -148,7 +145,7 @@ public class ArtikelDAOFireBird extends AbstractDAOFireBird implements interface
 	// artikelActief = 0 vraagt zowel de actieve als inactieve artikelen op.
 	// artikelActief = 1 vraagt alleen de actieve artikelen op.
 	@Override
-	public LinkedHashSet<Artikel> getAlleArtikelen(int artikelActief) throws GeneriekeFoutmelding {
+	public LinkedHashSet<Artikel> getAlleArtikelen(boolean artikelActief) throws GeneriekeFoutmelding {
 
 		// Alle artikelen worden in een Set opgeslagen
 		LinkedHashSet<Artikel> artikelSet = new LinkedHashSet<>()	;
@@ -163,7 +160,9 @@ public class ArtikelDAOFireBird extends AbstractDAOFireBird implements interface
 				PreparedStatement artikelStatement = connection.prepareStatement(artikelQuery)) {
 
 			connection.setAutoCommit(false);
-			artikelStatement.setString(1, (artikelActief == 0) ? "%" : "1");
+			// Omdat Firebird geen boolean bevat wordt de ternary gebruikt om te bepalen of alleen 
+			// actieve artikelen verkregen moeten worden (1), of alle artikelen (%) inclusief inactief.
+			artikelStatement.setString(1, (artikelActief) ? "1" : "%");
 
 			try (ResultSet artikelRset = artikelStatement.executeQuery()) {
 				while (artikelRset.next()){
@@ -186,8 +185,8 @@ public class ArtikelDAOFireBird extends AbstractDAOFireBird implements interface
 			return artikelSet;
 		}
 		catch (SQLException ex) {
-			DeLogger.getLogger().error("SQL fout tijdens opvragen van alle " + ((artikelActief == 0) ? "artikelen " : "actieve artikelen "));
-			throw new GeneriekeFoutmelding("SQL fout tijdens opvragen van alle " + ((artikelActief == 0) ? "artikelen " : "actieve artikelen "));
+			DeLogger.getLogger().error("SQL fout tijdens opvragen van alle " + (artikelActief ? "artikelen " : "actieve artikelen "));
+			throw new GeneriekeFoutmelding("SQL fout tijdens opvragen van alle " + (artikelActief ? "artikelen " : "actieve artikelen "));
 		}
 	}
 
@@ -300,7 +299,7 @@ public class ArtikelDAOFireBird extends AbstractDAOFireBird implements interface
 
 	//Delete
 	@Override
-	public void verwijderArtikel(Artikel a) throws GeneriekeFoutmelding {
+	public void verwijderArtikel(int artikelId) throws GeneriekeFoutmelding {
 
 		artikelQuery = "UPDATE ARTIKEL SET inAssortiment = ? WHERE artikel_id = ?;";
 
@@ -309,39 +308,98 @@ public class ArtikelDAOFireBird extends AbstractDAOFireBird implements interface
 
 			connection.setAutoCommit(false);
 			artikelStatement.setString(1, "0"); // Omdat firebird geen boolean accepteerd
-			artikelStatement.setInt(2, a.getArtikelId());
+			artikelStatement.setInt(2, artikelId);
 			artikelStatement.executeUpdate();
 			connection.commit();
 
 		}
 		catch (SQLException ex) {
-			DeLogger.getLogger().error("SQL fout tijdens het verwijderen van artikel met id " + a.getArtikelId());
-			throw new GeneriekeFoutmelding("SQL fout tijdens het verwijderen van artikel met id " + a.getArtikelId());
+			DeLogger.getLogger().error("SQL fout tijdens het verwijderen van artikel met id {}", artikelId);
+			throw new GeneriekeFoutmelding("SQL fout tijdens het verwijderen van artikel met id " + artikelId);
 		}
+	}
+
+	public void verwijderVoorHetEchie(long artikelId) throws GeneriekeFoutmelding{
+		artikelQuery = "DELETE FROM ARTIKEL WHERE artikel_id = ?;";
+		prijsQuery = "DELETE FROM PRIJS WHERE artikel_id = ?;";
+
+		try (Connection connection = connPool.verkrijgConnectie();
+				PreparedStatement verwijderArtikelStatement = connection.prepareStatement(artikelQuery);
+				PreparedStatement verwijderPrijsStatement = connection.prepareStatement(prijsQuery)) {
+
+			connection.setAutoCommit(false);
+
+			verwijderPrijsStatement.setLong(1, artikelId);
+			verwijderPrijsStatement.executeUpdate();
+
+			verwijderArtikelStatement.setLong(1, artikelId);
+			verwijderArtikelStatement.executeUpdate();
+
+			connection.commit();
+		}
+		catch (SQLException  ex) {
+			ex.printStackTrace();
+			DeLogger.getLogger().error("SQL fout tijdens het verwijderen van artikel met id {}", artikelId);
+			throw new GeneriekeFoutmelding("SQL fout tijdens het verwijderen van artikel met id " + artikelId);
+		}
+	}
+	
+	public void verWijderVoorHetEchie(long artikelId) throws GeneriekeFoutmelding{
+		artikelQuery = "DELETE FROM ARTIKEL WHERE artikel_id = ?;";
+		prijsQuery = "DELETE FROM PRIJS WHERE artikel_id = ?;";
+
+		try (Connection connection = connPool.verkrijgConnectie();
+				PreparedStatement verwijderArtikelStatement = connection.prepareStatement(artikelQuery);
+				PreparedStatement verwijderPrijsStatement = connection.prepareStatement(prijsQuery)) {
+
+			connection.setAutoCommit(false);
+
+			verwijderPrijsStatement.setLong(1, artikelId);
+			verwijderPrijsStatement.executeUpdate();
+
+			verwijderArtikelStatement.setLong(1, artikelId);
+			verwijderArtikelStatement.executeUpdate();
 
 
-		/* Onderstaande methode is er voor display purposes en toont aan dat artikelen en prijzen 
-		 * verwijdert kunnen worden
+			connection.commit();
+		}
+		catch (SQLException  ex) {
+			ex.printStackTrace();
+			DeLogger.getLogger().error("SQL fout tijdens het verwijderen van artikel met id {}", artikelId);
+			throw new GeneriekeFoutmelding("SQL fout tijdens het verwijderen van artikel met id " + artikelId);
+		}
+	}
+	public void verwijderAllesVoorHetEchie() throws GeneriekeFoutmelding{
+		artikelQuery = "DELETE FROM ARTIKEL;";
+		String bestelHeeftQuery = "DELETE FROM BESTELLING_HEEFT_ARTIKEL;";
+		String bestelQuery = "DELETE FROM BESTELLING;";
+		prijsQuery = "DELETE FROM PRIJS;";
 
-			artikelQuery = "DELETE FROM ARTIKEL WHERE artikel_id = ?;";
-			prijsQuery = "DELETE FROM PRIJS WHERE prijs_id = ?;";
+		try (Connection connection = connPool.verkrijgConnectie();
+				PreparedStatement verwijderArtikelStatement = connection.prepareStatement(artikelQuery);
+				PreparedStatement verwijderBestellingStatement = connection.prepareStatement(bestelQuery);
+				PreparedStatement verwijderBestellingHeeftStatement = connection.prepareStatement(bestelHeeftQuery);
+				PreparedStatement verwijderPrijsStatement = connection.prepareStatement(prijsQuery)) {
 
-			try (Connection connection = connPool.verkrijgConnectie();
-					PreparedStatement verwijderArtikelStatement = connection.prepareStatement(artikelQuery);
-					PreparedStatement verwijderPrijsStatement = connection.prepareStatement(prijsQuery)) {
+			connection.setAutoCommit(false);
+			verwijderBestellingHeeftStatement.executeUpdate();
 
-				connection.setAutoCommit(false);
-				verwijderArtikelStatement.setInt(1, a.getArtikelId());
-				verwijderArtikelStatement.executeUpdate();
-				verwijderPrijsStatement.setInt(1, a.getPrijsId());
-				verwijderPrijsStatement.executeUpdate();
-				connection.commit();
-			}
-			catch (SQLException ex) {
-				ex.printStackTrace();
-				DeLogger.getLogger().error("SQL fout tijdens het verwijderen van artikel met id " + a.getArtikelId());
-				throw new GeneriekeFoutmelding("SQL fout tijdens het verwijderen van artikel met id " + a.getArtikelId());
-			}
-		 */
+			verwijderBestellingStatement.executeUpdate();
+
+			//			verwijderPrijsStatement.setLong(1, artikelId);
+			verwijderPrijsStatement.executeUpdate();
+
+			//			verwijderArtikelStatement.setLong(1, artikelId);
+			verwijderArtikelStatement.executeUpdate();
+
+
+
+			connection.commit();
+		}
+		catch (SQLException  ex) {
+			ex.printStackTrace();
+			DeLogger.getLogger().error("SQL fout tijdens het verwijderen van artikel met id ");
+			throw new GeneriekeFoutmelding("SQL fout tijdens het verwijderen van artikel met id ");
+		}
 	}
 }

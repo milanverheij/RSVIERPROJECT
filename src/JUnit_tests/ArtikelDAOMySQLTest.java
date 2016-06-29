@@ -10,6 +10,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import factories.DAOFactoryMySQL;
 import model.Artikel;
 import mysql.ArtikelDAOMySQL;
 
@@ -17,13 +18,14 @@ public class ArtikelDAOMySQLTest {
 		
 	// Hier staat de klasse die getest wordt. 
 	private ArtikelDAOMySQL artikelDao = new ArtikelDAOMySQL();
-	
 
 	// Data
 	int id1;
+	int id2;
+	int id3;
+
 	int idGeretouneerd;
 	int prijsID;
-	String huidigeDatum = "2016-06-24";
 
 	Artikel a1 = new Artikel();
 	Artikel a2 = new Artikel();
@@ -32,36 +34,37 @@ public class ArtikelDAOMySQLTest {
 
 	@Before
 	public void setUp() throws Exception {
-		String huidigeDatum = "2016-06-24";
 		
+		if(artikelDao == null)
+			artikelDao = (ArtikelDAOMySQL) DAOFactoryMySQL.getDAOFactory("MySQL", "HikariCP").getArtikelDAO();
+
 		a1.setArtikelNaam("Oerang Oetang");
-		a1.setArtikelPrijs(new BigDecimal(1000));
-		a1.setDatumAanmaak(huidigeDatum);
+		a1.setArtikelPrijs(new BigDecimal(1000.00));
 		a1.setVerwachteLevertijd(3);
 		a1.setInAssortiment(true);
 
-		a2.setArtikelNaam("Oerang Oetang");
-		a2.setArtikelPrijs(new BigDecimal(1100));
-		a2.setDatumAanmaak(huidigeDatum);
+		a2.setArtikelNaam("Aasgier");
+		a2.setArtikelPrijs(new BigDecimal(1100.00));
 		a2.setVerwachteLevertijd(4);
 		a2.setInAssortiment(true);
 
 		a3.setArtikelNaam("Luiaard");
-		a3.setArtikelPrijs(new BigDecimal(500));
-		a3.setDatumAanmaak(huidigeDatum);
+		a3.setArtikelPrijs(new BigDecimal(500.00));
 		a3.setVerwachteLevertijd(14);
 		a3.setInAssortiment(false);
 
 		id1 = artikelDao.nieuwArtikel(a1);
+		id2 = artikelDao.nieuwArtikel(a2);
+		id3 = artikelDao.nieuwArtikel(a3);
 	}
-
 
 	@After
 	public void tearDown() throws Exception{
-		
-		artikelDao.verwijderArtikel(a1);
+		artikelDao.verWijderVoorHetEchie(id1);
+		artikelDao.verWijderVoorHetEchie(id2);
+		artikelDao.verWijderVoorHetEchie(id3);
 	}
-	
+
 	@Test
 	public void nieuwArtikel() throws Exception {
 		idGeretouneerd = artikelDao.nieuwArtikel(a1);
@@ -81,8 +84,8 @@ public class ArtikelDAOMySQLTest {
 		a1.setArtikelId(artikelDao.nieuwArtikel(a1));//in assortiment
 		a3.setArtikelId(artikelDao.nieuwArtikel(a3));//niet in assortiment
 
-		LinkedHashSet<Artikel> alleArtikelenLijst = artikelDao.getAlleArtikelen(0);
-		LinkedHashSet<Artikel> actieveArtikelenLijst = artikelDao.getAlleArtikelen(1);
+		LinkedHashSet<Artikel> alleArtikelenLijst = artikelDao.getAlleArtikelen(/*actief =*/false);
+		LinkedHashSet<Artikel> actieveArtikelenLijst = artikelDao.getAlleArtikelen(/*actief =*/true);
 
 		assertThat(actieveArtikelenLijst.size() <= alleArtikelenLijst.size(), is(true));
 
@@ -105,10 +108,18 @@ public class ArtikelDAOMySQLTest {
 
 	@Test
 	public void verwijderArtikel() throws Exception {
+		//Het artikel dat verwijdert wordt
+		a1 = new Artikel();
+		a1.setArtikelNaam("Aasgier");
+		a1.setArtikelPrijs(new BigDecimal(500));
+		a1.setVerwachteLevertijd(5);
+		a1.setInAssortiment(true);
 		
-		a1 = new Artikel("Aasgier", new BigDecimal(500), huidigeDatum, 5, true);
+		//Verkrijg het artikel id uit de database
 		idGeretouneerd = artikelDao.nieuwArtikel(a1);
-		artikelDao.verwijderArtikel(a1);
+		//Verwijder het artikel
+		artikelDao.verwijderArtikel(idGeretouneerd);
+		//Verkrijg het artikel uit de database om te kijken of het verwijdert is
 		aGeretouneerd = artikelDao.getArtikel(idGeretouneerd);
 
 		// Het artikel is verwijdert wanneer het niet meer in het assortiment is.

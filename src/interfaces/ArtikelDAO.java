@@ -13,14 +13,13 @@ public interface ArtikelDAO {
 	public int nieuwArtikel(Artikel aNieuw) throws GeneriekeFoutmelding;
 
 	//Read
-	public Artikel getArtikel(int artikel_id) throws GeneriekeFoutmelding;
-	public LinkedHashSet<Artikel> getAlleArtikelen(int artikelActief) throws GeneriekeFoutmelding;
-	
+	public Artikel getArtikel(int artikelId) throws GeneriekeFoutmelding;
+	public LinkedHashSet<Artikel> getAlleArtikelen(boolean artikelActief) throws GeneriekeFoutmelding;
 
 	//Update
-	public void updateArtikel(int artikel_id, Artikel aNieuw) throws GeneriekeFoutmelding;
+	public void updateArtikel(int artikelId, Artikel aNieuw) throws GeneriekeFoutmelding;
 	
 	//Delete
-	public void verwijderArtikel(Artikel a) throws GeneriekeFoutmelding;
+	public void verwijderArtikel(int artikelId) throws GeneriekeFoutmelding;
 	
 }

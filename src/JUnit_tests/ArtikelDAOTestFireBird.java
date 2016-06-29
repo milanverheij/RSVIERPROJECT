@@ -1,24 +1,24 @@
 package JUnit_tests;
 
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.math.BigDecimal;
 import java.util.LinkedHashSet;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import factories.DAOFactoryFireBird;
+import factories.DAOFactoryMySQL;
 import firebird.ArtikelDAOFireBird;
 import model.Artikel;
 
-public class ArtikelDAOFireBirdTest {
+public class ArtikelDAOTestFireBird {
 
-	// De klasse die getest wordt
-	private ArtikelDAOFireBird artikelDao;
+	//De klasse die getest wordt
+	ArtikelDAOFireBird artikelDao;
 
 	// Data
 	int id1;
@@ -27,6 +27,7 @@ public class ArtikelDAOFireBirdTest {
 
 	int idGeretouneerd;
 	int prijsID;
+	//	String huidigeDatum = "2016-06-24";
 
 	Artikel a1 = new Artikel();
 	Artikel a2 = new Artikel();
@@ -35,9 +36,10 @@ public class ArtikelDAOFireBirdTest {
 
 	@Before
 	public void setUp() throws Exception {
-
 		if(artikelDao == null)
-			artikelDao = (ArtikelDAOFireBird) DAOFactoryFireBird.getDAOFactory("FireBird", "HikariCP").getArtikelDAO();
+			artikelDao = (ArtikelDAOFireBird) DAOFactoryMySQL.getDAOFactory("FireBird", "HikariCP").getArtikelDAO();
+
+		//		String huidigeDatum = "2016-06-24";
 
 		a1.setArtikelNaam("Oerang Oetang");
 		a1.setArtikelPrijs(new BigDecimal(1000.00));
@@ -61,32 +63,27 @@ public class ArtikelDAOFireBirdTest {
 
 	@After
 	public void tearDown() throws Exception{
-		artikelDao.verWijderVoorHetEchie(id1);
-		artikelDao.verWijderVoorHetEchie(id2);
-		artikelDao.verWijderVoorHetEchie(id3);
-	}
-
-	@Test
-	public void nieuwArtikel() throws Exception {
-		idGeretouneerd = artikelDao.nieuwArtikel(a1);
+		artikelDao.verwijderVoorHetEchie(id1);
+		artikelDao.verwijderVoorHetEchie(id2);
+		artikelDao.verwijderVoorHetEchie(id3);
 	}
 
 	@Test
 	public void getArtikel() throws Exception {
 		aGeretouneerd = artikelDao.getArtikel(id1);
 
-		testOfBeideArtikelenGelijkZijn(aGeretouneerd, a1);
-
+		assertTrue(aGeretouneerd.getArtikelId() == id1);
+		assertEquals(aGeretouneerd.getArtikelNaam(), a1.getArtikelNaam());
+		assertTrue(aGeretouneerd.getArtikelPrijs().compareTo(a1.getArtikelPrijs()) == 0);
+		assertTrue(aGeretouneerd.getPrijsId() == a1.getPrijsId());
+		assertTrue(aGeretouneerd.getVerwachteLevertijd() == a1.getVerwachteLevertijd());
+		assertTrue(aGeretouneerd.isInAssortiment() == a1.isInAssortiment());
 	}
 
 	@Test
 	public void getAlleArtikelen() throws Exception {
-		// Schrijf een nieuw artikel naar de database en sla zijn artikel id op in het testObject
-		a1.setArtikelId(artikelDao.nieuwArtikel(a1));//in assortiment
-		a3.setArtikelId(artikelDao.nieuwArtikel(a3));//niet in assortiment
-
-		LinkedHashSet<Artikel> alleArtikelenLijst = artikelDao.getAlleArtikelen(/*actief =*/false);
-		LinkedHashSet<Artikel> actieveArtikelenLijst = artikelDao.getAlleArtikelen(/*actief =*/true);
+		LinkedHashSet<Artikel> alleArtikelenLijst = artikelDao.getAlleArtikelen(true);
+		LinkedHashSet<Artikel> actieveArtikelenLijst = artikelDao.getAlleArtikelen(false);
 
 		assertThat(actieveArtikelenLijst.size() <= alleArtikelenLijst.size(), is(true));
 
@@ -94,6 +91,7 @@ public class ArtikelDAOFireBirdTest {
 		// als uit assortiment zijn.
 		assertThat(alleArtikelenLijst.contains(a1), is (true));
 		assertThat(alleArtikelenLijst.contains(a3), is (true));
+
 		// Hier wordt gecontroleerd dat actieveArtikelenLijst alleen actieve artikelen bevat
 		assertThat(actieveArtikelenLijst.contains(a1), is (true));
 		assertThat(actieveArtikelenLijst.contains(a3), is (false));
@@ -109,34 +107,25 @@ public class ArtikelDAOFireBirdTest {
 
 	@Test
 	public void verwijderArtikel() throws Exception {
-		//Het artikel dat verwijdert wordt
-		a1 = new Artikel();
-		a1.setArtikelNaam("Aasgier");
-		a1.setArtikelPrijs(new BigDecimal(500));
-		a1.setVerwachteLevertijd(5);
-		a1.setInAssortiment(true);
-
-		//Verkrijg het artikel id uit de database
-		idGeretouneerd = artikelDao.nieuwArtikel(a1);
-		//Verwijder het artikel
-		artikelDao.verwijderArtikel(idGeretouneerd);
-		//Verkrijg het artikel uit de database om te kijken of het verwijdert is
-		aGeretouneerd = artikelDao.getArtikel(idGeretouneerd);
+		artikelDao.verwijderArtikel(a1.getArtikelId());
+		aGeretouneerd = artikelDao.getArtikel(a1.getArtikelId());
 
 		// Het artikel is verwijdert wanneer het niet meer in het assortiment is.
-		assertThat(aGeretouneerd.isInAssortiment(), is(equalTo(false)));
+		assertTrue(aGeretouneerd.isInAssortiment() == false);
 
+		// Test of de gegevens bewaart zijn gebleven in de database. idGeretouneerd wordt
+		// gelijk gesteld aan id1 omdat de methode die de artikelen vergelijkt anders het
+		// verkeerde id test!
+
+		testOfBeideArtikelenGelijkZijn(aGeretouneerd, a1);
 	}
 
 	// Utility methodes
 	public void testOfBeideArtikelenGelijkZijn(Artikel aGeretouneerd, Artikel a) {
-
 		assertThat(aGeretouneerd.getArtikelId(), is(equalTo(id1)));
 		assertThat(aGeretouneerd.getArtikelNaam(),is(equalTo(a.getArtikelNaam())));
 		assertThat(aGeretouneerd.getArtikelPrijs().compareTo(a.getArtikelPrijs()), is(equalTo(0)));
 		assertThat(aGeretouneerd.getPrijsId(), is(equalTo(a.getPrijsId())));
 		assertThat(aGeretouneerd.getVerwachteLevertijd(), is(equalTo(a.getVerwachteLevertijd())));
-		assertThat(aGeretouneerd.isInAssortiment(), is(equalTo(a.isInAssortiment())));
 	}
-
 }

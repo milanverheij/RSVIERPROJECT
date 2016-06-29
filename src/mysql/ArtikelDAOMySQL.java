@@ -33,7 +33,11 @@ public class ArtikelDAOMySQL extends AbstractDAOMySQL implements interfaces.Arti
 	// tabel en zorgt ervoor dat de ARTIKEL tabel het juiste prijs_id heeft.
 	@Override 
 	public int nieuwArtikel(Artikel aNieuw) throws GeneriekeFoutmelding {
-
+		
+		if (aNieuw == null) {
+			DeLogger.getLogger().error("Fout: Null waarde voor aNieuw in de methode nieuwArtikel");
+		}
+		
 		prijsQuery = "INSERT INTO PRIJS (prijs) VALUES (?);";
 		artikelQuery = "INSERT INTO ARTIKEL (omschrijving, prijs_id, verwachteLevertijd, inAssortiment)"
 				+ "VALUES (?, ?, ?, ?);";
@@ -45,9 +49,6 @@ public class ArtikelDAOMySQL extends AbstractDAOMySQL implements interfaces.Arti
 				PreparedStatement updateStatement = connection.prepareStatement(queryUpdate)){
 
 			connection.setAutoCommit(false);
-
-			//TODO - Controleer of het artikel al in de database staat!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
 
 			//Zet de prijs gegevens in de PRIJS tabel
 			prijsStatement.setBigDecimal(1, aNieuw.getArtikelPrijs());
@@ -134,17 +135,16 @@ public class ArtikelDAOMySQL extends AbstractDAOMySQL implements interfaces.Arti
 			return artikel;
 		}
 		catch (SQLException ex) {
-			DeLogger.getLogger().error("TODO");
-			throw new GeneriekeFoutmelding("TODO");
+			DeLogger.getLogger().error("SQL fout tijdens het verkrijgen van het artikel met artikelId {}", artikelId);
+			throw new GeneriekeFoutmelding("SQL fout tijdens het verkrijgen van het artikel met artikelId " + artikelId);
 		}
 	}
 
 	// Onderstaande methode haalt alle artiekelen uit de database en geeft ze terug in een iterator.
 	// Er kan gekozen worden om alleen de actieve artikelen of alle artikelen uit de database te halen.
-	// artikelActief = 0 vraagt zowel de actieve als inactieve artikelen op.
-	// artikelActief = 1 vraagt alleen de actieve artikelen op.
-	@Override
-	public LinkedHashSet<Artikel> getAlleArtikelen(int artikelActief) throws GeneriekeFoutmelding {
+	// artikelActief = false vraagt zowel de actieve als inactieve artikelen op.
+	// artikelActief = true vraagt alleen de actieve artikelen op.
+	public LinkedHashSet<Artikel> getAlleArtikelen(boolean artikelActief) throws GeneriekeFoutmelding {
 
 		// Alle artikelen worden in een Set opgeslagen
 		LinkedHashSet<Artikel> artikelSet = new LinkedHashSet<>()	;
@@ -156,10 +156,13 @@ public class ArtikelDAOMySQL extends AbstractDAOMySQL implements interfaces.Arti
 				+ "LEFT JOIN PRIJS ON ARTIKEL.prijs_id = PRIJS.prijs_id WHERE inAssortiment LIKE ?;";
 
 		try (Connection connection = connPool.verkrijgConnectie();
+
 				PreparedStatement artikelStatement = connection.prepareStatement(artikelQuery)) {
 
-			connection.setAutoCommit(false);
-			artikelStatement.setString(1, (artikelActief == 0) ? "%" : "1");
+			if(artikelActief)
+				artikelStatement.setBoolean(1, true);
+			else
+				artikelStatement.setString(1, "%");
 
 			try (ResultSet artikelRset = artikelStatement.executeQuery()) {
 				while (artikelRset.next()){
@@ -176,12 +179,12 @@ public class ArtikelDAOMySQL extends AbstractDAOMySQL implements interfaces.Arti
 				}
 			}
 			// Execute transaction
-			connection.commit();
 			return artikelSet;
 		}
 		catch (SQLException ex) {
-			DeLogger.getLogger().error("SQL fout tijdens opvragen van alle " + ((artikelActief == 0) ? "artikelen " : "actieve artikelen "));
-			throw new GeneriekeFoutmelding("SQL fout tijdens opvragen van alle " + ((artikelActief == 0) ? "artikelen " : "actieve artikelen "));
+			ex.printStackTrace();
+			DeLogger.getLogger().error("SQL fout tijdens opvragen van alle " + (artikelActief ? "artikelen " : "actieve artikelen "));
+			throw new GeneriekeFoutmelding("SQL fout tijdens opvragen van alle " + (artikelActief ? "artikelen " : "actieve artikelen "));
 		}
 	}
 
@@ -293,47 +296,51 @@ public class ArtikelDAOMySQL extends AbstractDAOMySQL implements interfaces.Arti
 
 	//Delete
 	@Override
-	public void verwijderArtikel(Artikel a) throws GeneriekeFoutmelding {
+	public void verwijderArtikel(int artikelId) throws GeneriekeFoutmelding {
 
 		artikelQuery = "UPDATE ARTIKEL SET inAssortiment = 0 WHERE artikel_id = ?;";
 
 		try(Connection connection = connPool.verkrijgConnectie();
+
 				PreparedStatement artikelStatement = connection.prepareStatement(artikelQuery)) {
 
 			connection.setAutoCommit(false);
-			artikelStatement.setInt(1, a.getArtikelId());
+			artikelStatement.setInt(1, artikelId);
 			artikelStatement.executeUpdate();
 			connection.commit();
 
 		}
 		catch (SQLException ex) {
-			DeLogger.getLogger().error("SQL fout tijdens het verwijderen van artikel met id " + a.getArtikelId());
-			throw new GeneriekeFoutmelding("SQL fout tijdens het verwijderen van artikel met id " + a.getArtikelId());
+			ex.printStackTrace();
+			DeLogger.getLogger().error("SQL fout tijdens het verwijderen van artikel met id {}", artikelId);
+			throw new GeneriekeFoutmelding("SQL fout tijdens het verwijderen van artikel met id " + artikelId);
 		}
-
-
-		/* Onderstaande methode is er voor display purposes en toont aan dat artikelen en prijzen 
-		 * verwijdert kunnen worden
-
+	}
+	
+	public void verWijderVoorHetEchie(long artikelId) throws GeneriekeFoutmelding{
 		artikelQuery = "DELETE FROM ARTIKEL WHERE artikel_id = ?;";
-		prijsQuery = "DELETE FROM PRIJS WHERE prijs_id = ?;";
+		prijsQuery = "DELETE FROM PRIJS WHERE artikel_id = ?;";
 
 		try (Connection connection = connPool.verkrijgConnectie();
 				PreparedStatement verwijderArtikelStatement = connection.prepareStatement(artikelQuery);
 				PreparedStatement verwijderPrijsStatement = connection.prepareStatement(prijsQuery)) {
 
 			connection.setAutoCommit(false);
-			verwijderArtikelStatement.setInt(1, a.getArtikelId());
-			verwijderArtikelStatement.executeUpdate();
-			verwijderPrijsStatement.setInt(1, a.getPrijsId());
+			
+			verwijderPrijsStatement.setLong(1, artikelId);
 			verwijderPrijsStatement.executeUpdate();
+			
+			verwijderArtikelStatement.setLong(1, artikelId);
+			verwijderArtikelStatement.executeUpdate();
+			
+			
 			connection.commit();
 		}
-		catch (SQLException ex) {
-			DeLogger.getLogger().error("SQL fout tijdens het verwijderen van artikel met id " + a.getArtikelId());
-			throw new GeneriekeFoutmelding("SQL fout tijdens het verwijderen van artikel met id " + a.getArtikelId());
+		catch (SQLException  ex) {
+			ex.printStackTrace();
+			DeLogger.getLogger().error("SQL fout tijdens het verwijderen van artikel met id {}", artikelId);
+			throw new GeneriekeFoutmelding("SQL fout tijdens het verwijderen van artikel met id " + artikelId);
 		}
-		 */
 	}
 }
 

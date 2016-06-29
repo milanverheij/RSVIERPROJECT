@@ -1,6 +1,5 @@
 package interfaces;
 
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Iterator;
 
@@ -16,13 +15,11 @@ public interface GuiBewerkingen {
 
 	void zoekKlant(ListView<String> klantListView, String klantId, String voorNaam, String achterNaam, String tussenVoegsel, String email);
 
-	void zoekBestelling(String bron, ListView<Long> bestellingListView, String klantIdField, String bestellingIdField) throws SQLException;
+	void zoekBestelling(String bron, ListView<Long> bestellingListView, String klantIdField, String bestellingIdField, boolean actieveItems) throws SQLException;
 
-	void populateBestellingListView(ListView<Long> bestellingListView, Iterator<Bestelling> it);
+	void populateBestellingListView(ListView<Long> bestellingListView, Iterator<Bestelling> it) throws GeneriekeFoutmelding;
 
-	void populateBestellingListView(ListView<Long> bestellingListView);
-
-	void verwerkKlantResultSet(ResultSet rs, ListView<String> klantListView) throws SQLException, GeneriekeFoutmelding;
+	void populateBestellingListView(ListView<Long> bestellingListView) throws GeneriekeFoutmelding;
 
 	void getItemVanKlantenLijst(ListView<String> klantListView);
 
