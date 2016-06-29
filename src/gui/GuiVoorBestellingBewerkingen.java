@@ -1,11 +1,12 @@
 package gui;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map.Entry;
 
 import exceptions.GeneriekeFoutmelding;
+import interfaces.ArtikelDAO;
+import interfaces.BestellingDAO;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
@@ -23,7 +24,8 @@ import mysql.ArtikelDAOMySQL;
 import mysql.BestellingDAOMySQL;
 
 public class GuiVoorBestellingBewerkingen extends Application{
-	ArtikelDAOMySQL artikelDao = new ArtikelDAOMySQL();
+	ArtikelDAO artikelDao;
+	BestellingDAO bestelDao;
 
 	Stage bestellingStage;
 	ListView<String> artikelenListView;
@@ -31,7 +33,7 @@ public class GuiVoorBestellingBewerkingen extends Application{
 	Button cancelButton;
 	Label issues = new Label("");
 
-	boolean aanpassen;
+	boolean bestellingAanpassen;
 
 	ArrayList<Artikel> artikelArrayList;
 	ArrayList<TextField> textFieldArrayList;
@@ -41,14 +43,21 @@ public class GuiVoorBestellingBewerkingen extends Application{
 
 	long klantId;
 
-	public void setKlantIdAndRun(long klantId) throws Exception{
+	// Voor aanpassen bestelling
+	public void setAndRun(long klantId, BestellingDAO bestelDao, ArtikelDAO artikelDao) throws Exception{
 		this.klantId = klantId;
-		start(new Stage());
+		this.artikelDao = artikelDao;
+		this.bestelDao = bestelDao;
+
 		start(new Stage());
 	}
 
-	public void setKlantIdAndRun(long klantId, ListView<Long> bestellingListView) throws Exception {
+	// Voor nieuwe bestelling
+	public void setAndRun(long klantId, ListView<Long> bestellingListView, BestellingDAO bestelDao, ArtikelDAO artikelDao) throws Exception {
 		this.klantId = klantId;
+		this.artikelDao = artikelDao;
+		this.bestelDao = bestelDao;
+
 		this.bestellingListView = bestellingListView;
 		start(new Stage());
 	}
@@ -62,13 +71,13 @@ public class GuiVoorBestellingBewerkingen extends Application{
 		if(bestelling != null){
 			setArtikelAantallen();
 			bestellingStage.setTitle("Bestelling aanpassen");
-			aanpassen = true;
+			bestellingAanpassen = true;
 		}
 
 		if(bestelling == null){
 			bestelling = new Bestelling();
 			bestellingStage.setTitle("Nieuwe bestelling");
-			aanpassen = false;
+			bestellingAanpassen = false;
 		}
 
 		GridPane bestelGrid = populateBestelGrid();
@@ -81,7 +90,7 @@ public class GuiVoorBestellingBewerkingen extends Application{
 		ArrayList<Artikel> artikelLijst = bestelling.getArtikelLijst();
 		int count = 0;
 		for(Artikel artikel : artikelLijst){
-			textFieldArrayList.get(count).setText("" + artikel.getAantal());
+			textFieldArrayList.get(count).setText("" + artikel.getAantalBesteld());
 			count++;
 		}
 	}
@@ -95,32 +104,27 @@ public class GuiVoorBestellingBewerkingen extends Application{
 	}
 
 	private void maakbestelling(){
-		if(checkAantal()){
-			bestelling.setKlant_id(1);
+		bestelling.setKlant_id(klantId);
 
-			if(bestelling.getArtikelLijst() != null)
-				bestelling.getArtikelLijst().clear();
+		if(bestelling.getArtikelLijst() != null)
+			bestelling.getArtikelLijst().clear();
 
-			voegArtikelenAanBestellingToe();
-			BestellingDAOMySQL bestelDAO = new BestellingDAOMySQL();
+		voegArtikelenAanBestellingToe();
 
-			try {
-				if(aanpassen){
-					bestelDAO.updateBestelling(bestelling);
-				}else{
-					long bestellingId = bestelDAO.nieuweBestelling(bestelling);
-					bestelling.setBestelling_id(bestellingId);
-					bestellingListView.getItems().add(bestellingId);
-					GuiPojo.bestellingLijst.put(bestellingId, bestelling);
-				}
-				bestellingStage.close();
-			}catch(SQLException | GeneriekeFoutmelding e) {
-				e.printStackTrace();
-			}catch(Exception e){
-				e.printStackTrace();
+		try {
+			if(bestellingAanpassen){
+				bestelDao.updateBestelling(bestelling);
+			}else{
+				long bestellingId = bestelDao.nieuweBestelling(bestelling);
+				bestelling.setBestelling_id(bestellingId);
+				bestellingListView.getItems().add(bestellingId);
+				GuiPojo.bestellingLijst.put(bestellingId, bestelling);
 			}
-		}else{
-			new ErrorBox().setMessageAndStart("Incorrect aantal artikelen");
+			bestellingStage.close();
+		}catch(GeneriekeFoutmelding e) {
+			e.printStackTrace();
+		}catch(Exception e){
+			e.printStackTrace();
 		}
 	}
 
@@ -139,17 +143,6 @@ public class GuiVoorBestellingBewerkingen extends Application{
 		}
 	}
 
-	private boolean checkAantal(){
-		long count = 0;
-		for(TextField t : textFieldArrayList){
-			count += Long.parseLong(t.getText());
-		}
-		if(count < 4 && count > 0)
-			return true;
-		else
-			return false;
-	}
-
 	private GridPane populateBestelGrid(){
 		GridPane bestelGrid = new GridPane();
 		bestelGrid.setVgap(2);
@@ -164,8 +157,8 @@ public class GuiVoorBestellingBewerkingen extends Application{
 		for(x = 1; x <= artikelArrayList.size(); x++){
 			Artikel artikel = artikelArrayList.get(x - 1);
 
-			bestelGrid.add(new Label(artikel.getArtikel_naam()), 0, x);
-			bestelGrid.add(new Label("" + artikel.getArtikel_prijs()), 1, x);
+			bestelGrid.add(new Label(artikel.getArtikelNaam()), 0, x);
+			bestelGrid.add(new Label("" + artikel.getArtikelPrijs()), 1, x);
 
 			bestelGrid.add(textFieldArrayList.get(x - 1), 2, x);
 		}
@@ -189,7 +182,7 @@ public class GuiVoorBestellingBewerkingen extends Application{
 
 			while(artikelIterator.hasNext()){
 				artikel = artikelIterator.next().getKey();
-				artikelenListView.getItems().add(artikel.getArtikel_naam());
+				artikelenListView.getItems().add(artikel.getArtikelNaam());
 
 				artikelArrayList.add(artikel);
 				textFieldArrayList.add(new TextField("0"));

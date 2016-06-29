@@ -6,7 +6,7 @@ public class Bestelling {
 	private long bestelling_id;
 	private long klant_id;
 	private String datumAanmaak;
-	private boolean bestellingActief;
+	private boolean bestellingActief = true;
 	private ArrayList<Artikel> artikelLijst;
 
 	public Bestelling(){}
@@ -44,6 +44,7 @@ public class Bestelling {
 	public ArrayList<Artikel> getArtikelLijst() {
 		return artikelLijst;
 	}
+	
 	public void voegArtikelToe(Artikel artikel){
 		if(artikelLijst == null)
 			artikelLijst = new ArrayList<Artikel>();
@@ -63,7 +64,7 @@ public class Bestelling {
 		this.datumAanmaak = datumAanmaak;
 	}
 
-	public boolean isBestellingActief() {
+	public boolean getBestellingActief() {
 		return bestellingActief;
 	}
 

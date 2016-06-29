@@ -9,6 +9,7 @@ import exceptions.GeneriekeFoutmelding;
 import gui.ErrorBox;
 import interfaces.GuiBewerkingen;
 import javafx.scene.control.ListView;
+import logger.DeLogger;
 import model.Adres;
 import model.Artikel;
 import model.Bestelling;
@@ -44,29 +45,28 @@ public abstract class AbstractGuiBewerkingen implements GuiBewerkingen{
 		GuiPojo.artikelLijst = GuiPojo.bestelling.getArtikelLijst();
 	}
 
-	public void populateBestellingListView(ListView<Long> bestellingListView, Iterator<Bestelling> it){
+	public void populateBestellingListView(ListView<Long> bestellingListView, Iterator<Bestelling> it) throws GeneriekeFoutmelding{
 		if(it == null)
 			it = GuiPojo.bestellingLijst.values().iterator();
 		while(it.hasNext()){
 			Bestelling bestelling = it.next();
-			if(!bestellingListView.getItems().contains(bestelling.getBestelling_id())){
+			if(!bestellingListView.getItems().contains(bestelling.getBestelling_id()) && bestelling.getBestelling_id() != 0){
 				bestellingListView.getItems().add(bestelling.getBestelling_id());
 				GuiPojo.bestellingLijst.put(bestelling.getBestelling_id(), bestelling);
 			}
 		}
 	}
 
-	public void populateBestellingListView(ListView<Long> bestellingListView){
+	public void populateBestellingListView(ListView<Long> bestellingListView) throws GeneriekeFoutmelding{
 		Iterator<Bestelling> it = GuiPojo.bestellingLijst.values().iterator();
 		while(it.hasNext()){
 			Bestelling bestelling = it.next();
-			if(!bestellingListView.getItems().contains(bestelling.getBestelling_id())){
+			if(!bestellingListView.getItems().contains(bestelling.getBestelling_id()) && bestelling.getBestelling_id() != 0){
 				bestellingListView.getItems().add(bestelling.getBestelling_id());
 				GuiPojo.bestellingLijst.put(bestelling.getBestelling_id(), bestelling);
 			}
 		}
 	}
-
 
 	public void getItemVanKlantenLijst(ListView<String> klantListView){
 		String selectedItem = klantListView.getSelectionModel().getSelectedItem();
@@ -103,7 +103,7 @@ public abstract class AbstractGuiBewerkingen implements GuiBewerkingen{
 
 	public abstract void zoekKlant(ListView<String> klantListView, String klantId, String voorNaam, String achterNaam, String tussenVoegsel, String email);
 
-	public abstract void zoekBestelling(String bron, ListView<Long> bestellingListView, String klantIdField, String bestellingIdField) throws SQLException;
+	public abstract void zoekBestelling(String bron, ListView<Long> bestellingListView, String klantIdField, String bestellingIdField, boolean actieveItems) throws SQLException;
 
 	public abstract void updateBestelling() throws SQLException, GeneriekeFoutmelding;
 

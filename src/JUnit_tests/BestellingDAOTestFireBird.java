@@ -14,10 +14,11 @@ import org.junit.Test;
 import factories.DAOFactory;
 import interfaces.ArtikelDAO;
 import interfaces.BestellingDAO;
+import interfaces.KlantDAO;
 import model.Artikel;
 import model.Bestelling;
 
-public class BestellingDAOMySQLTest {
+public class BestellingDAOTestFireBird {
 
 	Artikel a1 = new Artikel();
 	Artikel a2 = new Artikel();
@@ -30,13 +31,25 @@ public class BestellingDAOMySQLTest {
 	long id2;
 
 	BestellingDAO dao;
-
+	ArtikelDAO artikelDao;
+	KlantDAO klantDao;
+	
+	long klantId = 1;
+	
 	@Before
 	public void setUp() throws Exception{
+		
+		DAOFactory birdFactory = DAOFactory.getDAOFactory("FireBird", "HikariCP");
 		if(dao == null)
-			dao = DAOFactory.getDAOFactory("MySQL", "HikariCP").getBestellingDAO();
+			dao = birdFactory.getBestellingDAO();
 
-		ArtikelDAO artikelDao = DAOFactory.getDAOFactory("MySQL", "HikariCP").getArtikelDAO();
+		if(artikelDao == null)
+		artikelDao = birdFactory.getArtikelDAO();
+
+		if(klantDao == null){
+			klantDao = birdFactory.getKlantDAO();
+			klantId = klantDao.nieuweKlant("Albert" + (int) (Math.random() * 9999), "Lovers" + (int) (Math.random() * 9999));
+		}
 
 		a1.setArtikelNaam("Oerang Oetang");
 		a1.setArtikelPrijs(new BigDecimal(1000.00));
@@ -59,19 +72,19 @@ public class BestellingDAOMySQLTest {
 		a1.setArtikelId(artikelDao.nieuwArtikel(a1));
 		a2.setArtikelId(artikelDao.nieuwArtikel(a2));
 		a3.setArtikelId(artikelDao.nieuwArtikel(a3));
-
+		
 		ArrayList<Artikel> artikelLijst1 = new ArrayList<Artikel>();
 		artikelLijst1.add(a1);
 		artikelLijst1.add(a2);
 		artikelLijst1.add(a3);
-		bestelling1.setKlant_id(1);
+		bestelling1.setKlant_id(klantId);
 		bestelling1.setArtikelLijst(artikelLijst1);
 		bestelling1.setBestellingActief(true);
 
 		ArrayList<Artikel> artikelLijst2 = new ArrayList<Artikel>();
 		artikelLijst2.add(a1);
 		artikelLijst2.add(a2);
-		bestelling2.setKlant_id(1);
+		bestelling2.setKlant_id(klantId);
 		bestelling2.setArtikelLijst(artikelLijst2);
 		bestelling2.setBestellingActief(false);
 
@@ -105,7 +118,6 @@ public class BestellingDAOMySQLTest {
 		assertTrue(a3.getArtikelPrijs().compareTo(b1List.get(2).getArtikelPrijs()) == 0);
 	}
 
-
 	@Test
 	public void actiefInactiefGetBestellingTesten() throws Exception{
 		assertNull(dao.getBestellingOpBestellingId(id2, true));
@@ -132,7 +144,7 @@ public class BestellingDAOMySQLTest {
 	public void testAangemaakteTuplesLezenOpKlantId() throws Exception{
 
 		//Eerste bestelling bevat a1, a2, a3
-		Iterator<Bestelling> b1 = dao.getBestellingOpKlantId(1, false);
+		Iterator<Bestelling> b1 = dao.getBestellingOpKlantId(klantId, false);
 		ArrayList<Artikel> b1List = b1.next().getArtikelLijst();
 
 		assertEquals(a1.getArtikelId(), b1List.get(0).getArtikelId());
@@ -196,14 +208,14 @@ public class BestellingDAOMySQLTest {
 
 	@Test
 	public void setAlsInactiefAlleBestellingenKlant() throws Exception{
-		dao.setAlsInactiefAlleBestellingenKlant(1);
-		assertNull(dao.getBestellingOpKlantId(1, true));
+		dao.setAlsInactiefAlleBestellingenKlant(klantId);
+		assertNull(dao.getBestellingOpKlantId(klantId, true));
 	}
 
 	@Test
 	public void verwijderenAlleBestellingenKlant() throws Exception{
-		dao.verwijderAlleBestellingenKlant(1);
-		assertNull(dao.getBestellingOpKlantId(1, false));	
+		dao.verwijderAlleBestellingenKlant(klantId);
+		assertNull(dao.getBestellingOpKlantId(klantId, false));	
 	}
 
 	@Test
