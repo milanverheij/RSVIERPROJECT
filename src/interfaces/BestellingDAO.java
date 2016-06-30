@@ -8,21 +8,21 @@ import model.Artikel;
 import model.Bestelling;
 
 public interface BestellingDAO {
+
 	//Create
-	public long nieuweBestelling(Bestelling bestelling) throws GeneriekeFoutmelding;
-	public long nieuweBestelling(long klantId, List<Artikel> artikelLijst, boolean isActief) throws GeneriekeFoutmelding;
+	long nieuweBestelling(Bestelling bestelling) throws GeneriekeFoutmelding;
+	long nieuweBestelling(long klantId, List<Artikel> artikelLijst, boolean isActief) throws GeneriekeFoutmelding;
 
 	//Read
-	public Iterator<Bestelling> getBestellingOpKlantId(long klantId, boolean bestellingActief) throws GeneriekeFoutmelding;
-	public Iterator<Bestelling> getBestellingOpBestellingId(long bestellingId, boolean bestellingActief) throws GeneriekeFoutmelding;
+	Iterator<Bestelling> getBestellingOpKlantId(long klantId, boolean bestellingActief) throws GeneriekeFoutmelding;
+	Iterator<Bestelling> getBestellingOpBestellingId(long bestellingId, boolean bestellingActief) throws GeneriekeFoutmelding;
 	
 	//Update
-	public void updateBestelling(Bestelling bestelling) throws GeneriekeFoutmelding;
+	void updateBestelling(Bestelling bestelling) throws GeneriekeFoutmelding;
 	
 	//Delete
-	public void verwijderAlleBestellingenKlant(long klantId) throws GeneriekeFoutmelding;
-	public void verwijderEnkeleBestelling(long bestellingId) throws GeneriekeFoutmelding;
-	public void setAlsInactiefAlleBestellingenKlant(long klantId) throws GeneriekeFoutmelding;
-	public void setEnkeleBestellingInactief(long bestellingId) throws GeneriekeFoutmelding;
-
+	void verwijderAlleBestellingenKlant(long klantId) throws GeneriekeFoutmelding;
+	void verwijderEnkeleBestelling(long bestellingId) throws GeneriekeFoutmelding;
+	void setAlsInactiefAlleBestellingenKlant(long klantId) throws GeneriekeFoutmelding;
+	void setEnkeleBestellingInactief(long bestellingId) throws GeneriekeFoutmelding;
 }

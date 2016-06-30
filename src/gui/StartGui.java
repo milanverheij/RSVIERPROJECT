@@ -57,7 +57,7 @@ public class StartGui extends Application{
 
 		VBox box = new VBox();
 		box.getChildren().addAll(menuBar, stackPane);
-		Scene scene = new Scene(box, 400, 300);
+		Scene scene = new Scene(box, 400, 300); // TODO: Dynamic size
 
 		stage.setScene(scene);
 		stage.show();

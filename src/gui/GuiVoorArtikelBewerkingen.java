@@ -141,6 +141,7 @@ public class GuiVoorArtikelBewerkingen extends Application{
 	}
 
 	private void nieuwArtikel() {
+		artikel = new Artikel();
 		artikel.setArtikelNaam(naamField.getText());
 		artikel.setPrijsId(0);
 		artikel.setArtikelPrijs(new BigDecimal(artikelPrijsField.getText()));

@@ -1,7 +1,5 @@
 package gui;
 import exceptions.GeneriekeFoutmelding;
-import factories.DAOFactory;
-import interfaces.KlantDAO;
 import javafx.application.Application;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -14,28 +12,28 @@ import javafx.scene.image.Image;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 import model.Adres;
-import model.Bestelling;
+import model.GuiPojo;
 import model.Klant;
 
 
 public class GuiVoorKlantBewerkingen extends Application{
-	KlantDAO klantDAO;
-
-	TextField voorNaam = new TextField();
-	TextField tussenVoegsel = new TextField();
-	TextField achterNaam = new TextField();
-	TextField email = new TextField();
-	TextField straatNaam = new TextField();
-	TextField postcode = new TextField();
-	TextField huisNummer = new TextField();
-	TextField toevoeging = new TextField();
-	TextField woonplaats = new TextField();
+	TextField voorNaam = new TextField("");
+	TextField tussenVoegsel = new TextField("");
+	TextField achterNaam = new TextField("");
+	TextField email = new TextField("");
+	TextField straatNaam = new TextField("");
+	TextField postcode = new TextField("");
+	TextField huisNummer = new TextField("");
+	TextField toevoeging = new TextField("");
+	TextField woonplaats = new TextField("");
 
 	Label error = new Label();
 
 	private Klant klant;
 
 	public void start(Stage klantStage) throws Exception {
+		klant = GuiPojo.klant;
+
 		GridPane grid = new GridPane();
 
 		final BooleanProperty eersteKeer = new SimpleBooleanProperty(true); // Of de stage de eerste keer geladen word
@@ -46,8 +44,8 @@ public class GuiVoorKlantBewerkingen extends Application{
 		maakButtonsEnVoegAanGridToe(grid, klantStage);
 
 		klantStage.setScene(new Scene(grid));
-		klantStage.getIcons().add(new Image("\\images\\icon.jpg"));
-		klantStage.setTitle("Nieuwe klant voor Harrie's Tweedehands Beessies");
+		klantStage.getIcons().add(new Image("/images/icon.jpg"));
+		klantStage.setTitle("Harrie's Tweedehands Beessies");
 		klantStage.show();
 
 	}
@@ -102,41 +100,90 @@ public class GuiVoorKlantBewerkingen extends Application{
 		huisNummer.setPromptText("123");
 		toevoeging.setPromptText("A");
 		woonplaats.setPromptText("Woonplaats");
-		if(!(klant == null)){
-			voorNaam.setText(klant.getVoornaam());
-			achterNaam.setText(klant.getAchternaam());
-			tussenVoegsel.setText(klant.getTussenvoegsel());
-			email.setText(klant.getEmail());
 
-			Adres adres = klant.getAdresGegevens();
-			straatNaam.setText(adres.getStraatnaam());
-			postcode.setText(adres.getPostcode());
-			huisNummer.setText("" + adres.getHuisnummer());
-			toevoeging.setText(adres.getToevoeging());
-			woonplaats.setText(adres.getWoonplaats());
+		if(!(klant == null)){
+			if(klant.getVoornaam() != null)
+				voorNaam.setText(klant.getVoornaam());
+			if(klant.getAchternaam() != null)
+				achterNaam.setText(klant.getAchternaam());
+			if(klant.getTussenvoegsel() != null)
+				tussenVoegsel.setText(klant.getTussenvoegsel());
+			if(klant.getEmail() != null)
+				email.setText(klant.getEmail());
+
+			if(GuiPojo.klant.getAdresGegevens() != null) {
+				Adres adres = GuiPojo.klant.getAdresGegevens();
+
+				straatNaam.setText(adres.getStraatnaam());
+				postcode.setText(adres.getPostcode());
+				huisNummer.setText("" + adres.getHuisnummer());
+				toevoeging.setText(adres.getToevoeging());
+				woonplaats.setText(adres.getWoonplaats());
+			}
 		}
 	}
 
 	private void maakKlantAan(Stage klantStage){
-		Adres adres = new Adres(straatNaam.getText(), postcode.getText(), toevoeging.getText(),
-				Integer.parseInt(huisNummer.getText()), woonplaats.getText());
+		Adres adres = null;
+
+		alleVeldenInvullen();
+
+		if(!huisNummer.getText().equals("")){
+			adres = new Adres(straatNaam.getText(), postcode.getText(), toevoeging.getText(),
+					Integer.parseInt(huisNummer.getText()), woonplaats.getText());
+		}
+		Klant nieuweKlant = new Klant(0, voorNaam.getText(), achterNaam.getText(),
+				tussenVoegsel.getText(), email.getText(), adres);
+		adres = new Adres();
+		adres.setWoonplaats(woonplaats.getText());
+		adres.setPostcode(postcode.getText());
+		adres.setHuisnummer(Integer.parseInt(huisNummer.getText()));
+		adres.setStraatnaam(straatNaam.getText());
+		adres.setToevoeging(toevoeging.getText());
+		GuiPojo.klant.setAdresGegevens(adres);
+
+
+
 		try {
-			if(klant == null){
-				nieuweKlant(voorNaam.getText(),
-						achterNaam.getText(),
-						tussenVoegsel.getText(),
-						email.getText()); // TODO: 0 voor adres voor nieuw adres
-			}else
-				klantDAO.updateKlant(klant.getKlant_id(), voorNaam.getText(), achterNaam.getText(),
-						tussenVoegsel.getText(), email.getText(), adres);
+			if(klant.getVoornaam() == null){
+				GuiPojo.klant.setKlant_id(GuiPojo.klantDAO.nieuweKlant(nieuweKlant, 0));
+			} else {
+				GuiPojo.klantDAO.updateKlant(klant.getKlant_id(), nieuweKlant.getVoornaam(),
+						nieuweKlant.getAchternaam(), nieuweKlant.getTussenvoegsel(), nieuweKlant.getEmail());
+				if(GuiPojo.klant.getAdresGegevens().getAdres_id() != 0)
+					GuiPojo.adresDAO.updateAdres(GuiPojo.klant.getAdresGegevens().getAdres_id(), adres);
+				else
+					GuiPojo.adresDAO.nieuwAdres(klant.getKlant_id(), GuiPojo.klant.getAdresGegevens());
+			}
 			klantStage.close();
+
 		} catch (GeneriekeFoutmelding e) {
 			new ErrorBox().setMessageAndStart(e.getMessage());
 		}
 	}
 
-	public void setKlant(Klant klant){
-		this.klant = klant;
+	private void alleVeldenInvullen(){
+		if(voorNaam.getText().isEmpty())
+			voorNaam.setText("");
+		if(achterNaam.getText().isEmpty())
+			achterNaam.setText("");
+		if(tussenVoegsel.getText().isEmpty())
+			tussenVoegsel.setText("");
+		if(email.getText().isEmpty())
+			email.setText("");
+
+		if(straatNaam.getText().isEmpty())
+			straatNaam.setText("");
+		if(postcode.getText().isEmpty())
+			postcode.setText("");
+		if(toevoeging.getText().isEmpty())
+			toevoeging.setText("");
+		if(huisNummer.getText().isEmpty())
+			huisNummer.setText("");
+		if(woonplaats.getText().isEmpty())
+			woonplaats.setText("");
+
 	}
+
 
 }

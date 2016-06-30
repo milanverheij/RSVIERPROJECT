@@ -238,7 +238,7 @@ public interface KlantDAO {
      * @param klantId Klant_id van de te verwijderen klant.
      * @throws GeneriekeFoutmelding Foutmelding bij SQLException, info wordt meegegeven.
      */
-    long schakelStatusKlant(long klantId, int status) throws GeneriekeFoutmelding;
+    void schakelStatusKlant(long klantId, int status) throws GeneriekeFoutmelding;
 
     /**
      * Methode om een klant te verwijderen op basis van alleen voor- en achternaam;
@@ -271,6 +271,12 @@ public interface KlantDAO {
      */
     long verwijderKlantOpBestellingId(long bestellingId) throws GeneriekeFoutmelding;
 
-    // TODO: Tijdelijk om naar console te printen, aangezien later naar GUI gaat
-    public void printKlantenInConsole(ListIterator<Klant> klantenIterator) throws GeneriekeFoutmelding;
+    /**
+     * Handzame methode voor tijdens test / develop doel-einden eenvoudig informatie naar
+     * de console te printen.
+     *
+     * @param klantenIterator Een iterator van de klantenlijst
+     * @throws GeneriekeFoutmelding Foutmelding met omschrijving.
+     */
+    void printKlantenInConsole(ListIterator<Klant> klantenIterator) throws GeneriekeFoutmelding;
 }

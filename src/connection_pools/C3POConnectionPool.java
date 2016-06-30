@@ -2,6 +2,7 @@ package connection_pools;
 
 import com.mchange.v2.c3p0.*;
 import exceptions.GeneriekeFoutmelding;
+import logger.DeLogger;
 
 import java.beans.PropertyVetoException;
 import java.sql.Connection;
@@ -20,7 +21,6 @@ import java.util.Properties;
 public class C3POConnectionPool {
     private static C3POConnectionPool C3POConnectionPool;
     private ComboPooledDataSource cpds;
-
 
     // MySQL Settings
     private static final String MYSQL_URL = "jdbc:mysql://milanverheij.nl/RSVIERPROJECTDEEL2";
@@ -51,7 +51,9 @@ public class C3POConnectionPool {
                 cpds.setUser(MYSQL_USER);
                 cpds.setPassword(MYSQL_PASSWORD);
 
+                DeLogger.getLogger().info("C3PO Geconfigureerd voor MySQL");
             } catch (PropertyVetoException ex) {
+                DeLogger.getLogger().error("PropertyVetoExcepton in C3PO(MYSQL) connection pool: " + ex.getMessage());
                 throw new GeneriekeFoutmelding("PropertyVetoExcepton in C3PO connection pool");
             }
         }
@@ -67,7 +69,9 @@ public class C3POConnectionPool {
                 cpds.setUser(FIREBIRD_USER);
                 cpds.setPassword(FIREBIRD_PASSWORD);
 
+                DeLogger.getLogger().info("C3PO Geconfigureerd voor FireBird");
             } catch (PropertyVetoException ex) {
+                DeLogger.getLogger().error("PropertyVetoExcepton in C3PO(FB) connection pool: " + ex.getMessage());
                 throw new GeneriekeFoutmelding("PropertyVetoExcepton in C3PO connection pool");
             }
         }

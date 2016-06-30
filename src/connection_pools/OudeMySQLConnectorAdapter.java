@@ -14,6 +14,7 @@ import java.sql.Connection;
  * waardoor deze een verkrijgConnectie methode diente te implementeren.
  *
  */
+@Deprecated
 public class OudeMySQLConnectorAdapter implements VerkrijgConnectie {
 
     /**

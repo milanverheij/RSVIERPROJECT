@@ -4,10 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.List;
+import java.util.*;
 
 import exceptions.GeneriekeFoutmelding;
 import interfaces.BestellingDAO;
@@ -66,7 +63,8 @@ public class BestellingDAOFireBird extends AbstractDAOFireBird implements Bestel
 	public Iterator<Bestelling> getBestellingOpKlantId(long klantId, boolean bestellingActief) throws GeneriekeFoutmelding{
 		try(Connection con = connPool.verkrijgConnectie();
 				PreparedStatement statement = con.prepareStatement(
-						"SELECT BESTELLING.klant_id, BESTELLING.bestelling_id, BESTELLING.bestellingActief, ARTIKEL.artikel_id, ARTIKEL.omschrijving, BESTELLING_HEEFT_ARTIKEL.aantal, "
+						"SELECT BESTELLING.klant_id, BESTELLING.bestelling_id, BESTELLING.bestellingActief, ARTIKEL.artikel_id, " +
+								"ARTIKEL.omschrijving, BESTELLING_HEEFT_ARTIKEL.aantal, "
 								+ "BESTELLING_HEEFT_ARTIKEL.prijs_id_prijs, PRIJS.prijs, BESTELLING.datumAanmaak"
 
 							+ " FROM BESTELLING_HEEFT_ARTIKEL, ARTIKEL, BESTELLING, PRIJS"
@@ -80,7 +78,7 @@ public class BestellingDAOFireBird extends AbstractDAOFireBird implements Bestel
 			statement.setLong(1, klantId);
 
 			if(bestellingActief)
-				statement.setBoolean(2, bestellingActief);
+				statement.setInt(2, 1);
 			else
 				statement.setString(2, "%");
 			
@@ -99,6 +97,7 @@ public class BestellingDAOFireBird extends AbstractDAOFireBird implements Bestel
 	public Iterator<Bestelling> getBestellingOpBestellingId(long bestellingId, boolean bestellingActief) throws GeneriekeFoutmelding{
 		try(Connection con = connPool.verkrijgConnectie();
 				PreparedStatement statement = con.prepareStatement(
+
 						"SELECT BESTELLING.klant_id, BESTELLING.bestelling_id, BESTELLING.bestellingActief, ARTIKEL.artikel_id, "
 								+ "ARTIKEL.omschrijving, BESTELLING_HEEFT_ARTIKEL.aantal, "
 								+ "BESTELLING_HEEFT_ARTIKEL.prijs_id_prijs, PRIJS.prijs, "
@@ -115,7 +114,7 @@ public class BestellingDAOFireBird extends AbstractDAOFireBird implements Bestel
 			statement.setLong(1, bestellingId);
 
 			if(bestellingActief)
-				statement.setBoolean(2, bestellingActief);
+				statement.setInt(2, 1);
 			else
 				statement.setString(2, "%");
 			LinkedHashSet<Bestelling> set = verwerkResultSetGetBestelling(statement);
@@ -132,7 +131,7 @@ public class BestellingDAOFireBird extends AbstractDAOFireBird implements Bestel
 	public void updateBestelling(Bestelling bestelling) throws GeneriekeFoutmelding{
 		try(Connection con = connPool.verkrijgConnectie();
 				PreparedStatement deleteStatement = con.prepareStatement("DELETE FROM BESTELLING_HEEFT_ARTIKEL WHERE bestelling_id_best = ?;");
-				PreparedStatement setActiefStatement = con.prepareStatement("UPDATE BESTELLING SET bestellingActief= true WHERE bestelling_id = ?;")){
+				PreparedStatement setActiefStatement = con.prepareStatement("UPDATE BESTELLING SET bestellingActief = 1 WHERE bestelling_id = ?;")){
 
 
 			con.setAutoCommit(false);
@@ -146,7 +145,9 @@ public class BestellingDAOFireBird extends AbstractDAOFireBird implements Bestel
 			setActiefStatement.executeUpdate();
 			
 			// Schrijf alle nieuwe artikelen naar BESTELLING_HEEFT_ARTIKEL
+			System.out.println(bestelling.getArtikelLijst().toString());
 			schrijfAlleArtikelenNaarDeDatabase(con, bestelling.getBestelling_id(), bestelling.getArtikelLijst());
+
 			con.commit();
 		}catch (SQLException e){
 			e.printStackTrace();
@@ -300,7 +301,6 @@ public class BestellingDAOFireBird extends AbstractDAOFireBird implements Bestel
 			// Voeg artikelen toe aan de bestelling zolang het bestellingId gelijk is aan
 			// die op de vorige rij van de ResultSet, maak anders een nieuwe Bestelling aan
 			while(rs.next()){
-				System.out.println("Inhoud resultset: " + rs.getString(1));
 				// Kijk of het de eerste bestelling is
 				if(best.getBestelling_id() == 0){
 					setBestellingGegevens(rs, best);
@@ -321,16 +321,17 @@ public class BestellingDAOFireBird extends AbstractDAOFireBird implements Bestel
 				art.setArtikelId(rs.getInt("artikel_id"));
 				art.setArtikelNaam(rs.getString("omschrijving"));
 				art.setArtikelPrijs(rs.getBigDecimal("prijs"));
+				art.setPrijsId(rs.getInt("prijs_id_prijs"));
 				art.setAantalBesteld(rs.getInt("aantal"));
 				best.voegArtikelToe(art);
-			
 
+			}
 			//Laatste bestelling ook toevoegen aan de ArrayList
 			if(!(best.getArtikelLijst() == null)){
 				bestellingSet.add(best);
 				return bestellingSet;
 			}
-			}
+
 		} catch (SQLException e) {
 			throw new GeneriekeFoutmelding("Error in: " + this.getClass() + ": verwerkResultSetGetBestelling(con, statement, artikelList: " + e.getMessage());
 		} catch(Exception e){
@@ -363,7 +364,7 @@ public class BestellingDAOFireBird extends AbstractDAOFireBird implements Bestel
 	}
 	
 	
-	// Meuk om firebird uit te lezen
+	// Meuk om firebird uit te lezen //TODO: Language.. staat misschien minder als het in de presentatie voorbij komt ;)
 	public void alles(){
 
 		Connection con = null;

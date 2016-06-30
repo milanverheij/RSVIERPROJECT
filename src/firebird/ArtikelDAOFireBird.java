@@ -392,8 +392,6 @@ public class ArtikelDAOFireBird extends AbstractDAOFireBird implements interface
 			//			verwijderArtikelStatement.setLong(1, artikelId);
 			verwijderArtikelStatement.executeUpdate();
 
-
-
 			connection.commit();
 		}
 		catch (SQLException  ex) {

@@ -2,6 +2,7 @@ package firebird;
 
 import exceptions.GeneriekeFoutmelding;
 import interfaces.AdresDAO;
+import logger.DeLogger;
 import model.Adres;
 
 import java.sql.*;
@@ -35,7 +36,6 @@ public class AdresDAOFireBird extends AbstractDAOFireBird implements AdresDAO {
      */
     @Override
     public void updateAdres(long adres_id, Adres adresgegevens) throws GeneriekeFoutmelding {
-        // TODO: Een check op juiste invoer van gegevens.
 
         // Als er null wordt meegegeven als Adres wordt er een standaard leeg-adres geschrevne.
         if (adresgegevens == null) {
@@ -68,7 +68,8 @@ public class AdresDAOFireBird extends AbstractDAOFireBird implements AdresDAO {
             statement.execute();
 
         }  catch (SQLException ex) {
-            throw new GeneriekeFoutmelding("AdresDAOMySQL: FOUT TIJDENS UPDATEN VAN EEN ADRES: " + ex.getMessage());
+            DeLogger.getLogger().error("FOUT TIJDENS UPDATEN VAN EEN ADRES: " + ex.getMessage());
+            throw new GeneriekeFoutmelding("AdresDAOFireBird: FOUT TIJDENS UPDATEN VAN EEN ADRES: " + ex.getMessage());
         }
     }
 
@@ -98,11 +99,17 @@ public class AdresDAOFireBird extends AbstractDAOFireBird implements AdresDAO {
             statement.execute();
 
         } catch (SQLException ex) {
-            if (ex.getMessage().contains("Duplicate entry"))
-                throw new GeneriekeFoutmelding("AdresDAOMySQL: DIT ADRES IS REEDS GEKOPPELD AAN DEZE KLANT");
-            else
-                throw new GeneriekeFoutmelding("AdresDAOMySQL: SQL FOUT TIJDENS KOPPELEN PERSOON AAN BESTAAND ADRES: " +
+            if (ex.getMessage().contains("Duplicate entry")) {
+                DeLogger.getLogger().warn("ADRES IS REEDS GEKOPPELD AAN DEZE KLANT, klantid: " + klant_id +
+                        "adresid: " + adres_id);
+                throw new GeneriekeFoutmelding("AdresDAOFireBird: DIT ADRES IS REEDS GEKOPPELD AAN DEZE KLANT");
+            }
+            else {
+                DeLogger.getLogger().error("SQL FOUT TIJDENS KOPPELEN PERSOON AAN BESTAAND ADRES: " +
                         ex.getMessage());
+                throw new GeneriekeFoutmelding("AdresDAOFireBird: SQL FOUT TIJDENS KOPPELEN PERSOON AAN BESTAAND ADRES: " +
+                        ex.getMessage());
+            }
         }
     }
 
@@ -140,7 +147,6 @@ public class AdresDAOFireBird extends AbstractDAOFireBird implements AdresDAO {
             statementNieuwAdres.setString(3, adresgegevens.getToevoeging());
             statementNieuwAdres.setInt(4, adresgegevens.getHuisnummer());
             statementNieuwAdres.setString(5, adresgegevens.getWoonplaats());
-//            statementNieuwAdres.execute();
 
             // Ophalen van de laatste genegeneerde sleutel uit de generatedkeys (de nieuwe klant_id)
             long nieuw_adres_id = 0;
@@ -159,11 +165,16 @@ public class AdresDAOFireBird extends AbstractDAOFireBird implements AdresDAO {
 
             return nieuw_adres_id;
         } catch (SQLException ex) {
-            if (ex.getMessage().contains("Duplicate entry"))
-                throw new GeneriekeFoutmelding("AdresDAOMySQL: DIT ADRES BESTAAT AL IN DE DATABASE MET ID: " +
+            if (ex.getMessage().contains("Duplicate entry")) { // TODO: Is anders in FB
+                DeLogger.getLogger().warn("DIT ADRES BESTAAT AL IN DE DATABASE MET ID: " +
                         getAdresID(adresgegevens.getPostcode(), adresgegevens.getHuisnummer(), adresgegevens.getToevoeging()));
-            else
-                throw new GeneriekeFoutmelding("AdresDAOMySQL: SQL FOUT TIJDENS AANMAKEN ADRES: " + ex.getMessage());
+                throw new GeneriekeFoutmelding("AdresDAOFireBird: DIT ADRES BESTAAT AL IN DE DATABASE MET ID: " +
+                        getAdresID(adresgegevens.getPostcode(), adresgegevens.getHuisnummer(), adresgegevens.getToevoeging()));
+            }
+            else {
+                DeLogger.getLogger().error("SQL FOUT TIJDENS AANMAKEN ADRES " + ex.getMessage());
+                throw new GeneriekeFoutmelding("AdresDAOFireBird: SQL FOUT TIJDENS AANMAKEN ADRES " + ex.getMessage());
+            }
         }
     }
 
@@ -206,8 +217,22 @@ public class AdresDAOFireBird extends AbstractDAOFireBird implements AdresDAO {
                 }
             }
         } catch (SQLException ex) {
-            throw new GeneriekeFoutmelding("AdresDAOMySQL: SQL FOUT TIJDENS ZOEKEN ADRES: " + ex.getMessage());
+            DeLogger.getLogger().error("SQL FOUT TIJDENS ZOEKEN ADRES: " + ex.getMessage());
+            throw new GeneriekeFoutmelding("AdresDAOFireBird: SQL FOUT TIJDENS ZOEKEN ADRES: " + ex.getMessage());
         }
+    }
+
+    /**
+     * Geeft een specifiek adres terug in een Adres_Object
+     *
+     * @param adres_id Adres_id van het adres dat opgezocht dient te worden.
+     * @return Een Adres_object van het adres.
+     * @throws GeneriekeFoutmelding Als er een fout is wordt deze doorgestuurd naar de GeneriekeFoutmelding met de message van
+     * de exception.
+     */
+    @Override
+    public Adres getAdresOpAdresID(long adres_id) throws GeneriekeFoutmelding {
+        return null; // TODO
     }
 
     /**
@@ -261,7 +286,8 @@ public class AdresDAOFireBird extends AbstractDAOFireBird implements AdresDAO {
                 return adresLijst.listIterator();
             }
         } catch (SQLException ex) {
-            throw new GeneriekeFoutmelding("FOUT TIJDENS GETADRES: " + ex.getMessage());
+            DeLogger.getLogger().error("FOUT TIJDENS GETADRES: " + ex.getMessage());
+            throw new GeneriekeFoutmelding("AdresDAOFireBird: FOUT TIJDENS GETADRES: " + ex.getMessage());
         }
     }
 
@@ -291,7 +317,8 @@ public class AdresDAOFireBird extends AbstractDAOFireBird implements AdresDAO {
             statement.execute();
 
         } catch (SQLException ex) {
-            throw new GeneriekeFoutmelding("AdresDAOMySQL: SQL FOUT TIJDENS ADRES OP ID INACTIEF ZETTEN" + ex.getMessage());
+            DeLogger.getLogger().error("SQL FOUT TIJDENS ADRES OP ID INACTIEF ZETTEN" + ex.getMessage());
+            throw new GeneriekeFoutmelding("AdresDAOFireBird: SQL FOUT TIJDENS ADRES OP ID INACTIEF ZETTEN" + ex.getMessage());
         }
     }
 }

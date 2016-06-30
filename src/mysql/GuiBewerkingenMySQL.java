@@ -102,11 +102,13 @@ public class GuiBewerkingenMySQL extends AbstractGuiBewerkingen{
 	
 		try {
 			Iterator<Adres> adresIt = GuiPojo.adresDAO.getAdresOpKlantID(GuiPojo.klant.getKlant_id());
-			System.out.println(GuiPojo.klant.getKlant_id());
 			while(adresIt.hasNext()){
 				Adres adres = adresIt.next();
-				if(adres.getAdresActief().equals("1")){
-					GuiPojo.adres = adres;
+
+				System.out.print("["+adres.getAdresActief() + "]");
+				if(adres.getAdresActief().trim().equals("1")){ //TODO ook optie voor als adres niet actief is
+					System.out.println("IN ACTIEF BLOK");
+					GuiPojo.klant.setAdresGegevens(adres);
 					break;
 				}
 			}

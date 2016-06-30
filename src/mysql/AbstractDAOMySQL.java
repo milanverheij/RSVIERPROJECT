@@ -1,7 +1,6 @@
 package mysql;
 
 import interfaces.VerkrijgConnectie;
-
 import java.sql.PreparedStatement;
 
 public abstract class AbstractDAOMySQL {

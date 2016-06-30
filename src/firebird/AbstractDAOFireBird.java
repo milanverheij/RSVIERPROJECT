@@ -1,7 +1,6 @@
 package firebird;
 
 import interfaces.VerkrijgConnectie;
-
 import java.sql.PreparedStatement;
 
 public abstract class AbstractDAOFireBird {

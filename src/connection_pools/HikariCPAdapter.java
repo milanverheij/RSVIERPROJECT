@@ -2,6 +2,7 @@ package connection_pools;
 
 import exceptions.GeneriekeFoutmelding;
 import interfaces.VerkrijgConnectie;
+import logger.DeLogger;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -39,6 +40,7 @@ public class HikariCPAdapter implements VerkrijgConnectie {
         try {
             return HikariCPConnectionPool.getInstance(DBKeuze).getConnection();
         } catch (SQLException ex) {
+            DeLogger.getLogger().error("Fout bij getInstance (DBKEUZE: " + DBKeuze + "): " + ex.getMessage());
             throw new GeneriekeFoutmelding("C3POAdapter SQL Exception" + ex.getMessage());
         }
     }

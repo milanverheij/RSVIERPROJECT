@@ -45,6 +45,16 @@ public interface AdresDAO {
     ListIterator<Adres> getAdresOpKlantID(long klant_id) throws GeneriekeFoutmelding;
 
     /**
+     * Geeft een specifiek adres terug in een Adres_Object
+     *
+     * @param adres_id Adres_id van het adres dat opgezocht dient te worden.
+     * @return Een Adres_object van het adres.
+     * @throws GeneriekeFoutmelding Als er een fout is wordt deze doorgestuurd naar de GeneriekeFoutmelding met de message van
+     * de exception.
+     */
+    Adres getAdresOpAdresID(long adres_id) throws GeneriekeFoutmelding;
+
+    /**
      * Maakt een nieuw adres aan en koppelt deze aan de klant.
      *
      * @param klant_id Klant_id behorende bij het adres.

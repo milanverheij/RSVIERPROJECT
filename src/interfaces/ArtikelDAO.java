@@ -10,16 +10,16 @@ import model.Artikel;
 public interface ArtikelDAO {
 
 	//Create
-	public int nieuwArtikel(Artikel aNieuw) throws GeneriekeFoutmelding;
+	int nieuwArtikel(Artikel aNieuw) throws GeneriekeFoutmelding;
 
 	//Read
-	public Artikel getArtikel(int artikelId) throws GeneriekeFoutmelding;
-	public LinkedHashSet<Artikel> getAlleArtikelen(boolean artikelActief) throws GeneriekeFoutmelding;
+	Artikel getArtikel(int artikelId) throws GeneriekeFoutmelding;
+	LinkedHashSet<Artikel> getAlleArtikelen(boolean artikelActief) throws GeneriekeFoutmelding;
 
 	//Update
-	public void updateArtikel(int artikelId, Artikel aNieuw) throws GeneriekeFoutmelding;
+	void updateArtikel(int artikelId, Artikel aNieuw) throws GeneriekeFoutmelding;
 	
 	//Delete
-	public void verwijderArtikel(int artikelId) throws GeneriekeFoutmelding;
+	void verwijderArtikel(int artikelId) throws GeneriekeFoutmelding;
 	
 }

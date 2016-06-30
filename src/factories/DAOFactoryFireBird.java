@@ -3,9 +3,8 @@ package factories;
 import exceptions.GeneriekeFoutmelding;
 import firebird.AdresDAOFireBird;
 import firebird.ArtikelDAOFireBird;
+import firebird.BestellingDAOFireBird;
 import firebird.KlantDAOFireBird;
-//import firebird.BestellingDAOFireBird;
-//import firebird.ArtikelDAOFireBird;
 import interfaces.AdresDAO;
 import interfaces.ArtikelDAO;
 import interfaces.BestellingDAO;
@@ -48,8 +47,7 @@ public class DAOFactoryFireBird extends DAOFactory{
 	 */
 	@Override
 	public BestellingDAO getBestellingDAO() throws GeneriekeFoutmelding {
-//		return new BestellingDAOFireBird();
-		return null;
+		return new BestellingDAOFireBird();
 	}
 
 	/**
@@ -61,5 +59,4 @@ public class DAOFactoryFireBird extends DAOFactory{
 	public ArtikelDAO getArtikelDAO() throws GeneriekeFoutmelding {
 		return new ArtikelDAOFireBird();
 	}
-
 }

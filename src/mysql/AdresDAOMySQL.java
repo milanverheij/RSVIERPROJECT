@@ -2,6 +2,7 @@ package mysql;
 
 import exceptions.GeneriekeFoutmelding;
 import interfaces.AdresDAO;
+import logger.DeLogger;
 import model.Adres;
 
 import java.sql.*;
@@ -35,8 +36,6 @@ public class AdresDAOMySQL extends AbstractDAOMySQL implements AdresDAO {
      */
     @Override
     public void updateAdres(long adres_id, Adres adresgegevens) throws GeneriekeFoutmelding {
-        // TODO: Een check op juiste invoer van gegevens.
-
         // Als er null wordt meegegeven als Adres wordt er een standaard leeg-adres geschrevne.
         if (adresgegevens == null) {
             adresgegevens = new Adres();
@@ -68,6 +67,7 @@ public class AdresDAOMySQL extends AbstractDAOMySQL implements AdresDAO {
             statement.execute();
 
         }  catch (SQLException ex) {
+            DeLogger.getLogger().error("FOUT TIJDENS UPDATEN VAN EEN ADRES: " + ex.getMessage());
             throw new GeneriekeFoutmelding("AdresDAOMySQL: FOUT TIJDENS UPDATEN VAN EEN ADRES: " + ex.getMessage());
         }
     }
@@ -98,11 +98,17 @@ public class AdresDAOMySQL extends AbstractDAOMySQL implements AdresDAO {
             statement.execute();
 
         } catch (SQLException ex) {
-            if (ex.getMessage().contains("Duplicate entry"))
+            if (ex.getMessage().contains("Duplicate entry")) {
+                DeLogger.getLogger().warn("ADRES IS REEDS GEKOPPELD AAN DEZE KLANT, klantid: " + klant_id +
+                        "adresid: " + adres_id);
                 throw new GeneriekeFoutmelding("AdresDAOMySQL: DIT ADRES IS REEDS GEKOPPELD AAN DEZE KLANT");
-            else
+            }
+            else {
+                DeLogger.getLogger().error("SQL FOUT TIJDENS KOPPELEN PERSOON AAN BESTAAND ADRES: " +
+                        ex.getMessage());
                 throw new GeneriekeFoutmelding("AdresDAOMySQL: SQL FOUT TIJDENS KOPPELEN PERSOON AAN BESTAAND ADRES: " +
                         ex.getMessage());
+            }
         }
     }
 
@@ -126,8 +132,6 @@ public class AdresDAOMySQL extends AbstractDAOMySQL implements AdresDAO {
                 "(klant_id_klant, adres_id_adres) " +
                 "VALUES " +
                 "(?,        ?);";
-
-        //TODO: Transaction testen
 
         try (
                 Connection connection = connPool.verkrijgConnectie();
@@ -164,11 +168,16 @@ public class AdresDAOMySQL extends AbstractDAOMySQL implements AdresDAO {
 
             return nieuw_adres_id;
         } catch (SQLException ex) {
-            if (ex.getMessage().contains("Duplicate entry"))
+            if (ex.getMessage().contains("Duplicate entry")) {
+                DeLogger.getLogger().warn("DIT ADRES BESTAAT AL IN DE DATABASE MET ID: " +
+                        getAdresID(adresgegevens.getPostcode(), adresgegevens.getHuisnummer(), adresgegevens.getToevoeging()));
                 throw new GeneriekeFoutmelding("AdresDAOMySQL: DIT ADRES BESTAAT AL IN DE DATABASE MET ID: " +
                         getAdresID(adresgegevens.getPostcode(), adresgegevens.getHuisnummer(), adresgegevens.getToevoeging()));
-            else
-                throw new GeneriekeFoutmelding("AdresDAOMySQL: SQL FOUT TIJDENS AANMAKEN ADRES");
+            }
+            else {
+                DeLogger.getLogger().error("SQL FOUT TIJDENS AANMAKEN ADRES " + ex.getMessage());
+                throw new GeneriekeFoutmelding("AdresDAOMySQL: SQL FOUT TIJDENS AANMAKEN ADRES " + ex.getMessage());
+            }
         }
     }
 
@@ -204,13 +213,16 @@ public class AdresDAOMySQL extends AbstractDAOMySQL implements AdresDAO {
                     ResultSet rs = statement.executeQuery();
             ) {
 
-                if (!rs.next())
+                if (!rs.next()) {
+                    DeLogger.getLogger().warn("ADRES NIET GEVONDEN: " + postcode + "/" + huisnummer + "/" + toevoeging);
                     throw new GeneriekeFoutmelding("AdresDAOMySQL: ADRES NIET GEVONDEN");
+                }
                 else {
                     return rs.getLong(1); // Door if-statement is rs al bij next()
                 }
             }
         } catch (SQLException ex) {
+            DeLogger.getLogger().error("SQL FOUT TIJDENS ZOEKEN ADRES: " + ex.getMessage());
             throw new GeneriekeFoutmelding("AdresDAOMySQL: SQL FOUT TIJDENS ZOEKEN ADRES: " + ex.getMessage());
         }
     }
@@ -255,7 +267,7 @@ public class AdresDAOMySQL extends AbstractDAOMySQL implements AdresDAO {
                     tijdelijkAdres.setToevoeging(rs.getString(4));
                     tijdelijkAdres.setHuisnummer(rs.getInt(5));
                     tijdelijkAdres.setWoonplaats(rs.getString(6));
-                    tijdelijkAdres.setDatumAanmaak(rs.getString(7)); // TODO: Checken of aparte methode nodig is voor RS ->it
+                    tijdelijkAdres.setDatumAanmaak(rs.getString(7));
                     tijdelijkAdres.setDatumGewijzigd(rs.getString(8));
                     tijdelijkAdres.setAdresActief(rs.getString(9));
 
@@ -266,7 +278,58 @@ public class AdresDAOMySQL extends AbstractDAOMySQL implements AdresDAO {
                 return adresLijst.listIterator();
             }
         } catch (SQLException ex) {
-            throw new GeneriekeFoutmelding("FOUT TIJDENS GETADRES: " + ex.getMessage());
+            DeLogger.getLogger().error("FOUT TIJDENS GETADRES: " + ex.getMessage());
+            throw new GeneriekeFoutmelding("AdresDAOMySQL: FOUT TIJDENS GETADRES: " + ex.getMessage());
+        }
+    }
+
+    /**
+     * Geeft een specifiek adres terug in een Adres_Object
+     *
+     * @param adres_id Adres_id van het adres dat opgezocht dient te worden.
+     * @return Een Adres_object van het adres.
+     * @throws GeneriekeFoutmelding Als er een fout is wordt deze doorgestuurd naar de GeneriekeFoutmelding met de message van
+     * de exception.
+     */
+    @Override
+    public Adres getAdresOpAdresID(long adres_id) throws GeneriekeFoutmelding {
+        Adres tijdelijkAdres;
+
+        String query = "SELECT * " +
+                "FROM ADRES " +
+                "WHERE " +
+                "adres_id = ?;";
+        try (
+                Connection connection = connPool.verkrijgConnectie();
+                PreparedStatement statement = connection.prepareStatement(query);
+        ) {
+            statement.setLong(1, adres_id);
+
+            try (
+                    ResultSet rs = statement.executeQuery();
+            ) {
+
+                tijdelijkAdres = new Adres();
+
+                // Ga door de resultSet heen en koppel adres juist.
+                while (rs.next()) {
+                    tijdelijkAdres.setAdres_id(rs.getLong(1));
+                    tijdelijkAdres.setStraatnaam(rs.getString(2));
+                    tijdelijkAdres.setPostcode(rs.getString(3));
+                    tijdelijkAdres.setToevoeging(rs.getString(4));
+                    tijdelijkAdres.setHuisnummer(rs.getInt(5));
+                    tijdelijkAdres.setWoonplaats(rs.getString(6));
+                    tijdelijkAdres.setDatumAanmaak(rs.getString(7));
+                    tijdelijkAdres.setDatumGewijzigd(rs.getString(8));
+                    tijdelijkAdres.setAdresActief(rs.getString(9));
+                }
+
+                // Return een Adres-Object
+                return tijdelijkAdres;
+            }
+        } catch (SQLException ex) {
+            DeLogger.getLogger().error("FOUT TIJDENS GETADRES: " + ex.getMessage());
+            throw new GeneriekeFoutmelding("AdresDAOMySQL: FOUT TIJDENS GETADRES: " + ex.getMessage());
         }
     }
 
@@ -296,6 +359,7 @@ public class AdresDAOMySQL extends AbstractDAOMySQL implements AdresDAO {
             statement.execute();
 
         } catch (SQLException ex) {
+            DeLogger.getLogger().error("SQL FOUT TIJDENS ADRES OP ID INACTIEF ZETTEN" + ex.getMessage());
             throw new GeneriekeFoutmelding("AdresDAOMySQL: SQL FOUT TIJDENS ADRES OP ID INACTIEF ZETTEN" + ex.getMessage());
         }
     }

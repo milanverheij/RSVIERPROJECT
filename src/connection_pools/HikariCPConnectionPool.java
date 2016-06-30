@@ -3,6 +3,7 @@ package connection_pools;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import exceptions.GeneriekeFoutmelding;
+import logger.DeLogger;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -56,6 +57,8 @@ public class HikariCPConnectionPool {
             hikariConfig.addDataSourceProperty("password", MYSQL_PASSWORD);
 
             hikariDataSource = new HikariDataSource(hikariConfig);
+
+            DeLogger.getLogger().info("HikariCP geconfigureerd voor MySQL");
         }
 
         if (DBKeuze.equals("FireBird")) {
@@ -70,6 +73,8 @@ public class HikariCPConnectionPool {
             hikariConfig.addDataSourceProperty("password", FIREBIRD_PASSWORD);
 
             hikariDataSource = new HikariDataSource(hikariConfig);
+
+            DeLogger.getLogger().info("HikariCP geconfigureerd voor FireBird");
         }
     }
 

@@ -9,7 +9,6 @@ import exceptions.GeneriekeFoutmelding;
 import gui.ErrorBox;
 import interfaces.GuiBewerkingen;
 import javafx.scene.control.ListView;
-import model.Adres;
 import model.Artikel;
 import model.Bestelling;
 import model.GuiPojo;
@@ -22,7 +21,6 @@ public abstract class AbstractGuiBewerkingen implements GuiBewerkingen{
 		GuiPojo.bestelling = new Bestelling();
 		GuiPojo.artikel = new Artikel();
 		GuiPojo.klant = new Klant();
-		GuiPojo.adres  = new Adres();
 
 		GuiPojo.artikelLijst = new ArrayList<Artikel>();
 		GuiPojo.klantenLijst = new LinkedHashMap<Long, Klant>();

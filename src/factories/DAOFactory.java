@@ -63,6 +63,4 @@ public abstract class DAOFactory {
 	 * @return Een ArtikelDAO van het eerder gekozen database-type.
 	 */
 	public abstract interfaces.ArtikelDAO getArtikelDAO() throws GeneriekeFoutmelding;
-
-
 }

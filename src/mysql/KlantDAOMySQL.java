@@ -3,6 +3,7 @@ package mysql;
 import com.mysql.jdbc.Statement;
 import exceptions.GeneriekeFoutmelding;
 import interfaces.KlantDAO;
+import logger.DeLogger;
 import model.Adres;
 import model.Bestelling;
 import model.Klant;
@@ -108,7 +109,6 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
                 }
 
                 // Als er bestegegevens zijn meegegeven worden deze bijgevoegd
-                // TODO: Bestelling werkt nog na aanpassingen?
                 if (bestelGegevens != null) {
                     bestellingDAO = new BestellingDAOMySQL();
                     bestelGegevens.setKlant_id(nieuwId);
@@ -119,11 +119,16 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
             return nieuwId;
 
         } catch (SQLException ex) {
-            if (ex.getMessage().contains("Duplicate entry"))
+            if (ex.getMessage().contains("Duplicate entry")) {
+                DeLogger.getLogger().warn("KlantDAOMySQL: DEZE KLANT BESTAAT AL IN DE DATABASE MET ID: " +
+                        getKlantID(voornaam, achternaam, email));
                 throw new GeneriekeFoutmelding("KlantDAOMySQL: DEZE KLANT BESTAAT AL IN DE DATABASE MET ID: " +
                         getKlantID(voornaam, achternaam, email));
-            else
+            }
+            else {
+                DeLogger.getLogger().error("SQL FOUT TIJDENS AANMAKEN KLANT: " + ex.getMessage());
                 throw new GeneriekeFoutmelding("KlantDAOMySQL: SQL FOUT TIJDENS AANMAKEN KLANT: " + ex.getMessage());
+            }
         }
     }
 
@@ -151,6 +156,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
             return nieuwId;
         }
         else {
+            DeLogger.getLogger().warn("KAN GEEN KLANT AANMAKEN MET NULL OBJECT");
             throw new GeneriekeFoutmelding("KlantDAOMySQL: KAN GEEN KLANT AANMAKEN MET NULL OBJECT");
         }
     }
@@ -220,13 +226,16 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
                     ResultSet rs = statement.executeQuery();
             ){
                 // Als er een resultaat gevonden is bestaat de klant niet en wordt er een foutmelding gegooid.
-                if (!rs.next())
+                if (!rs.next()) {
+                    DeLogger.getLogger().warn("KLANT NIET GEVONDEN: " + voornaam + "/" + achternaam + "/" + email);
                     throw new GeneriekeFoutmelding("KlantDAOMySQL: KLANT NIET GEVONDEN");
+                }
                 else {
                     return rs.getLong(1); // Door if-statement is rs al bij next()
                 }
             }
         } catch (SQLException ex) {
+            DeLogger.getLogger().error("SQL FOUT TIJDENS OPZOEKEN KLANT ID: " + ex.getMessage());
             throw new GeneriekeFoutmelding("KlantDAOMySQL: SQL FOUT TIJDENS OPZOEKEN KLANT ID: " + ex.getMessage());
         }
     }
@@ -254,7 +263,8 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
             }
 
         } catch (SQLException ex) {
-            throw new GeneriekeFoutmelding("KlantDAOMySQL: SQL FOUT TIJDEN OPHALEN KLANTEN");
+            DeLogger.getLogger().error("SQL FOUT TIJDEN OPHALEN KLANTEN: " + ex.getMessage());
+            throw new GeneriekeFoutmelding("KlantDAOMySQL: SQL FOUT TIJDEN OPHALEN KLANTEN:" + ex.getMessage());
         }
     }
 
@@ -296,9 +306,11 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
                     return klantenLijst.listIterator();
                 }
             } catch (SQLException ex) {
+                DeLogger.getLogger().error("SQL FOUT TIJDENS OPZOEKEN KLANT " + ex.getMessage());
                 throw new GeneriekeFoutmelding("KlantDAOMySQL: SQL FOUT TIJDENS OPZOEKEN KLANT " + ex.getMessage());
             }
         } else {
+            DeLogger.getLogger().warn("ER DIENT EEN GEVULD KLANTOBJECT MEEGEGEVEN TE WORDEN OM EEN KLANT TE ZOEKEN");
             throw new GeneriekeFoutmelding("KlantDAOMySQL: ER DIENT EEN GEVULD KLANTOBJECT MEEGEGEVEN TE WORDEN OM EEN KLANT TE ZOEKEN");
         }
     }
@@ -388,7 +400,8 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
             }
 
         } catch (SQLException ex) {
-            throw new GeneriekeFoutmelding("KlantDAOMySQL: SQL FOUT TIJDENS OPZOEKEN KLANT OP VOLLE ADRES");
+            DeLogger.getLogger().error("SQL FOUT TIJDENS OPZOEKEN KLANT OP VOLLE ADRES: " + ex.getMessage());
+            throw new GeneriekeFoutmelding("KlantDAOMySQL: SQL FOUT TIJDENS OPZOEKEN KLANT OP VOLLE ADRES: " + ex.getMessage());
         }
     }
 
@@ -449,6 +462,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
                 }
             }
         } catch (SQLException ex) {
+            DeLogger.getLogger().error("SQL FOUT TIJDENS OPZOEKEN KLANT OP BESTELLINGID: " + ex.getMessage());
             throw new GeneriekeFoutmelding("KlantDAOMySQL: SQL FOUT TIJDENS OPZOEKEN KLANT OP BESTELLINGID: " +
                     ex.getMessage());
         }
@@ -493,7 +507,8 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
             statement.execute();
 
         } catch (SQLException ex) {
-            throw new GeneriekeFoutmelding("KlantDAOMySQL: SQL FOUT TIJDENS UPDATEN KLANT");
+            DeLogger.getLogger().error("SQL FOUT TIJDENS UPDATEN KLANT: " + ex.getMessage());
+            throw new GeneriekeFoutmelding("KlantDAOMySQL: SQL FOUT TIJDENS UPDATEN KLANT: " + ex.getMessage());
         }
     }
 
@@ -532,7 +547,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
      */
 
     @Override
-    public long schakelStatusKlant(long klantId, int status) throws GeneriekeFoutmelding {
+    public void schakelStatusKlant(long klantId, int status) throws GeneriekeFoutmelding {
         String query =
                 "UPDATE KLANT " +
                         "SET " +
@@ -540,22 +555,20 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
                         "WHERE " +
                         "klant_id = ?";
 
-        long verwijderdID = -1;
-
         try (
                 Connection connection = connPool.verkrijgConnectie();
                 PreparedStatement statement = connection.prepareStatement(query);
 
         ) {
-//            bestellingDAO = new BestellingDAOMySQL();
-//            verwijderdID = bestellingDAO.verwijderAlleBestellingenKlant(klantId); //TODO weer integreren als af is
+            bestellingDAO = new BestellingDAOMySQL();
+            bestellingDAO.verwijderAlleBestellingenKlant(klantId); //TODO weer integreren als af is
             statement.setInt(1, status);
             statement.setLong(2, klantId);
             statement.execute();
 
-            return verwijderdID;
         } catch (SQLException ex) {
-            throw new GeneriekeFoutmelding("KlantDAOMySQL: SQL FOUT TIJDENS KLANT OP ID INACTIEF ZETTEN" + ex.getMessage());
+            DeLogger.getLogger().error("SQL FOUT TIJDENS KLANT OP ID INACTIEF ZETTEN: " + ex.getMessage());
+            throw new GeneriekeFoutmelding("KlantDAOMySQL: SQL FOUT TIJDENS KLANT OP ID INACTIEF ZETTEN: " + ex.getMessage());
         }
     }
 
@@ -620,7 +633,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
         if (klantenIterator != null) {
             while (klantenIterator.hasNext()) {
                 Klant tijdelijkeKlant = klantenIterator.next();
-                verwijderdId = schakelStatusKlant(tijdelijkeKlant.getKlant_id(), 0);
+                schakelStatusKlant(tijdelijkeKlant.getKlant_id(), 0);
             }
         }
 
@@ -660,11 +673,18 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
 
             return klantenLijst;
         } catch (SQLException ex) {
-            throw new GeneriekeFoutmelding("KlantDAOMySQL: FOUT TIJDENS RESULTSET VOEGEN IN LIJST");
+            DeLogger.getLogger().error("FOUT TIJDENS RESULTSET VOEGEN IN LIJST: " + ex.getMessage());
+            throw new GeneriekeFoutmelding("KlantDAOMySQL: FOUT TIJDENS RESULTSET VOEGEN IN LIJST: " + ex.getMessage());
         }
     }
 
-    // TODO: Tijdelijk om naar console te printen, aangezien later naar GUI gaat deze methode er weer uit
+    /**
+     * Handzame methode voor tijdens test / develop doel-einden eenvoudig informatie naar
+     * de console te printen.
+     *
+     * @param klantenIterator Een iterator van de klantenlijst
+     * @throws GeneriekeFoutmelding Foutmelding met omschrijving.
+     */
     public void printKlantenInConsole(ListIterator<Klant> klantenIterator) throws GeneriekeFoutmelding {
 
         // Per klant een print, per klant alle adressen

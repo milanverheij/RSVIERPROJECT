@@ -5,33 +5,43 @@ import exceptions.GeneriekeFoutmelding;
 import interfaces.AdresDAO;
 import interfaces.KlantDAO;
 import model.Adres;
+import model.Klant;
 import mysql.AbstractDAOMySQL;
 import mysql.AdresDAOMySQL;
 import mysql.KlantDAOMySQL;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * Created by Milan_Verheij on 09-06-16.
- * Updated by Milan Verheij on 20-06-16 (nieuw DB-model).
+ * Updated by Milan Verheij on 26-06-16 (nieuw DB-model).
 
  *
  * TestClass om AdresDAOMySQL te Testen met JUnit
  */
 public class AdresDAOMySQLTest {
-    // Klant id is nodig om een adres te kunnen toevoegen
-    long klant_id_te_testen = 0;
-    long adres_id_te_testen = 0;
+    private final String STRAATNAAM = "TESTSTRAATNAAM"; // Max 26 karakters
+    private final String POSTCODE = "1234ZZ"; // Max 6 karakters
+    private final String TOEVOEGING = "TEST"; // max 6 karakters
+    private final int HUISNUMMER = 9999; // meer is onmogelijk in Nederland
+    private final String WOONPLAATS = "TESTWOONPLAATS"; // Max 26 karakters
+    private final String VOORNAAM = "TESTKLANTVOORNAAM4101AR1225"; // Uniek ID
+    private final String ACHTERNAAM = "TESTKLANTACHTERNAAM4101AR1225"; // Uniek ID
+    private final String TUSSENVOEGSEL = "TUSS";
+    private final String EMAIL = "TESTEMAIL@BEESTJES.TEST";
+    long klant_id_te_testen = 0; // Id is nodig voor diverse acties
+    long adres_id_te_testen = 0; // Id is nodig voor diverse acties
+
+    Adres testAdres = new Adres(STRAATNAAM, POSTCODE, TOEVOEGING, HUISNUMMER, WOONPLAATS);
+    Klant testKlant = new Klant(0, VOORNAAM, ACHTERNAAM, TUSSENVOEGSEL, EMAIL, null);
+
     KlantDAO klantDAO = new KlantDAOMySQL();
     AdresDAO adresDAO = new AdresDAOMySQL();
-
-    String juisteTestStraatnaam = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"; // Max 26 karakters
-    String juisteTestPostcode = "9999AB"; // Max 6 karakters
-    String juisteTestToevoeging = "ABCDEF"; // max 6 karakters
-    int juisteTestHuisnummer = 9999; // meer is onmogelijk in Nederland
-    String juisteTestWoonplaats = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"; // Max 26 karakters
-    Adres testAdres;
 
     @Before
     public void setUp() throws Exception {
@@ -39,38 +49,28 @@ public class AdresDAOMySQLTest {
         // alle DAO's gebruik maken van een gedeelde link naar een connection pool in de abstract DAO.
         AbstractDAOMySQL.setConnPool(new HikariCPAdapter("MySQL"));
 
-        // Ik moet eerste een klant aanmaken voordat ik een adres kan toevoegen en deze kan testen.
+        // Ik moet eerste een test-klant aanmaken voordat ik een adres kan koppelen en deze methode kan testen.
         // Derhalve eerste een nieuwe klant toevoegen en het klant_id achterhalen van deze klant
         // door hierop te zoeken.
         try {
-            klantDAO.nieuweKlant("GEBRUIKT", "IN TEST");
-
+            klant_id_te_testen = klantDAO.nieuweKlant(testKlant, 0); // Adres_id = 0, er wordt nog geen adres gekoppeld.
         } catch (GeneriekeFoutmelding ex) {
             if (!ex.getMessage().contains("BESTAAT AL")) {
                 throw new GeneriekeFoutmelding("FOUT TIJDENS SETUP");
             }
-            klant_id_te_testen = klantDAO.getKlantOpKlant("GEBRUIKT", "IN TEST").next().getKlant_id();
+            klant_id_te_testen = klantDAO.getKlantOpKlant(VOORNAAM, ACHTERNAAM).next().getKlant_id();
         }
-
-        try {
-            adresDAO.nieuwAdres(klant_id_te_testen, new Adres(juisteTestStraatnaam, juisteTestPostcode,
-                    juisteTestToevoeging, juisteTestHuisnummer, juisteTestWoonplaats));
-            adres_id_te_testen = adresDAO.getAdresID(juisteTestPostcode, juisteTestHuisnummer,
-                    juisteTestToevoeging);
-        } catch (GeneriekeFoutmelding ex) {
-            if (!ex.getMessage().contains("BESTAAT AL")) {
-                throw new GeneriekeFoutmelding("FOUT TIJDENS SETUP" + ex.getMessage());
-            }
-            adres_id_te_testen = adresDAO.getAdresID(juisteTestPostcode, juisteTestHuisnummer,
-                    juisteTestToevoeging);
-        }
+        System.out.println("KLANT_ID OM TE WORDEN GETEST = " + klant_id_te_testen);
     }
 
     @After
     public void tearDown() throws Exception {
-        klantDAO.updateKlant(klant_id_te_testen, "GEBRUIKT", "IN TEST", "", "TEARDOWN");
-        klantDAO.schakelStatusKlant(klant_id_te_testen, 0);
-        adresDAO.schakelStatusAdres(adres_id_te_testen, 0);
+        // Test-klant en adres op inactief zetten
+        if (klant_id_te_testen > 0)
+            klantDAO.schakelStatusKlant(klant_id_te_testen, 0);
+
+        if (adres_id_te_testen > 0)
+            adresDAO.schakelStatusAdres(adres_id_te_testen, 0);
 
         // Terug naar initialisatie van test-schakelaars
         AdresDAOMySQL.aangeroepenAdresInTest = new Adres("XXXXXX", "XXXX", "XX", 0000, "XXXX");
@@ -79,109 +79,79 @@ public class AdresDAOMySQLTest {
 
     @Test
     public void TestUpdateAdresDAOnullAdres_geenException() throws Exception {
+        // Als geen foutmelding is een nieuw adres gemaakt met lege waarden.
         adresDAO.updateAdres(adres_id_te_testen, null);
-
-        // Daarna naar goede adres omdat de teardown anders een fout maakt en de volgende keer
-        // een nieuw null adres wordt gemaakt in de DB.
-        adresDAO.updateAdres(adres_id_te_testen, new Adres(juisteTestStraatnaam, juisteTestPostcode,
-                juisteTestToevoeging, juisteTestHuisnummer, juisteTestWoonplaats));
     }
-//
-//    @Test
-//    public void TestUpdateAdresDAOBijNullAlleVeldenLeeg() throws Exception {
-//        AdresDAOMySQL.klantWordtGetest = true;
-//        adresDAO.updateAdres(adres_id_te_testen, null);
-//
-//        assertEquals("", AdresDAOMySQL.aangeroepenAdresInTest.getStraatnaam());
-//        assertEquals("", AdresDAOMySQL.aangeroepenAdresInTest.getPostcode());
-//        assertEquals("", AdresDAOMySQL.aangeroepenAdresInTest.getToevoeging());
-//        assertEquals("", AdresDAOMySQL.aangeroepenAdresInTest.getWoonplaats());
-//        assertEquals(0, AdresDAOMySQL.aangeroepenAdresInTest.getHuisnummer());
-//
-//        AdresDAOMySQL.klantWordtGetest = false;
-//        AdresDAOMySQL.aangeroepenAdresInTest = new Adres("XXXXXX", "XXXX", "XX", 0000, "XXXX");
-//    }
-//
-//    @Test
-//    public void TestUpdateAdresDAOStraatNaamKlopt() throws Exception {
-//        AdresDAOMySQL.klantWordtGetest = true;
-//
-//        adresDAO.updateAdres(adres_id_te_testen, new Adres(juisteTestStraatnaam, "", "", 0 , ""));
-//
-//        assertEquals(juisteTestStraatnaam, AdresDAOMySQL.aangeroepenAdresInTest.getStraatnaam());
-//
-//        AdresDAOMySQL.klantWordtGetest = false;
-//        AdresDAOMySQL.aangeroepenAdresInTest = new Adres("XXXXXX", "XXXX", "XX", 0000, "XXXX");
-//    }
-//
-//    @Test
-//    public void TestUpdateAdresDAOPostcodeKlopt() throws Exception {
-//        AdresDAOMySQL.klantWordtGetest = true;
-//
-//        adresDAO.updateAdres(adres_id_te_testen, new Adres("", juisteTestPostcode, "", 0 , ""));
-//
-//        assertEquals(juisteTestPostcode, AdresDAOMySQL.aangeroepenAdresInTest.getPostcode());
-//
-//        AdresDAOMySQL.klantWordtGetest = false;
-//        AdresDAOMySQL.aangeroepenAdresInTest = new Adres("XXXXXX", "XXXX", "XX", 0000, "XXXX");
-//    }
-//
-//    @Test
-//    public void TestUpdateAdresDAOToevoegingKlopt() throws Exception {
-//        AdresDAOMySQL.klantWordtGetest = true;
-//
-//        adresDAO.updateAdres(adres_id_te_testen, new Adres("", "", juisteTestToevoeging, 0 , ""));
-//
-//        assertEquals(juisteTestToevoeging, AdresDAOMySQL.aangeroepenAdresInTest.getToevoeging());
-//
-//        AdresDAOMySQL.klantWordtGetest = false;
-//        AdresDAOMySQL.aangeroepenAdresInTest = new Adres("XXXXXX", "XXXX", "XX", 0000, "XXXX");
-//    }
-//
-//    @Test
-//    public void TestUpdateAdresDAOHuisnummerKlopt() throws Exception {
-//        AdresDAOMySQL.klantWordtGetest = true;
-//
-//        adresDAO.updateAdres(adres_id_te_testen, new Adres("", "", "", juisteTestHuisnummer , ""));
-//
-//        assertEquals(juisteTestHuisnummer, AdresDAOMySQL.aangeroepenAdresInTest.getHuisnummer());
-//
-//        AdresDAOMySQL.klantWordtGetest = false;
-//        AdresDAOMySQL.aangeroepenAdresInTest = new Adres("XXXXXX", "XXXX", "XX", 0000, "XXXX");
-//    }
-//
-//    @Test
-//    public void TestUpdateAdresDAOWoonplaatsKlopt() throws Exception {
-//        AdresDAOMySQL.klantWordtGetest = true;
-//
-//        adresDAO.updateAdres(adres_id_te_testen, new Adres("", "", "", 0 , juisteTestWoonplaats));
-//
-//        assertEquals(juisteTestWoonplaats, AdresDAOMySQL.aangeroepenAdresInTest.getWoonplaats());
-//
-//        AdresDAOMySQL.klantWordtGetest = false;
-//        AdresDAOMySQL.aangeroepenAdresInTest = new Adres("XXXXXX", "XXXX", "XX", 0000, "XXXX");
-//    }
-//
-//
-//    @Rule
-//    public final ExpectedException exception = ExpectedException.none();
-//
-//    @Test
-//    public void TestUpdateAdresDAOEenFoutieveInvoergRSVIERException() throws Exception {
-//        // Een te lange postcode kan niet en ik verwacht dan ook dat er een GeneriekeFoutmelding wordt gegooid
-//        // en wel een RSVierException
-//        // Dit geld voor elke foutieve invoer, het gedrag zal hetzelfde zijn.
-//        exception.expect(GeneriekeFoutmelding.class);
-//        adresDAO.updateAdres(adres_id_te_testen, new Adres("", "TELANGEPOSTCODE", "", 0, ""));
-//    }
-//
-//    @Test
-//    public void TestUpdateAdresDAOConsistentGedragFoutieveInvoer() throws Exception {
-//        // Test of dat ook bij een andere foutieve invoer eenzelfde fout wordt gegooid, bij twee zal
-//        // de rest hetzelfde functioneren is de aanname.
-//        exception.expect(GeneriekeFoutmelding.class);
-//        adresDAO.updateAdres(adres_id_te_testen, new Adres("", "", "ABCDEFG", 0, ""));
-//    }
 
 
+    @Test
+    public void TestUpdateAdresDAOJuisteGegevenDoorgegevent() throws Exception {
+        getAdresId(); // Zet adres_id_te_testen op juiste adres_id.
+
+        adresDAO.updateAdres(adres_id_te_testen, testAdres);
+        Adres assertAdres = adresDAO.getAdresOpAdresID(adres_id_te_testen);
+
+        assertEquals(STRAATNAAM, assertAdres.getStraatnaam());
+        assertEquals(POSTCODE, assertAdres.getPostcode());
+        assertEquals(TOEVOEGING, assertAdres.getToevoeging());
+        assertEquals(WOONPLAATS, assertAdres.getWoonplaats());
+        assertEquals(HUISNUMMER, assertAdres.getHuisnummer());
+    }
+
+
+    @Rule
+    public final ExpectedException exception = ExpectedException.none();
+
+    @Test
+    public void TestUpdateAdresDAOEenFoutieveInvoergRSVIERException() throws Exception {
+        // Een te lange postcode kan niet en ik verwacht dan ook dat er een GeneriekeFoutmelding wordt gegooid
+        // en wel een RSVierException
+        // Dit geld voor elke foutieve invoer, het gedrag zal hetzelfde zijn.
+
+        getAdresId();
+        exception.expect(GeneriekeFoutmelding.class);
+
+        adresDAO.updateAdres(adres_id_te_testen, new Adres(STRAATNAAM, "TELANGEPOSTCODE", TOEVOEGING, HUISNUMMER, WOONPLAATS));
+
+        // Terug naar goede adres als faal
+        adresDAO.updateAdres(adres_id_te_testen, new Adres(STRAATNAAM, POSTCODE, POSTCODE, HUISNUMMER, WOONPLAATS));
+    }
+
+    @Test
+    public void TestUpdateAdresDAOConsistentGedragFoutieveInvoer() throws Exception {
+        // Test of dat ook bij een andere foutieve invoer eenzelfde fout wordt gegooid, bij twee zal
+        // de rest hetzelfde functioneren is de aanname.
+
+        getAdresId();
+        exception.expect(GeneriekeFoutmelding.class);
+
+        adresDAO.updateAdres(adres_id_te_testen, new Adres(STRAATNAAM, POSTCODE, "ABCDEFG", HUISNUMMER, WOONPLAATS));
+
+        // Terug naar goede adres als faal
+        adresDAO.updateAdres(adres_id_te_testen, new Adres(STRAATNAAM, POSTCODE, POSTCODE, HUISNUMMER, WOONPLAATS));
+    }
+
+
+    @Test
+    public void NieuwAdresEnKoppelen() throws Exception {
+
+    }
+
+
+
+    // Methode om adres_id te zoeken / adres te maken als deze er nog niet is (test_adres)
+    // Aangezien we niet verwijderen.. bestaat er 1 test_adres in de DB at a certain point.
+    private void getAdresId() throws GeneriekeFoutmelding{
+        try {
+            adres_id_te_testen = adresDAO.nieuwAdres(klant_id_te_testen, testAdres);
+            System.out.println("ADRES_ID OM TE WORDEN GETEST(NEW) = " + adres_id_te_testen);
+        } catch (GeneriekeFoutmelding ex) {
+            if (!ex.getMessage().contains("BESTAAT AL"))
+                throw new GeneriekeFoutmelding("FOUT BIJ MAKEN ADRES IN TEST");
+            else {
+                adres_id_te_testen = adresDAO.getAdresID(POSTCODE, HUISNUMMER, TOEVOEGING);
+                System.out.println("ADRES_ID OM TE WORDEN GETEST (FIND) = " + adres_id_te_testen);
+            }
+        }
+    }
 }
