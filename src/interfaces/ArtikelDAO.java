@@ -1,11 +1,7 @@
 package interfaces;
 
-
-
-import java.util.Iterator;
-import java.util.Map.Entry;
-
-import exceptions.RSVIERException;
+import java.util.LinkedHashSet;
+import exceptions.GeneriekeFoutmelding;
 import model.Artikel;
 
 /**
@@ -14,21 +10,16 @@ import model.Artikel;
 public interface ArtikelDAO {
 
 	//Create
-	public void nieuwArtikelOpBestelling(long bestelling_id, Artikel aNieuw) throws RSVIERException;
+	int nieuwArtikel(Artikel aNieuw) throws GeneriekeFoutmelding;
 
 	//Read
-	public Artikel getArtikelOpBestelling(long bestelling_id, int artikelNummer) throws RSVIERException;
-	public Iterator<Artikel> getAlleArtikelenOpBestelling(long bestelling_id) throws RSVIERException;
-	public Iterator<Entry<Artikel, Integer>> getAlleArtikelen() throws RSVIERException;
+	Artikel getArtikel(int artikelId) throws GeneriekeFoutmelding;
+	LinkedHashSet<Artikel> getAlleArtikelen(boolean artikelActief) throws GeneriekeFoutmelding;
 
 	//Update
-	public void updateArtikelOpBestelling(long bestelling_id, int artikelNummer, Artikel aNieuw) throws RSVIERException;
-	public void updateArtikelOpBestelling(long bestelling_id, Artikel aOud, Artikel aNieuw) throws RSVIERException;
-	public void updateAlleArtikelenOpBestelling(long bestelling_id, Artikel a1, Artikel a2, Artikel a3) throws RSVIERException;
-	public void updateArtikelen(Artikel aNieuw) throws RSVIERException;
+	void updateArtikel(int artikelId, Artikel aNieuw) throws GeneriekeFoutmelding;
 	
 	//Delete
-	public void verwijderArtikelVanBestelling(long bestelling_id, Artikel a) throws RSVIERException;
-	public void verwijderAlleArtikelenVanBestelling(long bestelling_id) throws RSVIERException;
+	void verwijderArtikel(int artikelId) throws GeneriekeFoutmelding;
 	
 }

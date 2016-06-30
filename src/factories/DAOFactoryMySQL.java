@@ -1,15 +1,15 @@
 package factories;
 
-import interfaces.AdresDAO;
-import interfaces.ArtikelDAO;
-import interfaces.BestellingDAO;
-import interfaces.KlantDAO;
+import exceptions.GeneriekeFoutmelding;
+import interfaces.*;
+import mysql.*;
 
 /**
  * @author Milan_Verheij
  * <p>
  * Deze concrete factory van het type MySQL maakt DAO's
  * aan voor de database MySQL en geeft deze terug aan de gebruiker.
+ *
  */
 
 public class DAOFactoryMySQL extends DAOFactory{
@@ -17,40 +17,41 @@ public class DAOFactoryMySQL extends DAOFactory{
 	/**
 	 * Methode om de een KlantDAO te maken.
 	 *
-	 * @return een KlantDAO van het MySQL-type
+	 * @return een KlantDAO van het MySQL-type(DBKeuze 1).
      */
 	@Override
-	public KlantDAO getKlantDAO() {
-		return new mysql.KlantDAOMySQL();
+	public KlantDAO getKlantDAO() throws GeneriekeFoutmelding {
+		return new KlantDAOMySQL();
 	}
 
 	/**
 	 * Methode om de een AdresDAO te maken.
 	 *
-	 * @return een AdresDAO van het MySQL-type
+	 * @return een AdresDAO van het MySQL-type(DBKeuze 1).
      */
 	@Override
-	public AdresDAO getAdresDAO() {
-		return new mysql.AdresDAOMySQL();
+	public AdresDAO getAdresDAO() throws GeneriekeFoutmelding {
+		return new AdresDAOMySQL();
 	}
 
-	/**
-	 * Methode om een BestellingDAO te maken.
+    /**
+     * Methode om de een BestellingDAO te maken.
+     *
+     * @return een BestellingDAO van het MySQL-type(DBKeuze 1).
+     */
+	@Override
+	public BestellingDAO getBestellingDAO() throws GeneriekeFoutmelding {
+		return new BestellingDAOMySQL();
+	}
+
+    /**
+     * Methode om de een ArtikelDAO te maken.
 	 *
-	 * @return een BestellingDAO van het MySQL-type.
+     * @return een ArtikelDAO van het MySQL-type(DBKeuze 1).
      */
 	@Override
-	public BestellingDAO getBestellingDAO() {
-		return new mysql.BestellingDAOMySQL();
-	}
-
-	/**
-	 * Methode om een ArtikelDAO te maken;
-	 * @return een ArtikelDAO van het MySQL-type
-     */
-	@Override
-	public ArtikelDAO getArtikelDAO() {
-		return new mysql.ArtikelDAOMySQL();
+	public ArtikelDAO getArtikelDAO() throws GeneriekeFoutmelding {
+		return new ArtikelDAOMySQL();
 	}
 
 }

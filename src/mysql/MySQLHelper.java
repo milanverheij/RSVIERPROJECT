@@ -1,6 +1,7 @@
 package mysql;
 
-import javax.sql.RowSet;
+import logger.DeLogger;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -15,8 +16,8 @@ import java.sql.SQLException;
  * ter voorkoming van dubbele code in het kader try / catch blocken e.d.
  *
  */
+@Deprecated
 public class MySQLHelper {
-    private static int logModus = 0; // 0 is standaard uit, 1 is aan
 
     /**
      * Overloaded method van de onderstaande methodes. Om gemakkelijk zowel de connectie,
@@ -25,6 +26,7 @@ public class MySQLHelper {
      *
      * @param connection Meegegeven connectie om te sluiten
      */
+    @Deprecated
     public static void close(Connection connection, PreparedStatement preparedStatement, ResultSet resultSet) {
         close(resultSet);
         close(preparedStatement);
@@ -39,6 +41,7 @@ public class MySQLHelper {
      * @param preparedStatement Meegegeven statement om te sluiten
      * @param connection Meegegeven connectie om te sluiten
      */
+    @Deprecated
     public static void close(Connection connection, PreparedStatement preparedStatement) {
         close(preparedStatement);
         close(connection);
@@ -52,6 +55,7 @@ public class MySQLHelper {
      * @param preparedStatement Meegegeven statement om te sluiten
      * @param resultSet Meegegeven resultset om te sluiten
      */
+    @Deprecated
     public static void close(PreparedStatement preparedStatement, ResultSet resultSet) {
         close(resultSet);
         close(preparedStatement);
@@ -61,14 +65,13 @@ public class MySQLHelper {
      * Als er een connectie is wordt deze gesloten.
      * @param connection Meegegeven connectie om te sluiten
      */
+    @Deprecated
     public static void close(Connection connection) {
         if (connection != null) {
             try {
                 connection.close();
-                if (logModus == 1)
-                    System.out.println("\n\tMySQLHelper: CONNECTIE GESLOTEN" );
             } catch (SQLException e) {
-                System.out.println("\n\tMySQLHelper: FOUT TIJDENS SLUITEN CONNECTIE");
+                DeLogger.getLogger().error("FOUT TIJDENS SLUITEN CONNECTIE: " + e.getMessage());
                 e.printStackTrace();
             }
         }
@@ -78,14 +81,13 @@ public class MySQLHelper {
      * Als er een PreparedStatement is wordt deze gesloten
      * @param statement Meegegeven statement om te sluiten
      */
+    @Deprecated
     public static void close(PreparedStatement statement) {
         if (statement != null) {
             try {
                 statement.close();
-                if (logModus == 1)
-                    System.out.println("\n\tMySQLHelper: STATEMENT GESLOTEN" );
             } catch (SQLException e) {
-                System.out.println("\n\tMySQLHelper: FOUT TIJDENS SLUITEN STATEMENT");
+                DeLogger.getLogger().error("FOUT TIJDENS SLUITEN STATEMENT");
             }
         }
     }
@@ -94,39 +96,14 @@ public class MySQLHelper {
      * Als er een resultSet is wordt deze gesloten
      * @param resultSet Meegegeven resultset om te sluiten
      */
+    @Deprecated
     public static void close(ResultSet resultSet) {
         if (resultSet != null) {
             try {
                 resultSet.close();
-                if (logModus == 1)
-                    System.out.println("\n\tMySQLHelper: RESULTSET GESLOTEN" );
             } catch (SQLException e) {
-                System.out.println("\n\tMySQLHelper: FOUT TIJDENS SLUITEN RESULTSET");
+                DeLogger.getLogger().error("FOUT TIJDENS SLUITEN RESULTSET");
             }
         }
-    }
-
-    /**
-     * Als er een rowSet is wordt deze gesloten.
-     * @param rowSet Meegegeven rowSet om te sluiten
-     */
-    public static void close(RowSet rowSet) {
-        if (rowSet != null) {
-            try {
-                rowSet.close();
-                if (logModus == 1)
-                    System.out.println("\n\tMySQLHelper: ROWSET gesloten" );
-            } catch (SQLException e) {
-                System.out.println("\n\tMySQLHelper: FOUT TIJDENS SLUITEN ROWSET");
-            }
-        }
-    }
-
-    /** Methode om logmodus aan of uit te zetten
-     *
-     * @param logModus: Logmodus uit(0) of aan(1)
-     */
-    public static void setLogModus(int logModus) {
-        MySQLHelper.logModus = logModus;
     }
 }

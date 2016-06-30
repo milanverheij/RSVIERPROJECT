@@ -1,236 +1,218 @@
 package JUnit_tests;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
 import java.util.Iterator;
-import java.util.LinkedHashMap;
+
+import static org.junit.Assert.*;
+
+import java.math.BigDecimal;
 import java.util.ArrayList;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.FixMethodOrder;
 import org.junit.Test;
-import org.junit.runners.MethodSorters;
 
+import factories.DAOFactory;
+import interfaces.ArtikelDAO;
+import interfaces.BestellingDAO;
 import model.Artikel;
 import model.Bestelling;
-import mysql.BestellingDAOMySQL;
 
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class BestellingDAOMySQLTest {
 
 	Artikel a1 = new Artikel();
 	Artikel a2 = new Artikel();
 	Artikel a3 = new Artikel();
+
 	Bestelling bestelling1 = new Bestelling();
 	Bestelling bestelling2 = new Bestelling();
-	Bestelling bestelling3 = new Bestelling();
 
 	long id1;
 	long id2;
-	long id3;
 
-	BestellingDAOMySQL dao = new BestellingDAOMySQL();
+	BestellingDAO dao;
 
 	@Before
 	public void setUp() throws Exception{
-		a1.setArtikel_id(1);
-		a1.setArtikel_naam("artikel 1");
-		a1.setArtikel_prijs(1.01);
+		if(dao == null)
+			dao = DAOFactory.getDAOFactory("MySQL", "HikariCP").getBestellingDAO();
 
-		a2.setArtikel_id(2);
-		a2.setArtikel_naam("artikel 2");
-		a2.setArtikel_prijs(2.02);
+		ArtikelDAO artikelDao = DAOFactory.getDAOFactory("MySQL", "HikariCP").getArtikelDAO();
 
-		a3.setArtikel_id(3);
-		a3.setArtikel_naam("artikel 3");
-		a3.setArtikel_prijs(3.03);
+		a1.setArtikelNaam("Oerang Oetang");
+		a1.setArtikelPrijs(new BigDecimal(1000.00));
+		a1.setVerwachteLevertijd(3);
+		a1.setInAssortiment(true);
+		a1.setAantalBesteld(4);
 
-		LinkedHashMap<Artikel, Integer> artikelLijst1 = new LinkedHashMap<Artikel, Integer>();
-		artikelLijst1.put(a1, 1);
-		artikelLijst1.put(a2, 1);
-		artikelLijst1.put(a3, 1);
+		a2.setArtikelNaam("Aasgier");
+		a2.setArtikelPrijs(new BigDecimal(1100.00));
+		a2.setVerwachteLevertijd(4);
+		a2.setInAssortiment(true);
+		a2.setAantalBesteld(2);
+
+		a3.setArtikelNaam("Luiaard");
+		a3.setArtikelPrijs(new BigDecimal(500.00));
+		a3.setVerwachteLevertijd(14);
+		a3.setInAssortiment(false);
+		a3.setAantalBesteld(3);
+
+		a1.setArtikelId(artikelDao.nieuwArtikel(a1));
+		a2.setArtikelId(artikelDao.nieuwArtikel(a2));
+		a3.setArtikelId(artikelDao.nieuwArtikel(a3));
+
+		ArrayList<Artikel> artikelLijst1 = new ArrayList<Artikel>();
+		artikelLijst1.add(a1);
+		artikelLijst1.add(a2);
+		artikelLijst1.add(a3);
 		bestelling1.setKlant_id(1);
 		bestelling1.setArtikelLijst(artikelLijst1);
+		bestelling1.setBestellingActief(true);
 
-		LinkedHashMap<Artikel, Integer> artikelLijst2 = new LinkedHashMap<Artikel, Integer>();
-		artikelLijst2.put(a1, 1);
-		artikelLijst2.put(a2, 2);
-		artikelLijst2.put(a3, 0);
+		ArrayList<Artikel> artikelLijst2 = new ArrayList<Artikel>();
+		artikelLijst2.add(a1);
+		artikelLijst2.add(a2);
 		bestelling2.setKlant_id(1);
 		bestelling2.setArtikelLijst(artikelLijst2);
-
-		LinkedHashMap<Artikel, Integer> artikelLijst3 = new LinkedHashMap<Artikel, Integer>();
-		artikelLijst3.put(a1, 0);
-		artikelLijst3.put(a2, 0);
-		artikelLijst3.put(a3, 3);
-		bestelling3.setKlant_id(1);
-		bestelling3.setArtikelLijst(artikelLijst3);
-
+		bestelling2.setBestellingActief(false);
 
 		id1 = dao.nieuweBestelling(bestelling1);
 		id2 = dao.nieuweBestelling(bestelling2);
-		id3 = dao.nieuweBestelling(bestelling3);		
 	}
 
 	@After
 	public void breakDown() throws Exception{
-
 		dao.verwijderEnkeleBestelling(id1);
 		dao.verwijderEnkeleBestelling(id2);
-		dao.verwijderEnkeleBestelling(id3);
-
 	}
-
-	@Test
-	public void aanmakenVanEenBestelingInDeDatabase() throws Exception{
-		Long id = dao.nieuweBestelling(171, a1);
-
-		Bestelling bestelling = dao.getBestellingOpKlantGegevens(171).next();
-		Artikel artikel = bestelling.getArtikelLijst().keySet().iterator().next();
-
-		assertEquals(171, bestelling.getKlant_id());
-		assertEquals(a1.getArtikel_naam(), artikel.getArtikel_naam());
-		assertTrue(a1.getArtikel_prijs() == artikel.getArtikel_prijs());
-		assertTrue(a1.getArtikel_id() == artikel.getArtikel_id());
-
-		dao.verwijderEnkeleBestelling(id);
-	}
-
 
 	@Test
 	public void testAangemaakteTuplesLezenOpBestellingId() throws Exception{
 
 		//Eerste bestelling bevat a1, a2, a3
-		Bestelling b1 = dao.getBestellingOpBestelling(id1).next();
-		ArrayList<Artikel> b1List = getArtikelArray(b1);
+		Bestelling b1 = dao.getBestellingOpBestellingId(id1, true).next();
+		ArrayList<Artikel> b1List = b1.getArtikelLijst();
 
-		assertEquals(a1.getArtikel_id(), b1List.get(0).getArtikel_id());
-		assertEquals(a1.getArtikel_naam(), b1List.get(0).getArtikel_naam());
-		assertTrue(a1.getArtikel_prijs() == b1List.get(0).getArtikel_prijs());
+		assertEquals(a1.getArtikelId(), b1List.get(0).getArtikelId());
+		assertEquals(a1.getArtikelNaam(), b1List.get(0).getArtikelNaam());
+		assertTrue(a1.getArtikelPrijs().compareTo(b1List.get(0).getArtikelPrijs()) == 0);
 
-		assertEquals(a2.getArtikel_id(), b1List.get(1).getArtikel_id());
-		assertEquals(a2.getArtikel_naam(), b1List.get(1).getArtikel_naam());
-		assertTrue(a2.getArtikel_prijs() == b1List.get(1).getArtikel_prijs());
+		assertEquals(a2.getArtikelId(), b1List.get(1).getArtikelId());
+		assertEquals(a2.getArtikelNaam(), b1List.get(1).getArtikelNaam());
+		assertTrue(a2.getArtikelPrijs().compareTo(b1List.get(1).getArtikelPrijs()) == 0);
 
-		assertEquals(a3.getArtikel_id(), b1List.get(2).getArtikel_id());
-		assertEquals(a3.getArtikel_naam(), b1List.get(2).getArtikel_naam());
-		assertTrue(a3.getArtikel_prijs() == b1List.get(2).getArtikel_prijs());
+		assertEquals(a3.getArtikelId(), b1List.get(2).getArtikelId());
+		assertEquals(a3.getArtikelNaam(), b1List.get(2).getArtikelNaam());
+		assertTrue(a3.getArtikelPrijs().compareTo(b1List.get(2).getArtikelPrijs()) == 0);
+	}
 
+
+	@Test
+	public void actiefInactiefGetBestellingTesten() throws Exception{
+		assertNull(dao.getBestellingOpBestellingId(id2, true));
+
+		Bestelling b1 = dao.getBestellingOpBestellingId(id1, true).next();
+		ArrayList<Artikel> b1List = b1.getArtikelLijst();
+
+		assertEquals(a1.getArtikelId(), b1List.get(0).getArtikelId());
+		assertEquals(a1.getArtikelNaam(), b1List.get(0).getArtikelNaam());
+		assertTrue(a1.getArtikelPrijs().compareTo(b1List.get(0).getArtikelPrijs()) == 0);
+
+		assertEquals(a2.getArtikelId(), b1List.get(1).getArtikelId());
+		assertEquals(a2.getArtikelNaam(), b1List.get(1).getArtikelNaam());
+		assertTrue(a2.getArtikelPrijs().compareTo(b1List.get(1).getArtikelPrijs()) == 0);
+
+		assertEquals(a3.getArtikelId(), b1List.get(2).getArtikelId());
+		assertEquals(a3.getArtikelNaam(), b1List.get(2).getArtikelNaam());
+		assertTrue(a3.getArtikelPrijs().compareTo(b1List.get(2).getArtikelPrijs()) == 0);
 
 	}
+
+	//Werkt alleen met een lege bestelling_heeft_artikel database wegens het lezen van alle tuples en het tegenkomen van onverwachte items
 	@Test
 	public void testAangemaakteTuplesLezenOpKlantId() throws Exception{
 
 		//Eerste bestelling bevat a1, a2, a3
-		Iterator<Bestelling> b1 = dao.getBestellingOpKlantGegevens(1);
-		ArrayList<Artikel> b1List = getArtikelArray(b1.next());
+		Iterator<Bestelling> b1 = dao.getBestellingOpKlantId(1, false);
+		ArrayList<Artikel> b1List = b1.next().getArtikelLijst();
 
-		assertEquals(a1.getArtikel_id(), b1List.get(0).getArtikel_id());
-		assertEquals(a1.getArtikel_naam(), b1List.get(0).getArtikel_naam());
-		assertTrue(a1.getArtikel_prijs() == b1List.get(0).getArtikel_prijs());
+		assertEquals(a1.getArtikelId(), b1List.get(0).getArtikelId());
+		assertEquals(a1.getArtikelNaam(), b1List.get(0).getArtikelNaam());
+		assertTrue(a1.getArtikelPrijs().compareTo(b1List.get(0).getArtikelPrijs()) == 0);
+		assertTrue(a1.getAantalBesteld() == b1List.get(0).getAantalBesteld());
 
-		assertEquals(a2.getArtikel_id(), b1List.get(1).getArtikel_id());
-		assertEquals(a2.getArtikel_naam(), b1List.get(1).getArtikel_naam());
-		assertTrue(a2.getArtikel_prijs() == b1List.get(1).getArtikel_prijs());
+		assertEquals(a2.getArtikelId(), b1List.get(1).getArtikelId());
+		assertEquals(a2.getArtikelNaam(), b1List.get(1).getArtikelNaam());
+		assertTrue(a2.getArtikelPrijs().compareTo(b1List.get(1).getArtikelPrijs()) == 0);
+		assertTrue(a2.getAantalBesteld() == b1List.get(1).getAantalBesteld());
 
-		assertEquals(a3.getArtikel_id(), b1List.get(2).getArtikel_id());
-		assertEquals(a3.getArtikel_naam(), b1List.get(2).getArtikel_naam());
-		assertTrue(a3.getArtikel_prijs() == b1List.get(2).getArtikel_prijs());
+		assertEquals(a3.getArtikelId(), b1List.get(2).getArtikelId());
+		assertEquals(a3.getArtikelNaam(), b1List.get(2).getArtikelNaam());
+		assertTrue(a3.getArtikelPrijs().compareTo(b1List.get(2).getArtikelPrijs()) == 0);
+		assertTrue(a3.getAantalBesteld() == b1List.get(2).getAantalBesteld());
 
-		//Tweede bestelling bevat a1, a2, a2
-		Bestelling b2 = b1.next();
-		ArrayList<Artikel> b2List = getArtikelArray(b2);
+		//Tweede bestelling bevat a1, a2
+		ArrayList<Artikel> b2List = b1.next().getArtikelLijst();
 
-		assertEquals(a1.getArtikel_id(), b2List.get(0).getArtikel_id());
-		assertEquals(a1.getArtikel_naam(), b2List.get(0).getArtikel_naam());
-		assertTrue(a1.getArtikel_prijs() == b2List.get(0).getArtikel_prijs());
+		assertEquals(a1.getArtikelId(), b2List.get(0).getArtikelId());
+		assertEquals(a1.getArtikelNaam(), b2List.get(0).getArtikelNaam());
+		assertTrue(a1.getArtikelPrijs().compareTo(b2List.get(0).getArtikelPrijs()) == 0);
+		assertTrue(a1.getAantalBesteld() == b2List.get(0).getAantalBesteld());
 
-		assertEquals(a2.getArtikel_id(), b2List.get(1).getArtikel_id());
-		assertEquals(a2.getArtikel_naam(), b2List.get(1).getArtikel_naam());
-		assertTrue(a2.getArtikel_prijs() == b2List.get(1).getArtikel_prijs());
-
-		assertEquals(a2.getArtikel_id(), b2List.get(1).getArtikel_id());
-		assertEquals(a2.getArtikel_naam(), b2List.get(1).getArtikel_naam());
-		assertTrue(a2.getArtikel_prijs() == b2List.get(1).getArtikel_prijs());
-
-		//Derde bestelling bevat a3, a3, a3
-		Bestelling b3 = b1.next();
-		ArrayList<Artikel> b3List = getArtikelArray(b3);
-
-		assertEquals(a3.getArtikel_id(), b3List.get(0).getArtikel_id());
-		assertEquals(a3.getArtikel_naam(), b3List.get(0).getArtikel_naam());
-		assertTrue(a3.getArtikel_prijs() == b3List.get(0).getArtikel_prijs());
-
-		assertEquals(a3.getArtikel_id(), b3List.get(1).getArtikel_id());
-		assertEquals(a3.getArtikel_naam(), b3List.get(1).getArtikel_naam());
-		assertTrue(a3.getArtikel_prijs() == b3List.get(1).getArtikel_prijs());
-
-		assertEquals(a3.getArtikel_id(), b3List.get(2).getArtikel_id());
-		assertEquals(a3.getArtikel_naam(), b3List.get(2).getArtikel_naam());
-		assertTrue(a3.getArtikel_prijs() == b3List.get(2).getArtikel_prijs());
-
-
+		assertEquals(a2.getArtikelId(), b2List.get(1).getArtikelId());
+		assertEquals(a2.getArtikelNaam(), b2List.get(1).getArtikelNaam());
+		assertTrue(a2.getArtikelPrijs().compareTo(b2List.get(1).getArtikelPrijs()) == 0);
+		assertTrue(a2.getAantalBesteld() == b1List.get(1).getAantalBesteld());
 	}
 
 	@Test
 	public void updateBestellingInDeDatabaseTest() throws Exception{
-
-		LinkedHashMap<Artikel, Integer> artikelLijst = new LinkedHashMap<Artikel, Integer>();
-		artikelLijst.put(a1, 3);
+		ArrayList<Artikel> artikelLijst = new ArrayList<Artikel>(); // gaat van a1 en a2 naar a2 en a3
+		artikelLijst.add(a2);
+		artikelLijst.add(a3);
 		bestelling2.setArtikelLijst(artikelLijst);
 		bestelling2.setBestelling_id(id2);
 		dao.updateBestelling(bestelling2);
 
-		ArrayList<Artikel> bList = getArtikelArray(dao.getBestellingOpBestelling(id2).next());
-		assertEquals(a1.getArtikel_id(), bList.get(0).getArtikel_id());
-		assertEquals(a1.getArtikel_naam(), bList.get(0).getArtikel_naam());
-		assertTrue(a1.getArtikel_prijs() == bList.get(0).getArtikel_prijs());
+		ArrayList<Artikel> bList = dao.getBestellingOpBestellingId(id2, false).next().getArtikelLijst();
+		assertEquals(a2.getArtikelId(), bList.get(0).getArtikelId());
+		assertEquals(a2.getArtikelNaam(), bList.get(0).getArtikelNaam());
+		assertTrue(a2.getArtikelPrijs().compareTo(bList.get(0).getArtikelPrijs()) == 0);
 
-		assertEquals(a1.getArtikel_id(), bList.get(1).getArtikel_id());
-		assertEquals(a1.getArtikel_naam(), bList.get(1).getArtikel_naam());
-		assertTrue(a1.getArtikel_prijs() == bList.get(1).getArtikel_prijs());
-
-		assertEquals(a1.getArtikel_id(), bList.get(2).getArtikel_id());
-		assertEquals(a1.getArtikel_naam(), bList.get(2).getArtikel_naam());
-		assertTrue(a1.getArtikel_prijs() == bList.get(2).getArtikel_prijs());		
-
+		assertEquals(a3.getArtikelId(), bList.get(1).getArtikelId());
+		assertEquals(a3.getArtikelNaam(), bList.get(1).getArtikelNaam());
+		assertTrue(a3.getArtikelPrijs().compareTo(bList.get(1).getArtikelPrijs()) == 0);
 	}
 
 	@Test
-	public void removeOneBestellingUitDeDatabase() throws Exception{
+	public void setAlsInactiefEenBestellingUitDeDatabase() throws Exception{
+		assertTrue(dao.getBestellingOpBestellingId(id1, false).next().getBestellingActief());
+		dao.setEnkeleBestellingInactief(id1);
+		assertEquals(dao.getBestellingOpBestellingId(id1, false).next().getBestellingActief(), false);
 
-		dao.verwijderEnkeleBestelling(id1);
-		dao.verwijderEnkeleBestelling(id2);
-		dao.verwijderEnkeleBestelling(id3);
-
-		assertNull(dao.getBestellingOpBestelling(id1));
-		assertNull(dao.getBestellingOpBestelling(id2));
-		assertNull(dao.getBestellingOpBestelling(id3));
-
+		assertFalse(dao.getBestellingOpBestellingId(id2, false).next().getBestellingActief());
+		dao.setEnkeleBestellingInactief(id2);
+		assertFalse(dao.getBestellingOpBestellingId(id2, false).next().getBestellingActief());
 	}
 
 	@Test
-	public void removeAllBestellingenVanEenKlantUitDeDataBase() throws Exception{
+	public void setAlsInactiefAlleBestellingenKlant() throws Exception{
+		dao.setAlsInactiefAlleBestellingenKlant(1);
+		assertNull(dao.getBestellingOpKlantId(1, true));
+	}
 
+	@Test
+	public void verwijderenAlleBestellingenKlant() throws Exception{
 		dao.verwijderAlleBestellingenKlant(1);
-		assertNull(dao.getBestellingOpKlantGegevens(1));
-
+		assertNull(dao.getBestellingOpKlantId(1, false));	
 	}
 
-	public ArrayList<Artikel> getArtikelArray(Bestelling b){
-		ArrayList<Artikel> list = new ArrayList<Artikel>();
-		LinkedHashMap<Artikel, Integer> artikelLijst = b.getArtikelLijst();
-		Iterator<Artikel> iterator = artikelLijst.keySet().iterator();
+	@Test
+	public void verwijderenEnkeleBestelling() throws Exception{
+		dao.verwijderEnkeleBestelling(id1);
+		assertNull(dao.getBestellingOpBestellingId(id1, false));
 
-		while(iterator.hasNext()){
-			Artikel artikel = iterator.next();
-			for(int x = 0; x < artikelLijst.get(artikel);x++){
-				list.add(artikel);
-			}
-		}
-		return list;
+		dao.verwijderEnkeleBestelling(id2);
+		assertNull(dao.getBestellingOpBestellingId(id2, false));
 	}
+
 }

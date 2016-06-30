@@ -1,31 +1,28 @@
 package interfaces;
 
-import java.sql.SQLException;
 import java.util.Iterator;
+import java.util.List;
 
-import exceptions.RSVIERException;
+import exceptions.GeneriekeFoutmelding;
 import model.Artikel;
 import model.Bestelling;
 
 public interface BestellingDAO {
+
 	//Create
-	public long nieuweBestelling(long klantId, Artikel a1, Artikel a2, Artikel a3) throws SQLException, RSVIERException;
-	public long nieuweBestelling(long klantId, Artikel a1, Artikel a2) throws SQLException, RSVIERException;
-	public long nieuweBestelling(long klantId, Artikel a1) throws SQLException, RSVIERException;
-	public long nieuweBestelling(Bestelling bestelling) throws SQLException, RSVIERException;
+	long nieuweBestelling(Bestelling bestelling) throws GeneriekeFoutmelding;
+	long nieuweBestelling(long klantId, List<Artikel> artikelLijst, boolean isActief) throws GeneriekeFoutmelding;
 
 	//Read
-	public Iterator<Bestelling> getBestellingOpKlantGegevens(long klantId) throws RSVIERException;
-	public Iterator<Bestelling> getBestellingOpBestelling(long bestellingId) throws RSVIERException;
+	Iterator<Bestelling> getBestellingOpKlantId(long klantId, boolean bestellingActief) throws GeneriekeFoutmelding;
+	Iterator<Bestelling> getBestellingOpBestellingId(long bestellingId, boolean bestellingActief) throws GeneriekeFoutmelding;
 	
 	//Update
-	public void updateBestelling(long bestellingId, Artikel a1) throws SQLException, RSVIERException;
-	public void updateBestelling(long bestellingId, Artikel a1, Artikel a2) throws SQLException, RSVIERException;
-	public void updateBestelling(long bestellingId, Artikel a1, Artikel a2, Artikel a3) throws SQLException, RSVIERException;
-	public void updateBestelling(Bestelling bestelling) throws SQLException, RSVIERException;
+	void updateBestelling(Bestelling bestelling) throws GeneriekeFoutmelding;
 	
 	//Delete
-	public long verwijderAlleBestellingenKlant(long klantId) throws RSVIERException;
-	public void verwijderEnkeleBestelling(long bestellingId) throws RSVIERException;
-
+	void verwijderAlleBestellingenKlant(long klantId) throws GeneriekeFoutmelding;
+	void verwijderEnkeleBestelling(long bestellingId) throws GeneriekeFoutmelding;
+	void setAlsInactiefAlleBestellingenKlant(long klantId) throws GeneriekeFoutmelding;
+	void setEnkeleBestellingInactief(long bestellingId) throws GeneriekeFoutmelding;
 }

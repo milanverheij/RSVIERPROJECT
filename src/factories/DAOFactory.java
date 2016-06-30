@@ -1,5 +1,9 @@
 package factories;
 
+import exceptions.GeneriekeFoutmelding;
+import firebird.AbstractDAOFireBird;
+import mysql.AbstractDAOMySQL;
+
 /**
  * @author Milan_Verheij
  * <p>
@@ -14,12 +18,16 @@ public abstract class DAOFactory {
 	 *
 	 * @param s De keuze van het databasetype in String formaat.
 	 * @return Geeft een concrete DAO fabriek terug.
-     */
-	public static DAOFactory getDAOFactory(String s){
-		if(s.equals("MySQL")) 
+	 */
+	public static DAOFactory getDAOFactory(String s, String connPoolKeuze) throws GeneriekeFoutmelding {
+		if(s.equals("MySQL")) {
+			AbstractDAOMySQL.setConnPool(ConnectionPoolFactory.getConnectionPool(connPoolKeuze, "MySQL"));
 			return new DAOFactoryMySQL();
-//		else if(s.equals("FireBird"))
-//			return new FireBirdDAOFactory();
+		}
+		else if(s.equals("FireBird")) {
+			AbstractDAOFireBird.setConnPool(ConnectionPoolFactory.getConnectionPool(connPoolKeuze, "FireBird"));
+			return new DAOFactoryFireBird();
+		}
 		else
 			return null;
 	}
@@ -29,19 +37,30 @@ public abstract class DAOFactory {
 	 * om een KlantDAO te maken.
 	 *
 	 * @return Een KlantDAO van het eerder gekozen database-type.
-     */
-	public abstract interfaces.KlantDAO getKlantDAO();
+	 */
+	public abstract interfaces.KlantDAO getKlantDAO() throws GeneriekeFoutmelding;
 
-	public abstract interfaces.AdresDAO getAdresDAO();
+	/**
+	 * De methode die geimplementeerd dient te worden door de concrete fabriek
+	 * om een AdresDAO te maken.
+	 *
+	 * @return Een AdresDAO van het eerder gekozen database-type.
+	 */
+	public abstract interfaces.AdresDAO getAdresDAO() throws GeneriekeFoutmelding;
 
 	/**
 	 * De methode die geimplementeerd dient te worden door de concrete fabriek
 	 * om een BestellingDAO te maken.
 	 *
 	 * @return Een BestellingDAO van het eerder gekozen database-type.
-     */
-	public abstract interfaces.BestellingDAO getBestellingDAO();
-	public abstract interfaces.ArtikelDAO getArtikelDAO();
-	
-	
+	 */
+	public abstract interfaces.BestellingDAO getBestellingDAO() throws GeneriekeFoutmelding;
+
+	/**
+	 * De methode die geimplementeerd dient te worden door de concrete fabriek
+	 * om een ArtikelDAO te maken.
+	 *
+	 * @return Een ArtikelDAO van het eerder gekozen database-type.
+	 */
+	public abstract interfaces.ArtikelDAO getArtikelDAO() throws GeneriekeFoutmelding;
 }

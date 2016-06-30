@@ -1,6 +1,7 @@
 package JUnit_tests;
 
 import model.Adres;
+import model.Bestelling;
 import model.Klant;
 import org.junit.After;
 import org.junit.Before;
@@ -10,6 +11,7 @@ import static org.junit.Assert.*;
 
 /**
  * Created by Milan_Verheij on 10-06-16.
+ * Updated by Milan Verheij on 20-06-16 (nieuw DB-model).
  *
  * J-Unit testklasse om de Klant POJO te testen
  *
@@ -20,14 +22,19 @@ public class KlantTest {
     private final String TUSSENVOEGSEL = "TESTTV";
     private final String ACHTERNAAM = "TESTACHTERNAAM";
     private final String EMAIL = "TESTMAIL@TESTDOMEIN.NL";
+    private final String DATUMAANMAAK = "TEST-AANMAAK";
+    private final String DATUMGEWIJZIGD = "TEST-GEWIJZIGD";
+    private final String KLANTACTIEF = "TEST-ACTIEF";
     private final Adres ADRES = new Adres();
+    private final Bestelling BESTELLING = new Bestelling();
+
     private String nieuweWaarde = "";
     private Klant testKlant;
 
     @Before
     public void setUp() throws Exception {
         testKlant = new Klant(KLANT_ID, VOORNAAM, ACHTERNAAM, TUSSENVOEGSEL,
-                                    EMAIL, ADRES);
+                                    EMAIL, DATUMAANMAAK, DATUMGEWIJZIGD, KLANTACTIEF, ADRES, BESTELLING);
     }
 
     @After
@@ -65,7 +72,26 @@ public class KlantTest {
         assertTrue(ADRES == testKlant.getAdresGegevens());
     }
 
-    // TODO: Kan double maken ivm gebruik getters in set-testers, maar onhandig qua versies
+    @Test
+    public void getBestelGegevens() throws Exception {
+        assertTrue(BESTELLING == testKlant.getBestellingGegevens());
+    }
+
+    @Test
+    public void getDatumAanmaak() throws Exception {
+        assertTrue(DATUMAANMAAK == testKlant.getDatumAanmaak());
+    }
+
+    @Test
+    public void getDatumGewijzigd() throws Exception {
+        assertTrue(DATUMGEWIJZIGD == testKlant.getDatumGewijzigd());
+    }
+
+    @Test
+    public void getKlantActief() throws Exception {
+        assertTrue(KLANTACTIEF == testKlant.getKlantActief());
+    }
+
     @Test
     public void setKlant_id() throws Exception {
         nieuweWaarde = "8888";
@@ -102,6 +128,42 @@ public class KlantTest {
     }
 
     @Test
+    public void setAdresGegevens() throws Exception {
+        Adres testAdres = new Adres();
+        testKlant.setAdresGegevens(testAdres);
+        assertTrue(testAdres == testKlant.getAdresGegevens());
+    }
+
+    @Test
+    public void setBestelGegevens() throws Exception {
+        Bestelling testBestelling = new Bestelling();
+        testKlant.setBestellingGegevens(testBestelling);
+        assertTrue(testBestelling == testKlant.getBestellingGegevens());
+    }
+
+    @Test
+    public void setDatumAanmaak() throws Exception {
+        nieuweWaarde = "NIEUWE DATUM AANMAAK";
+        testKlant.setDatumAanmaak(nieuweWaarde);
+        assertTrue(nieuweWaarde == testKlant.getDatumAanmaak());
+    }
+
+    @Test
+    public void setDatumGewijzigd() throws Exception {
+        nieuweWaarde = "NIEUWE DATUM GEWIJZIGD";
+        testKlant.setDatumGewijzigd(nieuweWaarde);
+        assertTrue(nieuweWaarde == testKlant.getDatumGewijzigd());
+    }
+
+    @Test
+    public void setKlantActief() throws Exception {
+        nieuweWaarde = "NIEUWE KLANT ACTIEF";
+        testKlant.setKlantActief(nieuweWaarde);
+        assertTrue(nieuweWaarde == testKlant.getKlantActief());
+    }
+
+
+    @Test
     public void equalsTrue() throws Exception {
         testKlant = new Klant(KLANT_ID, VOORNAAM, ACHTERNAAM, TUSSENVOEGSEL,
                 EMAIL, ADRES);
@@ -118,6 +180,4 @@ public class KlantTest {
                 EMAIL, ADRES);
         assertFalse(testKlant.equals(testKlant2));
     }
-
-    //TODO: ToString method testen
 }

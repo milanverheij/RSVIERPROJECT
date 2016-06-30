@@ -1,14 +1,13 @@
 package mysql;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.Map.Entry;
-
-import exceptions.RSVIERException;
+import java.sql.Statement;
+import java.util.LinkedHashSet;
+import exceptions.GeneriekeFoutmelding;
+import logger.DeLogger;
 import model.Artikel;
 
 /* Author @Douwe Jongeneel
@@ -18,384 +17,333 @@ import model.Artikel;
  * een Iterator. Er van uitgaande dat elke bestelling uit max 3 artikelen bestaat maar dat deze artikelen per 
  * bestelling kunnen verschillen.
  *
- * TODO1 - artikel_id is nog een int, moet dit ook een long worden? in database was het een varchar geloof ik.
  */
 public class ArtikelDAOMySQL extends AbstractDAOMySQL implements interfaces.ArtikelDAO{
-	private Artikel artikel;
-	private Connection connection;
-	private ResultSet rset = null;
-	//ArtikelCountMap zorgt ervoor dat er per bestelling maar drie artikelen kunnen zijn
-	private LinkedHashMap<Long, Integer> artikelCountMap = new LinkedHashMap<>();
+	private String artikelQuery = "";
+	private String prijsQuery = "";
+	private Artikel artikel = new Artikel();
+
 
 	public ArtikelDAOMySQL() {
 	}
 
 	//Create
 
-	// Onderstaande methode voegt een artikel toe aan een bestelling zolang er nog geen drie artikelen 
-	// in de bestelling aanwezig zijn.
+	// Onderstaande methode maakt een nieuw artikel aan in de ARTIKEL tabel, zet de prijs gegevens van het artikel in de PRIJS
+	// tabel en zorgt ervoor dat de ARTIKEL tabel het juiste prijs_id heeft.
 	@Override 
-	public void nieuwArtikelOpBestelling(long bestelling_id, Artikel aNieuw) throws RSVIERException {
-		boolean kanArtikelToevoegen = true;
-
-		try {
-			// Hier wordt gecontroleerd hoeveel artikelen zich in de bestelling bevinden, zolang er
-			// nog geen drie artikelen zijn kan het nieuwe artikel worden toegevoegd.
-			if (!artikelCountMap.containsKey(bestelling_id)) {
-				artikelCountMap.put(bestelling_id, 1);
-			}
-			else if (artikelCountMap.get(bestelling_id) >= 3) {
-				kanArtikelToevoegen = false;
-				throw new RSVIERException("Kan geen artikel toevoegen, maximaal 3 artikelen!");
-			}
-			else if (artikelCountMap.containsKey(bestelling_id)) {
-				artikelCountMap.put(bestelling_id, artikelCountMap.get(bestelling_id) + 1);
-			}
-			if (kanArtikelToevoegen) {
-				// Het nieuwe artikel wordt toegevoegd aan artikel1, 2 of 3 op basis van het aantal artikelen dat zich
-				// in de bestelling bevind, wat gecontroleerd wordt middels de Integer value uit artikelCountMap.
-				updateArtikelOpBestelling(bestelling_id,artikelCountMap.get(bestelling_id), aNieuw);
-			}
+	public int nieuwArtikel(Artikel aNieuw) throws GeneriekeFoutmelding {
+		
+		if (aNieuw == null) {
+			DeLogger.getLogger().error("Fout: Null waarde voor aNieuw in de methode nieuwArtikel");
 		}
-		catch (RSVIERException e) {
-		}
-	}
+		
+		prijsQuery = "INSERT INTO PRIJS (prijs) VALUES (?);";
+		artikelQuery = "INSERT INTO ARTIKEL (omschrijving, prijs_id, verwachteLevertijd, inAssortiment)"
+				+ "VALUES (?, ?, ?, ?);";
+		String queryUpdate = "UPDATE PRIJS SET artikel_id = ? WHERE prijs_id = ?;";
 
-	//Read
+		try (Connection connection = connPool.verkrijgConnectie();
+				PreparedStatement prijsStatement = connection.prepareStatement(prijsQuery, Statement.RETURN_GENERATED_KEYS);
+				PreparedStatement artikelStatement = connection.prepareStatement(artikelQuery, Statement.RETURN_GENERATED_KEYS);
+				PreparedStatement updateStatement = connection.prepareStatement(queryUpdate)){
 
-	// Onderstaande methode vraagt een artikel op van de bestelling op basis van het artikelNummer(artikel1, artikel2 of artikel3).
-	@Override
-	public Artikel getArtikelOpBestelling(long bestelling_id, int artikelNummer) throws RSVIERException {
-		connection = MySQLConnectieLeverancier.getConnection();
-		try {
-			if (artikelNummer <= 0 & artikelNummer > 3) {
-				throw new RSVIERException("artikelNummer is incorrect, kies 1, 2 of 3.");
-			}
-			statement = connection.prepareStatement("SELECT artikel" + artikelNummer + "_id, "
-					+ "artikel" + artikelNummer + "_naam, artikel" + artikelNummer + "_prijs "
-					+ "FROM BESTELLING "
-					+ "WHERE bestelling_id = " + bestelling_id + ";");
-			rset = statement.executeQuery();
-			rset.next();
-			artikel = new Artikel(Integer.parseInt(rset.getString(1)), rset.getString(2), rset.getDouble(3));
-		}
-		catch (RSVIERException e) {
-		}
-		catch (SQLException e) {
-			throw new RSVIERException("SQLexception tijdens opvragen artikel" + artikelNummer);
-		}
-		finally {
-			MySQLHelper.close(connection, statement, rset);
-		}
-		return artikel;
-	}
+			connection.setAutoCommit(false);
 
-	// Onderstaande methode retourneert alle artikelen van de bestelling in een Iterator
-	@Override
-	public Iterator<Artikel> getAlleArtikelenOpBestelling(long bestelling_id) throws RSVIERException {
+			//Zet de prijs gegevens in de PRIJS tabel
+			prijsStatement.setBigDecimal(1, aNieuw.getArtikelPrijs());
+			prijsStatement.executeUpdate();
 
-		connection = MySQLConnectieLeverancier.getConnection();
-
-
-		//Sla alle artikelen van de bestelling op in een ArrayList
-		ArrayList<Artikel> artikelLijst = new ArrayList<>();
-
-		try {
-			statement = connection.prepareStatement("SELECT artikel1_id, artikel1_naam, artikel1_prijs, "
-					+ "artikel2_id, artikel2_naam, artikel2_prijs, "
-					+ "artikel3_id, artikel3_naam, artikel3_prijs "
-					+ "FROM BESTELLING "
-					+ "WHERE bestelling_id = " + bestelling_id + ";");
-			rset = statement.executeQuery();
-
-			rset.next(); //Doorloop rset en voeg alle unieke artikelen toe en update hun aantal
-			for(int x = 1; x <=7 ; x+=3) {
-				if (rset.getString(x) != null) { //Bestelling bevat artikel
-					artikel = new Artikel(Integer.parseInt(rset.getString(x)), rset.getString(x+1), rset.getDouble(x+2));
-					artikelLijst.add(artikel);
+			try (ResultSet generatedPrijsId = prijsStatement.getGeneratedKeys()) {
+				if (generatedPrijsId.next()) {
+					aNieuw.setPrijsId(generatedPrijsId.getInt(1));
 				}
 			}
-			return artikelLijst.iterator();
+
+			//Zet de artikel gegevens in de ARTIKEL tabel
+			artikelStatement.setString(1, aNieuw.getArtikelNaam());
+			artikelStatement.setInt(2, aNieuw.getPrijsId());
+			artikelStatement.setInt(3, aNieuw.getVerwachteLevertijd());
+			artikelStatement.setBoolean(4, aNieuw.isInAssortiment());
+			artikelStatement.executeUpdate();
+
+			try (ResultSet generatedArtikelId = artikelStatement.getGeneratedKeys()) {
+				if (generatedArtikelId.next()) {
+					aNieuw.setArtikelId(generatedArtikelId.getInt(1));
+				}
+			}
+
+			//Zet artikel_id in PRIJS tabel
+			updateStatement.setInt(1, aNieuw.getArtikelId());
+			updateStatement.setInt(2, aNieuw.getPrijsId());
+			updateStatement.executeUpdate();
+
+			//Execute Transaction
+			connection.commit();
+			connection.setAutoCommit(true);
+
+			return aNieuw.getArtikelId();
 		}
-		catch (SQLException e) {
-			throw new RSVIERException("SQLexception tijdens getAlleArtikelen()");
-		}
-		finally {
-			MySQLHelper.close(connection, statement, rset);
+		catch (SQLException ex) {
+			ex.printStackTrace();
+			DeLogger.getLogger().error("SQL fout tijdens invoeren nieuw artikel");
+			throw new GeneriekeFoutmelding("Niew artikel aanmaken kan niet");
 		}
 	}
 
-	// Onderstaande methode retouneerd alle unieke artikelen + hoevaak ze besteld zijn in een Iterator
+
+	//Read
 	@Override
-	public Iterator<Entry<Artikel, Integer>> getAlleArtikelen() throws RSVIERException {
+	public Artikel getArtikel(int artikelId) throws GeneriekeFoutmelding {
 
-		connection = MySQLConnectieLeverancier.getConnection();
+		artikelQuery = "SELECT * FROM ARTIKEL WHERE artikel_id = ? ;";
+		prijsQuery	= "SELECT prijs FROM PRIJS WHERE prijs_id = ? ;";
 
-		// Sla alle unieke artikelen binnen de tabel BESTELLING op in een map
-		LinkedHashMap<Artikel, Integer> map = new LinkedHashMap<>();
-		// Alle unieke atikelen worden in een iterator geretouneerd
+		try (Connection connection = connPool.verkrijgConnectie();
+				PreparedStatement artikelStatement = connection.prepareStatement(artikelQuery);
+				PreparedStatement prijsStatement = connection.prepareStatement(prijsQuery)){
 
-		@SuppressWarnings("unused")
+			connection.setAutoCommit(false);
+			artikelStatement.setInt(1, artikelId);
 
+			// Vraag de artikel gegevens op
+			try (ResultSet artikelRset = artikelStatement.executeQuery()) {
 
-		Iterator<Entry<Artikel,Integer>> iterator = null;
+				if (artikelRset.next()) {
+					artikel.setArtikelId(artikelRset.getInt(1));
+					artikel.setArtikelNaam(artikelRset.getString(2));
+					artikel.setPrijsId(artikelRset.getInt(3));
+					artikel.setDatumAanmaak(artikelRset.getString(4));
+					artikel.setVerwachteLevertijd(artikelRset.getInt(5));
+					artikel.setInAssortiment(artikelRset.getBoolean(6));
 
-		try {
-			statement = connection.prepareStatement("SELECT artikel1_id, artikel1_naam, artikel1_prijs, "
-					+ "artikel2_id, artikel2_naam, artikel2_prijs, "
-					+ "artikel3_id, artikel3_naam, artikel3_prijs "
-					+ "FROM BESTELLING ;");
-			rset = statement.executeQuery();
+					// Vraag de prijs gegevens op
+					prijsStatement.setInt(1, artikel.getPrijsId());
 
-			while (rset.next()) { //Doorloop rset en voeg alle unieke artikelen toe en update hun aantal
-				for(int x = 1; x <=7 ; x+=3) {
-					if (rset.getString(x) != null) { //Zolang de bestelling artikelen bevat voeg ze toe aan de map
-						artikel = new Artikel(Integer.parseInt(rset.getString(x)), rset.getString(x+1), rset.getDouble(x+2));
-						voegArtikelToeAanMap(map, artikel);
+					try (ResultSet prijsRset = prijsStatement.executeQuery()) {
+
+						if (prijsRset.next()) {
+							artikel.setArtikelPrijs(prijsRset.getBigDecimal(1));
+						}
 					}
 				}
 			}
-			return iterator = map.entrySet().iterator();
+
+			//Execute transaction
+			connection.commit();
+			connection.setAutoCommit(true);
+
+			return artikel;
 		}
-		catch (SQLException e) {
-			throw new RSVIERException("SQLexception tijdens getAlleArtikelen()");
-		}
-		finally {
-			MySQLHelper.close(connection, statement, rset);
-		}
-	}
-
-	//Update
-
-	// Onderstaande methode vervangt het artikel dat zich op het doorgegeven artikel(1, 2, 3) nummer bevind met het nieuwe artikel aNieuw
-	@Override
-	public void updateArtikelOpBestelling(long bestelling_id, int artikelNummer, Artikel aNieuw) throws RSVIERException {
-
-		connection = MySQLConnectieLeverancier.getConnection();
-
-		try {
-			statement = connection.prepareStatement("UPDATE BESTELLING SET "
-					+ "artikel" + artikelNummer + "_id = ?,"
-					+ "artikel" + artikelNummer + "_naam = ?,"
-					+ "artikel" + artikelNummer + "_prijs = ? "
-					+ "WHERE bestelling_id = " + bestelling_id + ";");
-
-			statement.setString(1, "" + aNieuw.getArtikel_id());
-			statement.setString(2, aNieuw.getArtikel_naam());
-			statement.setDouble(3, aNieuw.getArtikel_prijs());
-
-			statement.executeUpdate();
-
-		}
-		catch (SQLException e) {
-			throw new RSVIERException("SQLexception update artikel " + artikelNummer + " ging verkeerd");
-		}
-		finally {
-			MySQLHelper.close(connection, statement);
+		catch (SQLException ex) {
+			DeLogger.getLogger().error("SQL fout tijdens het verkrijgen van het artikel met artikelId {}", artikelId);
+			throw new GeneriekeFoutmelding("SQL fout tijdens het verkrijgen van het artikel met artikelId " + artikelId);
 		}
 	}
 
-	// Onderstaande methode vervangt Artikel aOud met Artikel aNieuw op bestelling(bestelling_id).
-	@Override
-	public void updateArtikelOpBestelling(long bestelling_id, Artikel aOud, Artikel aNieuw) throws RSVIERException {
+	// Onderstaande methode haalt alle artiekelen uit de database en geeft ze terug in een iterator.
+	// Er kan gekozen worden om alleen de actieve artikelen of alle artikelen uit de database te halen.
+	// artikelActief = false vraagt zowel de actieve als inactieve artikelen op.
+	// artikelActief = true vraagt alleen de actieve artikelen op.
+	public LinkedHashSet<Artikel> getAlleArtikelen(boolean artikelActief) throws GeneriekeFoutmelding {
 
-		connection = MySQLConnectieLeverancier.getConnection();
+		// Alle artikelen worden in een Set opgeslagen
+		LinkedHashSet<Artikel> artikelSet = new LinkedHashSet<>()	;
 
-		int artikelNummer = 0;
+		// Onderstaande query combineert de ARTIKEL en PRIJS tabel zodat alle artikel gegevens in een
+		// keer uitgelezen kunnen worden, tevens kan er geselecteerd worden op alle of alleen actieve artikelen.
+		artikelQuery = "SELECT ARTIKEL.artikel_id, ARTIKEL.omschrijving, ARTIKEL.prijs_id, PRIJS.prijs, "
+				+ "ARTIKEL.datumAanmaak, ARTIKEL.verwachteLevertijd, ARTIKEL.inAssortiment FROM ARTIKEL "
+				+ "LEFT JOIN PRIJS ON ARTIKEL.prijs_id = PRIJS.prijs_id WHERE inAssortiment LIKE ?;";
 
-		try {
-			// Kijk of het artikel dat geupdate dient te worden artikel1, 2 of 3 is in de DataBase.
-			statement = connection.prepareStatement("SELECT artikel1_id, artikel2_id, artikel3_id "
-					+ "FROM BESTELLING WHERE bestelling_id = " + bestelling_id + ";");
-			ResultSet rset = statement.executeQuery();
-			rset.next();
-			for(int i = 1; i <= rset.getMetaData().getColumnCount(); i++) {
-				if (rset.getInt(/*vanKolom*/i) == aOud.getArtikel_id()) {
-					artikelNummer = i;
+		try (Connection connection = connPool.verkrijgConnectie();
+
+				PreparedStatement artikelStatement = connection.prepareStatement(artikelQuery)) {
+
+			if(artikelActief)
+				artikelStatement.setBoolean(1, true);
+			else
+				artikelStatement.setString(1, "%");
+
+			try (ResultSet artikelRset = artikelStatement.executeQuery()) {
+				while (artikelRset.next()){
+
+					artikel = new Artikel();
+					artikel.setArtikelId(artikelRset.getInt(1));
+					artikel.setArtikelNaam(artikelRset.getString(2));
+					artikel.setPrijsId(artikelRset.getInt(3));
+					artikel.setArtikelPrijs(artikelRset.getBigDecimal(4));
+					artikel.setDatumAanmaak(artikelRset.getString(5));
+					artikel.setVerwachteLevertijd(artikelRset.getInt(6));
+					artikel.setInAssortiment(artikelRset.getBoolean(7));
+					artikelSet.add(artikel);
 				}
 			}
-			// Wanneer de bestelling het oude artikel niet bevat throw Exception
-			if (artikelNummer == 0) {
-				throw new RSVIERException("Kan artikel(" + aOud.toString() + ") niet vervangen "
-						+ "omdat het zich niet op bestelling" + bestelling_id + " bevind!");
+			// Execute transaction
+			return artikelSet;
+		}
+		catch (SQLException ex) {
+			ex.printStackTrace();
+			DeLogger.getLogger().error("SQL fout tijdens opvragen van alle " + (artikelActief ? "artikelen " : "actieve artikelen "));
+			throw new GeneriekeFoutmelding("SQL fout tijdens opvragen van alle " + (artikelActief ? "artikelen " : "actieve artikelen "));
+		}
+	}
+
+	/*
+	 *  Onderstaande methode update de artikel gegevens in de database, de prijs en of artikel gegevens kunnen
+	 *  tegelijkertijd en appart geupdate worden. Tevens zorgt de methode ervoor dat er geen inconsistentie op
+	 *  kan treden in de artikel prijs gegevens alswel in het artikel object.
+	 */
+
+	//Update
+	@Override
+	public void updateArtikel(int artikelId, Artikel aNieuw) throws GeneriekeFoutmelding {
+
+		boolean dePrijsIsVerandert = false;
+		int prijsIdUitDataBase = 0;
+
+		artikelQuery = "UPDATE ARTIKEL SET "
+				+ "omschrijving = ?, "
+				+ "prijs_id = ?, "
+				+ "verwachteLevertijd = ?, "
+				+ "inAssortiment = ? "
+				+ "WHERE artikel_id = ? ;";
+
+		// Met onderstaande join tables wordt het artikel_id en daarbij behorende prijs verkregen
+		prijsQuery = "SELECT ARTIKEL.prijs_id, PRIJS.prijs "
+				+ "FROM ARTIKEL "
+				+ "LEFT JOIN PRIJS "
+				+ "ON ARTIKEL.prijs_id = PRIJS.prijs_id "
+				+ "WHERE ARTIKEL.artikel_id = ? ;";
+
+		String nieuwePrijsQuery = "INSERT INTO PRIJS (prijs, artikel_id) "
+				+ "VALUES (?, ?);";
+
+		try (Connection connection = connPool.verkrijgConnectie();
+				PreparedStatement artikelStatement = connection.prepareStatement(artikelQuery);
+				PreparedStatement prijsStatement = connection.prepareStatement(prijsQuery)) {
+
+			connection.setAutoCommit(false);
+			artikelStatement.setInt(5, artikelId);
+			prijsStatement.setInt(1, artikelId);
+			aNieuw.setArtikelId(artikelId);
+
+			// Voordat de artikel gegevens geupdate worden moet gecontroleerd worden of de prijs 
+			// van het artikel gewijzigd is. Hiervoor wordt de prijs van het artikel uit de 
+			// database gehaald.
+			try (ResultSet prijsRset = prijsStatement.executeQuery()) {
+				if (prijsRset.next()) {
+
+					// Hier wordt gecontroleerd of de prijs van het artikel in de database en dat van de 
+					// artikelgegevens die geupdate worden van elkaar verschillen.
+					if (	(prijsRset.getBigDecimal(2)).compareTo(aNieuw.getArtikelPrijs()) != 0) {
+						dePrijsIsVerandert = true;
+					}
+					// Wanneer de prijs niet verandert, mag het prijsId ook niet veranderen.
+					// Hier wordt vastgesteld dat het prijsId alleen mag veranderen wanneer
+					// de prijs verandert is. Als de prijs niet verandert wordt het prijsId
+					// van aNieuw geupdate zodat het weer overeenkomt met de gegevens in de 
+					// database. Op deze manier kunnen artikelen geen onrechtmatige prijzen
+					// worden toegekend.
+					if (prijsRset.getInt(1) != aNieuw.getPrijsId() && !dePrijsIsVerandert) {
+
+						aNieuw.setPrijsId(prijsRset.getInt(1));
+						String dataInconsistentie = "Data inconsistentie: Het prijs_id van aNieuw(" + aNieuw.toString() + ")\n "
+								+ "verschilt van het prijs_id uit de DB " + prijsIdUitDataBase + " terwijl "
+								+ "de prijs niet verandert is!!!";
+						DeLogger.getLogger().info(dataInconsistentie);
+					}
+				}
 			}
-			// Update de gegevens op locatie aOud met aNieuw
-			statement = connection.prepareStatement("UPDATE BESTELLING SET "
-					+ "artikel" + artikelNummer + "_id = ?,"
-					+ "artikel" + artikelNummer + "_naam = ?,"
-					+ "artikel" + artikelNummer + "_prijs = ? "
-					+ "WHERE bestelling_id = " + bestelling_id + ";");
 
-			statement.setString(1, "" + aNieuw.getArtikel_id());
-			statement.setString(2, aNieuw.getArtikel_naam());
-			statement.setDouble(3, aNieuw.getArtikel_prijs());
+			if (dePrijsIsVerandert) {
 
-			statement.executeUpdate();
+				// Wanneer de prijs van het artikel verandert is dan wordt hier de nieuwe 
+				// prijs in de database gezet.
+				try (PreparedStatement nieuwePrijsStatement = connection.prepareStatement(
+						nieuwePrijsQuery, Statement.RETURN_GENERATED_KEYS)) {
+
+					nieuwePrijsStatement.setBigDecimal(1, aNieuw.getArtikelPrijs());
+					nieuwePrijsStatement.setInt(2, artikelId);
+					nieuwePrijsStatement.executeUpdate();
+
+					try (ResultSet prijsIdRset = nieuwePrijsStatement.getGeneratedKeys()) {
+						if (prijsIdRset.next()) {
+							aNieuw.setPrijsId(prijsIdRset.getInt(1));
+						}
+					}
+				}
+			}
+
+			// Hier worden de artikel gegevens in de database geupdate.
+			artikelStatement.setString(1, aNieuw.getArtikelNaam());
+			artikelStatement.setInt(2, aNieuw.getPrijsId());
+			artikelStatement.setInt(3, aNieuw.getVerwachteLevertijd());
+			artikelStatement.setBoolean(4, aNieuw.isInAssortiment());
+			artikelStatement.executeUpdate();
+
+			//Execute transaction
+			connection.commit();
+			connection.setAutoCommit(true);
+
 
 		}
-		catch (RSVIERException e) {
+		catch (SQLException ex) {
+			DeLogger.getLogger().error("SQL fout tijdens updaten van artikel met artikel_id " + artikelId);
+			throw new GeneriekeFoutmelding("SQL fout tijdens updaten van artikel met artikel_id " + artikelId);
 		}
-		catch (SQLException e) {
-			throw new RSVIERException("SQLexception update artikel " + artikelNummer + " ging verkeerd");
-		}
-		finally {
-			MySQLHelper.close(connection, statement);
-		}
+
 	}
 
-	// Update alle artikelen van bestelling(bestelling_id) met drie nieuwe artikelen.
-	@Override 
-	public void updateAlleArtikelenOpBestelling(long bestelling_id, Artikel a1, Artikel a2, Artikel a3)
-			throws RSVIERException {
-		connection = MySQLConnectieLeverancier.getConnection();
-		try {
-			statement = connection.prepareStatement("UPDATE BESTELLING SET "
-					+ "artikel1_id = ?, artikel1_naam = ?, artikel1_prijs = ?, "
-					+ "artikel2_id = ?, artikel2_naam = ?, artikel2_prijs = ?, "
-					+ "artikel3_id = ?, artikel3_naam = ?, artikel3_prijs = ? "
-					+ "WHERE bestelling_id = " + bestelling_id + ";");
+	//Delete
+	@Override
+	public void verwijderArtikel(int artikelId) throws GeneriekeFoutmelding {
 
-			statement.setString(1, "" + a1.getArtikel_id());
-			statement.setString(2, a1.getArtikel_naam());
-			statement.setDouble(3, a1.getArtikel_prijs());
-			statement.setString(4, "" + a2.getArtikel_id());
-			statement.setString(5, a2.getArtikel_naam());
-			statement.setDouble(6, a2.getArtikel_prijs());
-			statement.setString(7, "" + a3.getArtikel_id());
-			statement.setString(8, a3.getArtikel_naam());
-			statement.setDouble(9, a3.getArtikel_prijs());
+		artikelQuery = "UPDATE ARTIKEL SET inAssortiment = 0 WHERE artikel_id = ?;";
 
-			statement.executeUpdate();
+		try(Connection connection = connPool.verkrijgConnectie();
 
-		}
-		catch (SQLException e) {
-			throw new RSVIERException("SQLexception update artikelen van bestelling met"
-					+ bestelling_id + " ging verkeerd");
-		}
-		finally {
-			MySQLHelper.close(connection, statement);
-		}
-	}
-
-	// Onderstaande methode update alle gegevens van het artikel dat meegegeven wordt in de ghele DataBase
-	public void updateArtikelen(Artikel aNieuw) throws RSVIERException {
-
-		connection = MySQLConnectieLeverancier.getConnection();
-
-		try {
-			connection.setAutoCommit(false);
-			statement = connection.prepareStatement("UPDATE BESTELLING SET "
-					+ "artikel1_id = ?,"
-					+ "artikel1_naam = ?,"
-					+ "artikel1_prijs = ? "
-					+ "WHERE artikel1_id = ?;");
+				PreparedStatement artikelStatement = connection.prepareStatement(artikelQuery)) {
 
 			connection.setAutoCommit(false);
-			statement = connection.prepareStatement("UPDATE BESTELLING SET "
-					+ "artikel1_naam = ?,"
-					+ "artikel1_prijs = ? "
-					+ "WHERE artikel1_id = ?;");
-
-			statement.setLong(1, aNieuw.getArtikel_id());
-			statement.setString(2, aNieuw.getArtikel_naam());
-			statement.setDouble(3, aNieuw.getArtikel_prijs());
-			statement.setLong(4, aNieuw.getArtikel_id());
-			statement.executeUpdate();
-
-			statement = connection.prepareStatement("UPDATE BESTELLING SET "
-					+ "artikel2_id = ?,"
-					+ "artikel2_naam = ?,"
-					+ "artikel2_prijs = ? "
-					+ "WHERE artikel2_id = ?;");
-
-			statement.setLong(1, aNieuw.getArtikel_id());
-			statement.setString(2, aNieuw.getArtikel_naam());
-			statement.setDouble(3, aNieuw.getArtikel_prijs());
-			statement.setString(4, aNieuw.getArtikel_naam());
-			statement.executeUpdate();
-
-			statement = connection.prepareStatement("UPDATE BESTELLING SET "
-					+ "artikel3_id = ?,"
-					+ "artikel3_naam = ?,"
-					+ "artikel3_prijs = ? "
-					+ "WHERE artikel3_id = ?;");
-
-			statement.setLong(1, aNieuw.getArtikel_id());
-			statement.setString(2, aNieuw.getArtikel_naam());
-			statement.setDouble(3, aNieuw.getArtikel_prijs());
-			statement.setString(4, aNieuw.getArtikel_naam());
-
-			statement.setString(1, aNieuw.getArtikel_naam());
-			statement.setDouble(2, aNieuw.getArtikel_prijs());
-			statement.setLong(3, aNieuw.getArtikel_id());
-			statement.executeUpdate();
-
-			statement = connection.prepareStatement("UPDATE BESTELLING SET "
-					+ "artikel2_naam = ?,"
-					+ "artikel2_prijs = ? "
-					+ "WHERE artikel2_id = ?;");
-
-			statement.setString(1, aNieuw.getArtikel_naam());
-			statement.setDouble(2, aNieuw.getArtikel_prijs());
-			statement.setLong(3, aNieuw.getArtikel_id());
-			statement.executeUpdate();
-
-			statement = connection.prepareStatement("UPDATE BESTELLING SET "
-					+ "artikel3_naam = ?,"
-					+ "artikel3_prijs = ? "
-					+ "WHERE artikel3_id = ?;");
-
-			statement.setString(1, aNieuw.getArtikel_naam());
-			statement.setDouble(2, aNieuw.getArtikel_prijs());
-			statement.setLong(3, aNieuw.getArtikel_id());
-
-			statement.executeUpdate();
-
+			artikelStatement.setInt(1, artikelId);
+			artikelStatement.executeUpdate();
 			connection.commit();
 
 		}
-		catch (SQLException e) {
-			throw new RSVIERException("SQLexception update artikel " + aNieuw.getArtikel_naam() + " ging verkeerd" + "\n" + e.getMessage());
-		}
-		finally {
-			MySQLHelper.close(connection, statement);
+		catch (SQLException ex) {
+			ex.printStackTrace();
+			DeLogger.getLogger().error("SQL fout tijdens het verwijderen van artikel met id {}", artikelId);
+			throw new GeneriekeFoutmelding("SQL fout tijdens het verwijderen van artikel met id " + artikelId);
 		}
 	}
+	
+	public void verWijderVoorHetEchie(long artikelId) throws GeneriekeFoutmelding{
+		artikelQuery = "DELETE FROM ARTIKEL WHERE artikel_id = ?;";
+		prijsQuery = "DELETE FROM PRIJS WHERE artikel_id = ?;";
 
+		try (Connection connection = connPool.verkrijgConnectie();
+				PreparedStatement verwijderArtikelStatement = connection.prepareStatement(artikelQuery);
+				PreparedStatement verwijderPrijsStatement = connection.prepareStatement(prijsQuery)) {
 
-
-	// Delete
-
-	// Onderstaande methode verwijdert de artikel gegevens van aOud van de bestelling door de waardes 
-	// in de database allemaal op 0 te zetten. 
-	@Override
-	public void verwijderArtikelVanBestelling(long bestelling_id, Artikel aOud) throws RSVIERException {
-		//Maak een artikel dat alle waardes op 0 zet
-		Artikel artikelWisser = new Artikel(0, "0", 0);
-
-		// Onderstaande methode update de gegevens van aOud met aNieuw
-		updateArtikelOpBestelling(bestelling_id, aOud, artikelWisser);
-	}
-
-	// Onderstaande methode verwijdert alle artikel gegevens van de bestelling door de waardes in de
-	// database op 0 te zetten.
-	@Override
-	public void verwijderAlleArtikelenVanBestelling(long bestelling_id) throws RSVIERException {
-		//artikel met waardes 0
-		Artikel artikelWisser = new Artikel(0, "0", 0) ;
-
-		//Onderstaande methode update alle artikel gegevens naar 0
-		updateAlleArtikelenOpBestelling(bestelling_id, artikelWisser, artikelWisser, artikelWisser);
-	}
-
-	//Utility
-	//Methodes
-	public void voegArtikelToeAanMap(LinkedHashMap<Artikel, Integer> map, Artikel artikel) {
-		if (map.containsKey(artikel)) {
-			map.put(artikel, map.get(artikel) + 1); //Aantal + 1
+			connection.setAutoCommit(false);
+			
+			verwijderPrijsStatement.setLong(1, artikelId);
+			verwijderPrijsStatement.executeUpdate();
+			
+			verwijderArtikelStatement.setLong(1, artikelId);
+			verwijderArtikelStatement.executeUpdate();
+			
+			
+			connection.commit();
 		}
-		else {
-			map.put(artikel, 1);
+		catch (SQLException  ex) {
+			ex.printStackTrace();
+			DeLogger.getLogger().error("SQL fout tijdens het verwijderen van artikel met id {}", artikelId);
+			throw new GeneriekeFoutmelding("SQL fout tijdens het verwijderen van artikel met id " + artikelId);
 		}
 	}
 }
+
+
+
