@@ -1,6 +1,6 @@
 package gui;
-import java.util.LinkedHashMap;
 
+import java.util.LinkedHashMap;
 import exceptions.GeneriekeFoutmelding;
 import javafx.application.Application;
 import javafx.geometry.Insets;
@@ -138,6 +138,7 @@ public class HoofdGui extends Application{
 		updateBestellingButton = new Button("Update bestelling");
 		nieuweBestellingButton = new Button("Nieuwe bestelling");
 		verwijderBestelling = new Button("Verwijder bestelling");
+		
 		updateArtikelButton = new Button("Update Artikel");
 
 		nieuweKlantButton = new Button("Nieuwe klant");
@@ -146,12 +147,28 @@ public class HoofdGui extends Application{
 		zoekButton.setOnAction(e -> zoekKnopKlik());
 		leegButton.setOnAction(E -> leegAlles());
 
+		updateArtikelButton.setOnAction(e -> nieuwArtikel());
+		
 		updateBestellingButton.setOnAction(e -> updateBestelling());
 		nieuweBestellingButton.setOnAction(e -> nieuweBestelling());
 		verwijderBestelling.setOnAction(e -> verwijderBestelling());
 
 		nieuweKlantButton.setOnAction(e -> nieuweKlant());
 		updateKlantButton.setOnAction(e -> updateKlant());
+	}
+
+	private void nieuwArtikel() {
+		try {
+			GuiVoorArtikelBewerkingen artikelGui = new GuiVoorArtikelBewerkingen();
+			artikelGui.setAndRun(GuiPojo.artikelDAO.getAlleArtikelen(false));
+		} catch (GeneriekeFoutmelding e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 	}
 
 	/* Verwijdert een enkele bestelling uit de database */
@@ -311,6 +328,14 @@ public class HoofdGui extends Application{
 				achterNaamField.setText(GuiPojo.klant.getAchternaam());
 				tussenVoegselField.setText(GuiPojo.klant.getTussenvoegsel());
 				emailField.setText(GuiPojo.klant.getEmail());
+				
+				System.out.println(GuiPojo.klant.getKlant_id());
+				guiBewerkingen.getAdres(actieveItems.isSelected());				
+				straatnaamField.setText(GuiPojo.adres.getStraatnaam());;
+				huisnummerField.setText("" + GuiPojo.adres.getHuisnummer());
+				toevoegingField.setText(GuiPojo.adres.getToevoeging());
+				postcodeField.setText(GuiPojo.adres.getPostcode());
+				woonplaatsField.setText(GuiPojo.adres.getWoonplaats());
 
 				zoekBestelling();
 			}
@@ -323,6 +348,7 @@ public class HoofdGui extends Application{
 	 */
 	private void getItemVanBestellingLijst(){
 		if(bestellingListView.getSelectionModel().getSelectedItem() != null){
+			artikelListView.getItems().clear();
 			long selectedItem = bestellingListView.getSelectionModel().getSelectedItem();
 			if(selectedItem >= 0){
 				guiBewerkingen.getItemVanBestellingLijst(selectedItem);
@@ -389,8 +415,9 @@ public class HoofdGui extends Application{
 		if(!klantIdField.getText().isEmpty()){
 			GuiVoorBestellingBewerkingen bestellingBewerken = new GuiVoorBestellingBewerkingen();
 			try {
-				bestellingBewerken.setAndRun(GuiPojo.bestelling.getKlant_id(), bestellingListView, GuiPojo.bestelDAO, GuiPojo.artikelDAO);
+				bestellingBewerken.setAndRun(GuiPojo.klant.getKlant_id(), bestellingListView);
 			} catch (Exception e) {
+				e.printStackTrace();
 				errorBox.setMessageAndStart(e.getMessage());
 			}
 		}else{
@@ -416,7 +443,6 @@ public class HoofdGui extends Application{
 		}catch (Exception e) {
 			errorBox.setMessageAndStart(e.getMessage());
 		}
-
 	}
 
 	/* Lanceert een nieuw Stage waar een nieuwe klant gemaakt kan worden.*/
@@ -426,7 +452,6 @@ public class HoofdGui extends Application{
 		} catch (Exception e) {
 			errorBox.setMessageAndStart(e.getMessage());
 		}
-
 	}
 
 	public void setConnection(String databaseSelected, String connectionSelected) {

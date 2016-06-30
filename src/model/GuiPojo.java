@@ -14,6 +14,7 @@ public class GuiPojo {
 	public static ArtikelDAO artikelDAO;
 	public static KlantDAO klantDAO;
 	public static AdresDAO adresDAO;
+	
 	public static ErrorBox errorBox = new ErrorBox();
 	
 	public static long klantId;

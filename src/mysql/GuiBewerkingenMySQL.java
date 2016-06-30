@@ -5,15 +5,13 @@ import exceptions.GeneriekeFoutmelding;
 import factories.DAOFactory;
 import javafx.scene.control.ListView;
 import logger.DeLogger;
+import model.Adres;
 import model.Artikel;
 import model.Bestelling;
 import model.GuiPojo;
 import model.Klant;
 
 public class GuiBewerkingenMySQL extends AbstractGuiBewerkingen{
-	public void resetArtikelVariabelen(){
-		GuiPojo.artikelLijst.clear();
-	}
 
 	public void zoekKlant(ListView<String> klantListView, String klantId, String voorNaam, String achterNaam, String tussenVoegsel, String email){
 		klantListView.getItems().clear();
@@ -100,5 +98,21 @@ public class GuiBewerkingenMySQL extends AbstractGuiBewerkingen{
 		}
 	}
 
-
+	public void getAdres(boolean selected) {
+	
+		try {
+			Iterator<Adres> adresIt = GuiPojo.adresDAO.getAdresOpKlantID(GuiPojo.klant.getKlant_id());
+			System.out.println(GuiPojo.klant.getKlant_id());
+			while(adresIt.hasNext()){
+				Adres adres = adresIt.next();
+				if(adres.getAdresActief().equals("1")){
+					GuiPojo.adres = adres;
+					break;
+				}
+			}
+		}catch (GeneriekeFoutmelding e){
+			errorBox.setMessageAndStart(String.format("Fout bij ophalen alle adressen van klant %d", GuiPojo.klant.getKlant_id()));
+			e.printStackTrace();
+		}
+	}
 }

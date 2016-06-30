@@ -9,7 +9,9 @@ public class Bestelling {
 	private boolean bestellingActief = true;
 	private ArrayList<Artikel> artikelLijst;
 
-	public Bestelling(){}
+	public Bestelling(){
+		artikelLijst = new ArrayList<Artikel>();
+	}
 	
 	public Bestelling(long bestelling_id, long klant_id, ArrayList<Artikel> artikelLijst, String datumAanmaak){
 		this.bestelling_id = bestelling_id;

@@ -134,7 +134,9 @@ public class BestellingDAOMySQL extends AbstractDAOMySQL implements BestellingDA
 	@Override
 	public void updateBestelling(Bestelling bestelling) throws GeneriekeFoutmelding{
 		try(Connection con = connPool.verkrijgConnectie();
-				PreparedStatement deleteStatement = con.prepareStatement("DELETE FROM `BESTELLING_HEEFT_ARTIKEL` WHERE bestelling_id_best = ?;")){
+				PreparedStatement deleteStatement = con.prepareStatement("DELETE FROM `BESTELLING_HEEFT_ARTIKEL` WHERE bestelling_id_best = ?;");
+				PreparedStatement setActiefStatement = con.prepareStatement("UPDATE `BESTELLING` SET `bestellingActief`= true WHERE bestelling_id = ?;")
+				){
 
 			con.setAutoCommit(false);
 
@@ -142,6 +144,9 @@ public class BestellingDAOMySQL extends AbstractDAOMySQL implements BestellingDA
 			deleteStatement.setLong(1, bestelling.getBestelling_id());
 			deleteStatement.executeUpdate();
 
+			setActiefStatement.setLong(1, bestelling.getBestelling_id());
+			setActiefStatement.executeUpdate();
+			
 			// Schrijf alle nieuwe artikelen naar BESTELLING_HEEFT_ARTIKEL
 			schrijfAlleArtikelenNaarDeDatabase(con, bestelling.getBestelling_id(), bestelling.getArtikelLijst());
 			con.commit();
@@ -232,8 +237,8 @@ public class BestellingDAOMySQL extends AbstractDAOMySQL implements BestellingDA
 		}
 	}
 
-	
-	
+
+
 
 	private long schrijfAlleArtikelenNaarDeDatabase(Connection con, long bestellingId, List<Artikel> artikelList) throws GeneriekeFoutmelding{
 		try(PreparedStatement statementBestelHeeftArtikelTabel = con.prepareStatement(
@@ -312,16 +317,17 @@ public class BestellingDAOMySQL extends AbstractDAOMySQL implements BestellingDA
 				art.setArtikelId(rs.getInt("artikel_id"));
 				art.setArtikelNaam(rs.getString("omschrijving"));
 				art.setArtikelPrijs(rs.getBigDecimal("prijs"));
+				art.setPrijsId(rs.getInt("prijs_id_prijs"));
 				art.setAantalBesteld(rs.getInt("aantal"));
 				best.voegArtikelToe(art);
 			
-
+			}
 			//Laatste bestelling ook toevoegen aan de ArrayList
 			if(!(best.getArtikelLijst() == null)){
 				bestellingSet.add(best);
 				return bestellingSet;
 			}
-			}
+			
 		} catch (SQLException e) {
 			throw new GeneriekeFoutmelding("Error in: " + this.getClass() + ": verwerkResultSetGetBestelling(con, statement, artikelList: " + e.getMessage());
 		} catch(Exception e){
