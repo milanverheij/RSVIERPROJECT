@@ -27,7 +27,7 @@ public class MySQLConnectieLeverancier {
     @SuppressWarnings("unused")
     private static MySQLConnectieLeverancier instance = new MySQLConnectieLeverancier();
     private static Connection connection;
-    private static final String URL = "jdbc:mysql://milanverheij.nl/RSVIERPROJECTDEEL2";
+    private static final String URL = "jdbc:mysql://milanverheij.nl/RSVIERPROJECTDEEL3";
     private static final String USER = "rsvierproject";
     private static final String PASSWORD = "slechtwachtwoord";
     private static final String DRIVER_CLASS = "com.mysql.jdbc.Driver";

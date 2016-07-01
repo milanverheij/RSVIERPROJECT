@@ -23,14 +23,14 @@ public class C3POConnectionPool {
     private ComboPooledDataSource cpds;
 
     // MySQL Settings
-    private static final String MYSQL_URL = "jdbc:mysql://milanverheij.nl/RSVIERPROJECTDEEL2";
+    private static final String MYSQL_URL = "jdbc:mysql://milanverheij.nl/RSVIERPROJECTDEEL3";
     private static final String MYSQL_USER = "rsvierproject";
     private static final String MYSQL_PASSWORD = "slechtwachtwoord";
     private static final String MYSQL_DRIVER_CLASS = "com.mysql.jdbc.Driver";
 
     // FireBird settings
     private static final String FIREBIRD_URL =
-            "jdbc:firebirdsql://milanverheij.nl:3050//var//lib//firebird//2.5//data//RSVIERPROJECTDEEL2.fdb";
+            "jdbc:firebirdsql://milanverheij.nl:3050//var//lib//firebird//2.5//data//RSVIERPROJECTDEEL3.fdb";
     private static final String FIREBIRD_USER = "rsvierproject";
     private static final String FIREBIRD_PASSWORD = "slechtwachtwoord";
     private static final String FIREBIRD_DRIVER_CLASS = "org.firebirdsql.jdbc.FBDriver";
