@@ -8,6 +8,7 @@ import model.Adres;
 import model.Bestelling;
 import model.Klant;
 
+import java.lang.reflect.Field;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -17,12 +18,12 @@ import java.util.ListIterator;
 
 /**
  * Created by Milan_Verheij on 06-06-16.
- *
+ * <p>
  * KlantDAOMySQL is de DAO van de Klant POJO. <p>
  * Het verzorgt de database-operaties tussen MySQL en de objecten. <p>
- *
+ * <p>
  * De DAO is opgezet in CRUD volgorde (Create, Read, Update, Delete)<p>
- *
+ * <p>
  * Zie de afzonderlijke methods en constructor voor commentaar.
  */
 
@@ -45,37 +46,37 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
      * Het is mogelijk door middel van een adres_id mee te geven geen nieuw adres aan te maken maar
      * deze te koppelen aan de klant.
      *
-     * @param voornaam De voornaam van de klant (max 50 karakters).
-     * @param achternaam De achternaam van de klant (max 51 karakters).
-     * @param tussenvoegsel Tussenvoegsel van de klant (max 10 karakters).
-     * @param email Emailadres van de klant (max 80 karakters).
+     * @param nieuweKlant Nieuwe klantgegevens in een Klant-object.
      * @param adresgegevens Adresgegevens van de klant in een Klant object (zie Klant).
      * @param bestelGegevens Bestelgegevens van de klant in een Bestel object (zie Bestelling).
      * @throws GeneriekeFoutmelding Foutmelding bij SQLException, info wordt meegegeven.
      */
-
     @Override
-    public long nieuweKlant(String voornaam,
-                            String achternaam,
-                            String tussenvoegsel,
-                            String email,
+    public long nieuweKlant(Klant nieuweKlant,
                             long adres_id,
                             Adres adresgegevens,
                             Bestelling bestelGegevens) throws GeneriekeFoutmelding {
 
-        query = "INSERT INTO KLANT " +
-                "(voornaam, achternaam, tussenvoegsel, email) " +
-                "VALUES " +
-                "(?,        ?,          ?,              ?);";
+        // Als er geen klant wordt meegegeven wordt een fout gegooid.
+        if (nieuweKlant == null) {
+            DeLogger.getLogger().warn("KAN GEEN KLANT AANMAKEN MET NULL OBJECT");
+            throw new GeneriekeFoutmelding("KlantDAOMySQL: KAN GEEN KLANT AANMAKEN MET NULL OBJECT");
+        }
+
+        // Een klant aanmaken kan enkel met een voornaam en en achternaam, niet minder
+        if (nieuweKlant.getVoornaam().trim().length() == 0 || nieuweKlant.getAchternaam().trim().length() == 0) {
+            DeLogger.getLogger().warn(("KAN GEEN KLANT MAKEN ZONDER VOOR EN ACHTERNAAM"));
+            throw new GeneriekeFoutmelding("KlantDAOMySQL: KAN GEEN KLANT MAKEN ZONDER VOOR EN ACHTERNAAM");
+        }
+
+        // Bouw de query
+        query = queryGenerator.buildInsertStatement(nieuweKlant);
+
         try (
                 Connection connection = connPool.verkrijgConnectie();
                 PreparedStatement statement = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
         ) {
             // Voer query uit en haal de gegenereerde sleutels op bij deze query
-            statement.setString(1, voornaam);
-            statement.setString(2, achternaam);
-            statement.setString(3, tussenvoegsel);
-            statement.setString(4, email);
             statement.execute();
 
             // Ophalen van de laatste genegeneerde sleutel uit de generatedkeys (de nieuwe klant_id)
@@ -83,9 +84,8 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
             try (
                     ResultSet generatedKeys = statement.getGeneratedKeys();
             ) {
-                if (generatedKeys.next()) {
+                if (generatedKeys.next())
                     nieuwId = generatedKeys.getInt(1);
-                }
 
                 // Als er een adres_id wordt meegegeven betekent dit dat er een bestaand adres gekoppeled wordt
                 // aan een nieuwe klant
@@ -114,18 +114,16 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
                     bestelGegevens.setKlant_id(nieuwId);
                     bestellingDAO.nieuweBestelling(bestelGegevens);
                 }
-
             }
             return nieuwId;
 
         } catch (SQLException ex) {
             if (ex.getMessage().contains("Duplicate entry")) {
                 DeLogger.getLogger().warn("KlantDAOMySQL: DEZE KLANT BESTAAT AL IN DE DATABASE MET ID: " +
-                        getKlantID(voornaam, achternaam, email));
+                        getKlantID(nieuweKlant.getVoornaam(), nieuweKlant.getAchternaam(), nieuweKlant.getEmail()));
                 throw new GeneriekeFoutmelding("KlantDAOMySQL: DEZE KLANT BESTAAT AL IN DE DATABASE MET ID: " +
-                        getKlantID(voornaam, achternaam, email));
-            }
-            else {
+                        getKlantID(nieuweKlant.getVoornaam(), nieuweKlant.getAchternaam(), nieuweKlant.getEmail()));
+            } else {
                 DeLogger.getLogger().error("SQL FOUT TIJDENS AANMAKEN KLANT: " + ex.getMessage());
                 throw new GeneriekeFoutmelding("KlantDAOMySQL: SQL FOUT TIJDENS AANMAKEN KLANT: " + ex.getMessage());
             }
@@ -133,65 +131,15 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
     }
 
     /**
-     * Deze methode kan een Klant-object ontvangen en maakt op basis daarvan een nieuwe
-     * klant aan in de database. Adres-object en bestelling-object mogen null zijn.
-     * Zie verder de overloaded nieuweKlant methods.
-     *
-     * Als een bestaand adres gekoppeld dient te worden kan er een adres_id worden meegegeven.
-     * Er wordt dan geen nieuw adres meer aangemaakt.
-     *
-     * @param nieuweKlant Klantobject van de klant die gemaakt dient te worden.
-     * @param adres_id Er kan een adres_id worden meegegeven om een bestaand adres te koppelen.
-     * @return klant_id van de nieuwe klant.
+     * TODO: invullen
+     * @param nieuweKlant
+     * @param adres_id
+     * @return
      * @throws GeneriekeFoutmelding
      */
     @Override
     public long nieuweKlant(Klant nieuweKlant, long adres_id) throws GeneriekeFoutmelding {
-
-        // Als er geen klant wordt meegegeven wordt een fout gegooid.
-        if (nieuweKlant != null) {
-            long nieuwId =  nieuweKlant(nieuweKlant.getVoornaam(), nieuweKlant.getAchternaam(),
-                    nieuweKlant.getTussenvoegsel(), nieuweKlant.getEmail(), adres_id,
-                    nieuweKlant.getAdresGegevens(), nieuweKlant.getBestellingGegevens());
-            return nieuwId;
-        }
-        else {
-            DeLogger.getLogger().warn("KAN GEEN KLANT AANMAKEN MET NULL OBJECT");
-            throw new GeneriekeFoutmelding("KlantDAOMySQL: KAN GEEN KLANT AANMAKEN MET NULL OBJECT");
-        }
-    }
-
-    /**
-     * Maakt een nieuwe klant aan in de database met voornaam, achternaam en adresgegevens.
-     * Er wordt in de database automatisch een uniek ID gegenereerd welke automatisch verhoogd wordt.
-     *
-     * @param voornaam De voornaam van de klant (max 50 karakters).
-     * @param achternaam De achternaam van de klant (max 51 karakters).
-     * @param adresgegevens De adresgegevens van de klant in een Adres object (Adres).
-     * @throws GeneriekeFoutmelding Foutmelding bij SQLException, info wordt meegegeven.
-     */
-    @Override
-    public long nieuweKlant(String voornaam,
-                            String achternaam,
-                            Adres adresgegevens) throws GeneriekeFoutmelding {
-        long nieuwID = nieuweKlant(voornaam, achternaam, "", "", 0, adresgegevens, null);
-        return nieuwID;
-    }
-
-    /**
-     * Maakt een nieuwe klant aan in de database met voor- en achternaam.
-     * Er wordt in de database automatisch een uniek ID gegenereerd welke automatisch verhoogd wordt.
-     * Aangezien geen adres wordt meegegeven wordt een null waarde gestuurd naar de HOOFDMETHODE van
-     * nieuweKlant.
-     *
-     * @param voornaam De voornaam van de klant (max 50 karakters).
-     * @param achternaam De achternaam van de klant (max 51 karakters).
-     */
-    @Override
-    public long nieuweKlant(String voornaam,
-                            String achternaam) throws GeneriekeFoutmelding {
-        long nieuwID = nieuweKlant(voornaam, achternaam, null);
-        return nieuwID;
+        return nieuweKlant(nieuweKlant, adres_id, null, null);
     }
 
     /** READ METHODS */
@@ -200,9 +148,9 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
      * Zoekt het klant_id op van de klant.
      * De uniekheid van een klant is op basis van voornaam, achternaam en email, hier kan er dus maar 1 van bestaan.
      *
-     * @param voornaam De te zoeken voornaam
+     * @param voornaam   De te zoeken voornaam
      * @param achternaam De te zoeken achternaam
-     * @param email De te zoeken email van de klant
+     * @param email      De te zoeken email van de klant
      * @return Het klant_id van de klant
      */
     @Override
@@ -224,13 +172,12 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
 
             try (
                     ResultSet rs = statement.executeQuery();
-            ){
+            ) {
                 // Als er een resultaat gevonden is bestaat de klant niet en wordt er een foutmelding gegooid.
                 if (!rs.next()) {
                     DeLogger.getLogger().warn("KLANT NIET GEVONDEN: " + voornaam + "/" + achternaam + "/" + email);
                     throw new GeneriekeFoutmelding("KlantDAOMySQL: KLANT NIET GEVONDEN");
-                }
-                else {
+                } else {
                     return rs.getLong(1); // Door if-statement is rs al bij next()
                 }
             }
@@ -270,7 +217,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
 
     /**
      * HOOFD READ METHODE.
-     *
+     * <p>
      * In deze methode kan een klant-object ontvangen en op basis van de ingevulde velden de klant(en)
      * opzoeken.
      *
@@ -280,7 +227,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
      */
     @Override
     public ListIterator<Klant> getKlantOpKlant(Klant klant) throws GeneriekeFoutmelding {
-        if (klant != null && klant.getKlant_id() != -1 ) {
+        if (klant != null && klant.getKlant_id() != -1) {
             String query = "SELECT * FROM " +
                     "KLANT WHERE " +
                     "klant_id LIKE ? AND " +
@@ -293,8 +240,8 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
                     Connection connection = connPool.verkrijgConnectie();
                     PreparedStatement statement = connection.prepareStatement(query);
             ) {
-                statement.setString(1, klant.getKlant_id() == 0 ? "%" : String.valueOf(klant.getKlant_id()) );
-                statement.setString(2, klant.getVoornaam().equals("") |  klant.getVoornaam() == null ? "%" : klant.getVoornaam());
+                statement.setString(1, klant.getKlant_id() == 0 ? "%" : String.valueOf(klant.getKlant_id()));
+                statement.setString(2, klant.getVoornaam().equals("") | klant.getVoornaam() == null ? "%" : klant.getVoornaam());
                 statement.setString(3, klant.getAchternaam().equals("") ? "%" : klant.getAchternaam());
                 statement.setString(4, klant.getTussenvoegsel().equals("") ? "%" : klant.getTussenvoegsel());
                 statement.setString(5, klant.getEmail().equals("") ? "%" : klant.getEmail());
@@ -345,7 +292,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
      * Deze methode haalt op basis van de voor- en achternaam an een klant informatie uit de database en geeft dit
      * terug in en ListIterator van de ArrayList.
      *
-     * @param voornaam Voornaam van de te zoeken klant(en).
+     * @param voornaam   Voornaam van de te zoeken klant(en).
      * @param achternaam Achternaam van de te zoeken klant(en).
      * @return een ListIterator wordt teruggegeven van de ArrayList met daarin Klant-objecten.
      * @throws GeneriekeFoutmelding Foutmelding bij SQLException, info wordt meegegeven.
@@ -358,7 +305,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
 
     /**
      * HOOFD-READMETHODE VAN getKlantOpAdres
-     *
+     * <p>
      * Deze methode haalt op basis van adresgegevens klanten op uit de database en geeft dit
      * terug in en ListIterator van de ArrayList.
      *
@@ -393,8 +340,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
             statement.setString(5, adresgegevens.getWoonplaats().equals("") ? "%" : adresgegevens.getWoonplaats());
 
             try (
-                    ResultSet resultSet = statement.executeQuery(); )
-            {
+                    ResultSet resultSet = statement.executeQuery();) {
                 klantenLijst = voegResultSetInLijst(resultSet);
                 return klantenLijst.listIterator();
             }
@@ -423,7 +369,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
      * Deze methode haalt op basis van een postcode en huisnummer klanten op uit de database en geeft dit
      * terug in en ListIterator van de ArrayList.
      *
-     * @param postcode De postcode van de te zoeken klant(en).
+     * @param postcode   De postcode van de te zoeken klant(en).
      * @param huisnummer Het huisnummer van de te zoeken klant(en).
      * @return een ListIterator wordt teruggegeven van de ArrayList met daarin Klant-objecten.
      * @throws GeneriekeFoutmelding Foutmelding bij SQLException, info wordt meegegeven.
@@ -474,11 +420,11 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
     /**
      * Methode om een klant met een bepaald klant_id zijn naamgegevens up te daten.
      *
-     * @param KlantId Het klantId van de klant wiens gegevens gewijzigd dienen te worden.
-     * @param voornaam De 'gewijzigde' voornaam van de klant.
-     * @param achternaam De 'gewijzigde' achternaam van de klant.
+     * @param KlantId       Het klantId van de klant wiens gegevens gewijzigd dienen te worden.
+     * @param voornaam      De 'gewijzigde' voornaam van de klant.
+     * @param achternaam    De 'gewijzigde' achternaam van de klant.
      * @param tussenvoegsel Het 'gewijzigde' tussenvoegsel van de klant.
-     * @param email Het gewijzigde emailadres van de klant.
+     * @param email         Het gewijzigde emailadres van de klant.
      * @throws GeneriekeFoutmelding Foutmelding bij SQLException, info wordt meegegeven.
      */
     @Override
@@ -516,11 +462,11 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
      * Methode om een klant met een bepaald klant_id zijn naam en tevens
      * adres gegevens up te daten.
      *
-     * @param KlantId Het klantId van de klant wiens gegevens gewijzigd dienen te worden.
-     * @param voornaam De 'gewijzigde' voornaam van de klant.
-     * @param achternaam De 'gewijzigde' achternaam van de klant.
+     * @param KlantId       Het klantId van de klant wiens gegevens gewijzigd dienen te worden.
+     * @param voornaam      De 'gewijzigde' voornaam van de klant.
+     * @param achternaam    De 'gewijzigde' achternaam van de klant.
      * @param tussenvoegsel Het 'gewijzigde' tussenvoegsel van de klant.
-     * @param email Het 'gewijzigde' emailadres van de klant.
+     * @param email         Het 'gewijzigde' emailadres van de klant.
      * @param adresgegevens De 'gewijzigde' adresgegevens van de klant in Klantobject.
      * @throws GeneriekeFoutmelding Foutmelding bij SQLException, info wordt meegegeven.
      */
@@ -595,8 +541,8 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
      * Methode om een klant zijn/haar status te switchen op basis van naamgegevens. Alle bestellingen van de klant worden
      * tevens ook op non-actief gezet.
      *
-     * @param voornaam De voornaam van de te verwijderen klant.
-     * @param achternaam De achternaam van de te verwijderen klant.
+     * @param voornaam      De voornaam van de te verwijderen klant.
+     * @param achternaam    De achternaam van de te verwijderen klant.
      * @param tussenvoegsel Het tussenvoegsel van de te verwijderen klant.
      * @throws GeneriekeFoutmelding Foutmelding bij SQLException, info wordt meegegeven.
      */
@@ -658,7 +604,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
                 // Klant aanmaken met lege waarden, default constructor zet adres
                 // op null (ivm equals methode) derhalve dient er een waarde aanwezig
                 // te zijn om een null pointer exception te voorkomen.
-                Klant tijdelijkeKlant = new Klant(0, "", "","","", new Adres());
+                Klant tijdelijkeKlant = new Klant(0, "", "", "", "", new Adres());
 
                 tijdelijkeKlant.setKlant_id(resultSet.getLong(1));
                 tijdelijkeKlant.setVoornaam(resultSet.getString(2));
@@ -669,7 +615,8 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
                 tijdelijkeKlant.setDatumGewijzigd(resultSet.getString(7));
                 tijdelijkeKlant.setKlantActief(resultSet.getString(8));
                 klantenLijst.add(klantenTeller, tijdelijkeKlant);
-                klantenTeller++; }
+                klantenTeller++;
+            }
 
             return klantenLijst;
         } catch (SQLException ex) {
@@ -721,20 +668,20 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
                         System.out.print("\n\t\tWoonplaats:        " + tijdelijkAdres.getWoonplaats());
                         System.out.print("\n\t\tDatum Aangemaakt:  " + tijdelijkAdres.getDatumAanmaak());
                         System.out.print("\n\t\tDatum Gewijzigd:   " + tijdelijkAdres.getDatumGewijzigd());
-                    }
-                    else
-                    {
+                    } else {
                         System.out.println("\n\t\tADRESID: " + tijdelijkAdres.getAdres_id() + " INACTIEF");
                     }
                 }
                 System.out.println("\n\n\t------------------KLANT " + tijdelijkeKlant.getKlant_id() + " EIND----------------------------");
 
-            }
-            else {
+            } else {
                 System.out.println("\n\t------------------KLANT " + tijdelijkeKlant.getKlant_id() + " INACTIEF------------------------");
             }
         }
         System.out.println("\n");
     }
+
+
+
 }
 

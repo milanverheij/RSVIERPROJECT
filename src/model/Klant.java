@@ -19,8 +19,12 @@ public class Klant {
     private String datumAanmaak;
     private String datumGewijzigd;
     private String klantActief;
-    private Adres adresGegevens;
+    private Adres adresGegevens = null;
     private Bestelling bestellingGegevens;
+
+    //  Default public no-arg constructor
+    public Klant() {
+    }
 
     // Standaard public constructor met basis parameters
     public Klant(long klant_id,
@@ -67,11 +71,6 @@ public class Klant {
         this.bestellingGegevens = bestellingGegevens;
     }
 
-    // Als er een klant aangemaakt wordt, wordt er een Adres-object aan gekoppeld
-    public Klant() {
-        klant_id = -1;
-        adresGegevens = null;
-    }
 
     // Getters & setters
     public long getKlant_id() {

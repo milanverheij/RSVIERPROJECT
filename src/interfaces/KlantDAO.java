@@ -28,61 +28,25 @@ public interface KlantDAO {
      * Het is mogelijk door middel van een adres_id mee te geven geen nieuw adres aan te maken maar
      * deze te koppelen aan de klant.
      *
-     * @param voornaam De voornaam van de klant (max 50 karakters).
-     * @param achternaam De achternaam van de klant (max 51 karakters).
-     * @param tussenvoegsel Tussenvoegsel van de klant (max 10 karakters).
-     * @param email Emailadres van de klant (max 80 karakters).
+     * @param nieuweKlant Nieuwe klantgegevens in een Klant-object.
      * @param adresgegevens Adresgegevens van de klant in een Klant object (zie Klant).
      * @param bestelGegevens Bestelgegevens van de klant in een Bestel object (zie Bestelling).
      * @throws GeneriekeFoutmelding Foutmelding bij SQLException, info wordt meegegeven.
      */
-    long nieuweKlant(String voornaam,
-                     String achternaam,
-                     String tussenvoegsel,
-                     String email,
+    long nieuweKlant(Klant nieuweKlant,
                      long adres_id,
                      Adres adresgegevens,
                      Bestelling bestelGegevens) throws GeneriekeFoutmelding;
 
     /**
-     * Deze methode kan een Klant-object ontvangen en maakt op basis daarvan een nieuwe
-     * klant aan in de database. Adres-object en bestelling-object mogen null zijn.
-     * Zie verder de overloaded nieuweKlant methods.
-     *
-     * Als een bestaand adres gekoppeld dient te worden kan er een adres_id worden meegegeven.
-     * Er wordt dan geen nieuw adres meer aangemaakt.
-     *
-     * @param nieuweKlant Klantobject van de klant die gemaakt dient te worden.
-     * @param adres_id Er kan een adres_id worden meegegeven om een bestaand adres te koppelen.
-     * @return klant_id van de nieuwe klant.
+     * TODO: invullen
+     * @param nieuweKlant
+     * @param adres_id
+     * @return
      * @throws GeneriekeFoutmelding
      */
-    long nieuweKlant(Klant nieuweKlant, long adres_id) throws GeneriekeFoutmelding;
-
-    /**
-     * Maakt een nieuwe klant aan in de database met voornaam, achternaam en adresgegevens.
-     * Er wordt in de database automatisch een uniek ID gegenereerd welke automatisch verhoogd wordt.
-     *
-     * @param voornaam De voornaam van de klant (max 50 karakters).
-     * @param achternaam De achternaam van de klant (max 51 karakters).
-     * @param adresgegevens De adresgegevens van de klant in een Adres object (Adres).
-     * @throws GeneriekeFoutmelding Foutmelding bij SQLException, info wordt meegegeven.
-     */
-    long nieuweKlant(String voornaam,
-                     String achternaam,
-                     Adres adresgegevens) throws GeneriekeFoutmelding;
-
-    /**
-     * Maakt een nieuwe klant aan in de database met voor- en achternaam.
-     * Er wordt in de database automatisch een uniek ID gegenereerd welke automatisch verhoogd wordt.
-     * Aangezien geen adres wordt meegegeven wordt een null waarde gestuurd naar de HOOFDMETHODE van
-     * nieuweKlant.
-     *
-     * @param voornaam De voornaam van de klant (max 50 karakters).
-     * @param achternaam De achternaam van de klant (max 51 karakters).
-     */
-    long nieuweKlant(String voornaam,
-                     String achternaam) throws GeneriekeFoutmelding;
+    long nieuweKlant(Klant nieuweKlant,
+                     long adres_id) throws GeneriekeFoutmelding;
 
     /** READ METHODS */
 

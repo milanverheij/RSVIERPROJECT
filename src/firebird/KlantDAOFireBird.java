@@ -43,38 +43,27 @@ public class KlantDAOFireBird extends AbstractDAOFireBird implements KlantDAO {
      * Het is mogelijk door middel van een adres_id mee te geven geen nieuw adres aan te maken maar
      * deze te koppelen aan de klant.
      *
-     * @param voornaam De voornaam van de klant (max 50 karakters).
-     * @param achternaam De achternaam van de klant (max 51 karakters).
-     * @param tussenvoegsel Tussenvoegsel van de klant (max 10 karakters).
-     * @param email Emailadres van de klant (max 80 karakters).
+//     * @param voornaam De voornaam van de klant (max 50 karakters).
+//     * @param achternaam De achternaam van de klant (max 51 karakters).
+//     * @param tussenvoegsel Tussenvoegsel van de klant (max 10 karakters).
+//     * @param email Emailadres van de klant (max 80 karakters).
      * @param adresgegevens Adresgegevens van de klant in een Klant object (zie Klant).
      * @param bestelGegevens Bestelgegevens van de klant in een Bestel object (zie Bestelling).
      * @throws GeneriekeFoutmelding Foutmelding bij SQLException, info wordt meegegeven.
      */
 
     @Override
-    public long nieuweKlant(String voornaam,
-                            String achternaam,
-                            String tussenvoegsel,
-                            String email,
+    public long nieuweKlant(Klant nieuweKlant,
                             long adres_id,
                             Adres adresgegevens,
                             Bestelling bestelGegevens) throws GeneriekeFoutmelding {
 
-        query = "INSERT INTO KLANT " +
-                "(voornaam, achternaam, tussenvoegsel, email) " +
-                "VALUES " +
-                "(?,        ?,          ?,              ?) " +
-                "RETURNING klant_id;";
+        query = queryGenerator.buildInsertStatement(nieuweKlant) + " RETURNING klant_id;";
+
         try (
                 Connection connection = connPool.verkrijgConnectie();
                 PreparedStatement statement = connection.prepareStatement(query);
         ) {
-            // Voer query uit en haal de gegenereerde sleutels op bij deze query
-            statement.setString(1, voornaam);
-            statement.setString(2, achternaam);
-            statement.setString(3, tussenvoegsel);
-            statement.setString(4, email);
 //            statement.execute();
 
             // Ophalen van de laatste genegeneerde sleutel (de nieuwe klant_id)
@@ -120,9 +109,11 @@ public class KlantDAOFireBird extends AbstractDAOFireBird implements KlantDAO {
         } catch (SQLException ex) {
             if (ex.getMessage().contains("Duplicate entry")) { // TODO: Is anders in FB
                 DeLogger.getLogger().warn("KlantDAOFireBird: DEZE KLANT BESTAAT AL IN DE DATABASE MET ID: " +
-                        getKlantID(voornaam, achternaam, email));
+//                        getKlantID(voornaam, achternaam, email));
+                        "");
                 throw new GeneriekeFoutmelding("KlantDAOFireBird: DEZE KLANT BESTAAT AL IN DE DATABASE MET ID: " +
-                        getKlantID(voornaam, achternaam, email));
+//                        getKlantID(voornaam, achternaam, email));
+                        "");
             }
             else {
                 DeLogger.getLogger().error("SQL FOUT TIJDENS AANMAKEN KLANT: " + ex.getMessage());
@@ -149,48 +140,13 @@ public class KlantDAOFireBird extends AbstractDAOFireBird implements KlantDAO {
 
         // Als er geen klant wordt meegegeven wordt een fout gegooid.
         if (nieuweKlant != null) {
-            long nieuwId =  nieuweKlant(nieuweKlant.getVoornaam(), nieuweKlant.getAchternaam(),
-                    nieuweKlant.getTussenvoegsel(), nieuweKlant.getEmail(), adres_id,
-                    nieuweKlant.getAdresGegevens(), nieuweKlant.getBestellingGegevens());
+            long nieuwId =  nieuweKlant(nieuweKlant, adres_id, null, null);
             return nieuwId;
         }
         else {
             DeLogger.getLogger().warn("KAN GEEN KLANT AANMAKEN MET NULL OBJECT");
             throw new GeneriekeFoutmelding("KlantDAOFireBird: KAN GEEN KLANT AANMAKEN MET NULL OBJECT");
         }
-    }
-
-    /**
-     * Maakt een nieuwe klant aan in de database met voornaam, achternaam en adresgegevens.
-     * Er wordt in de database automatisch een uniek ID gegenereerd welke automatisch verhoogd wordt.
-     *
-     * @param voornaam De voornaam van de klant (max 50 karakters).
-     * @param achternaam De achternaam van de klant (max 51 karakters).
-     * @param adresgegevens De adresgegevens van de klant in een Adres object (Adres).
-     * @throws GeneriekeFoutmelding Foutmelding bij SQLException, info wordt meegegeven.
-     */
-    @Override
-    public long nieuweKlant(String voornaam,
-                            String achternaam,
-                            Adres adresgegevens) throws GeneriekeFoutmelding {
-        long nieuwID = nieuweKlant(voornaam, achternaam, "", "", 0, adresgegevens, null);
-        return nieuwID;
-    }
-
-    /**
-     * Maakt een nieuwe klant aan in de database met voor- en achternaam.
-     * Er wordt in de database automatisch een uniek ID gegenereerd welke automatisch verhoogd wordt.
-     * Aangezien geen adres wordt meegegeven wordt een null waarde gestuurd naar de HOOFDMETHODE van
-     * nieuweKlant.
-     *
-     * @param voornaam De voornaam van de klant (max 50 karakters).
-     * @param achternaam De achternaam van de klant (max 51 karakters).
-     */
-    @Override
-    public long nieuweKlant(String voornaam,
-                            String achternaam) throws GeneriekeFoutmelding {
-        long nieuwID = nieuweKlant(voornaam, achternaam, null);
-        return nieuwID;
     }
 
     /** READ METHODS */
