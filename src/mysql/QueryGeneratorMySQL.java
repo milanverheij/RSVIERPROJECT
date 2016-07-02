@@ -51,12 +51,56 @@ public class QueryGeneratorMySQL extends QueryGenerator {
                 throw new GeneriekeFoutmelding("Fout bij maken insert statement " + "[" + className + "]: " + e.getMessage());
             }
         }
+
+        if (variableToInsert == 0) {
+            DeLogger.getLogger().warn("Geen declared fields, niets te inserten");
+            throw new GeneriekeFoutmelding("QueryGeneratorMySQL: Geen declared fields, niets te inserten");
+        }
+
         return "INSERT INTO " + sqlTableName + "(" + columns  + ") " + "values (" + values + ");";
     }
 
     @Override
     public String buildUpdateStatement(Object object) throws GeneriekeFoutmelding {
-        return null;
+        int variableToUpdate = 0;
+        Class className = object.getClass();
+        String sqlTableName = className.getSimpleName().toUpperCase();
+        StringBuilder columnsValues = new StringBuilder();
+        Field[] declaredFields = className.getDeclaredFields();
+
+
+        for (Field dcField : declaredFields) {
+            try {
+                dcField.setAccessible(true);
+                if (dcField.get(object) != null) {
+                    if (!isPrimitiveZero(dcField.get(object)) && !isExcluded(dcField)) {
+                        variableToUpdate++;
+
+                        if (variableToUpdate > 1) {
+                            columnsValues.append(", " + dcField.getName());
+                        } else
+                            columnsValues.append(dcField.getName());
+
+                        if (dcField.get(object) instanceof String) {
+                            columnsValues.append(" = \'");
+                            columnsValues.append(dcField.get(object));
+                            columnsValues.append("\'");
+                        } else
+                            columnsValues.append(" = " + dcField.get(object));
+                    }
+                }
+            } catch (IllegalArgumentException | IllegalAccessException | SecurityException e) {
+                DeLogger.getLogger().error("Fout bij maken update(MYSQL) statement " + "[" + className + "]: " + e.getMessage());
+                throw new GeneriekeFoutmelding("Fout bij maken update(MYSQL) statement " + "[" + className + "]: " + e.getMessage());
+            }
+        }
+
+        if (variableToUpdate == 0) {
+            DeLogger.getLogger().warn("Geen declared fields, niets up te daten");
+            throw new GeneriekeFoutmelding("QueryGeneratorMySQL: Geen declared fields, niets up te daten");
+        }
+
+        return "UPDATE " + sqlTableName + " SET " + columnsValues + " WHERE";
     }
 
     @Override

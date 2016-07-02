@@ -427,36 +427,25 @@ public class KlantDAOFireBird extends AbstractDAOFireBird implements KlantDAO {
     /**
      * Methode om een klant met een bepaald klant_id zijn naamgegevens up te daten.
      *
-     * @param KlantId Het klantId van de klant wiens gegevens gewijzigd dienen te worden.
-     * @param voornaam De 'gewijzigde' voornaam van de klant.
-     * @param achternaam De 'gewijzigde' achternaam van de klant.
-     * @param tussenvoegsel Het 'gewijzigde' tussenvoegsel van de klant.
-     * @param email Het gewijzigde emailadres van de klant.
+     * @param nieuweKlant De te updaten klant in Klant-object
      * @throws GeneriekeFoutmelding Foutmelding bij SQLException, info wordt meegegeven.
      */
     @Override
-    public void updateKlant(Long KlantId,
-                            String voornaam,
-                            String achternaam,
-                            String tussenvoegsel,
-                            String email) throws GeneriekeFoutmelding {
-        String query = "UPDATE KLANT " +
-                "SET " +
-                "voornaam = ?, " +
-                "achternaam = ?, " +
-                "tussenvoegsel = ?, " +
-                "email = ? " +
-                "WHERE " +
-                "klant_id = ?;";
+    public void updateKlant(Klant nieuweKlant) throws GeneriekeFoutmelding {
+        // Check of er een adres is meegegeven, deze wordt afzonderlijk door de adresDAO
+        // behandeld en daarna op null gezet anders neemt de querygenerator deze foutief mee.
+        if (nieuweKlant.getAdresGegevens() != null) {
+            adresDAO = new AdresDAOFireBird();
+            adresDAO.updateAdres(nieuweKlant.getAdresGegevens().getAdres_id(), nieuweKlant.getAdresGegevens());
+            nieuweKlant.setAdresGegevens(null);
+        }
+
+        query = queryGenerator.buildUpdateStatement(nieuweKlant) + " klant_id = " + nieuweKlant.getKlant_id() + ";";
+
         try (
                 Connection connection = connPool.verkrijgConnectie();
                 PreparedStatement statement = connection.prepareStatement(query);
         ) {
-            statement.setString(1, voornaam);
-            statement.setString(2, achternaam);
-            statement.setString(3, tussenvoegsel);
-            statement.setString(4, email);
-            statement.setLong(5, KlantId);
             statement.execute();
 
         } catch (SQLException ex) {
@@ -466,27 +455,19 @@ public class KlantDAOFireBird extends AbstractDAOFireBird implements KlantDAO {
     }
 
     /**
-     * Methode om een klant met een bepaald klant_id zijn naam en tevens
-     * adres gegevens up te daten.
+     * Methode om een klant te updaten met een mogelijk los adres-object.
      *
-     * @param KlantId Het klantId van de klant wiens gegevens gewijzigd dienen te worden.
-     * @param voornaam De 'gewijzigde' voornaam van de klant.
-     * @param achternaam De 'gewijzigde' achternaam van de klant.
-     * @param tussenvoegsel Het 'gewijzigde' tussenvoegsel van de klant.
-     * @param email Het 'gewijzigde' emailadres van de klant.
+     * @param nieuweKlant De te updaten klant in Klant-object
      * @param adresgegevens De 'gewijzigde' adresgegevens van de klant in Klantobject.
      * @throws GeneriekeFoutmelding Foutmelding bij SQLException, info wordt meegegeven.
      */
     @Override
-    public void updateKlant(long KlantId, String voornaam,
-                            String achternaam,
-                            String tussenvoegsel,
-                            String email,
-                            long adres_id,
+    public void updateKlant(Klant nieuweKlant,
                             Adres adresgegevens) throws GeneriekeFoutmelding {
-        updateKlant(KlantId, voornaam, achternaam, tussenvoegsel, email);
-        adresDAO = new AdresDAOFireBird();
-        adresDAO.updateAdres(adres_id, adresgegevens);
+        if (adresgegevens != null)
+            nieuweKlant.setAdresGegevens(adresgegevens);
+
+        updateKlant(nieuweKlant);
     }
 
     /** DELETE METHODS */

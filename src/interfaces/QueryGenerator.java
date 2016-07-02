@@ -2,6 +2,8 @@ package interfaces;
 
 import exceptions.GeneriekeFoutmelding;
 
+import java.lang.reflect.Field;
+
 /**
  * Created by Milan_Verheij on 01-07-16.
  *
@@ -35,5 +37,16 @@ public abstract class QueryGenerator {
             }
         }
         return isPrimitiveZero;
+    }
+
+    public boolean isExcluded(Field declaredField) {
+        boolean isExcluded = false;
+        String[] excludedColumns = {"klant_id", "adres_id", "artikel_id", "bestelling_id", "prijs_id"};
+
+        for (String excludedColumn : excludedColumns) {
+            if (declaredField.getType().equals(long.class) && declaredField.getName().equals(excludedColumn))
+                isExcluded = true;
+        }
+        return isExcluded;
     }
 }

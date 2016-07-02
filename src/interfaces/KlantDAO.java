@@ -39,11 +39,13 @@ public interface KlantDAO {
                      Bestelling bestelGegevens) throws GeneriekeFoutmelding;
 
     /**
-     * TODO: invullen
-     * @param nieuweKlant
-     * @param adres_id
-     * @return
-     * @throws GeneriekeFoutmelding
+     * Maakt een nieuwe klant aan met enkel een Adres Object en een mogelijk adres-id. Als geen
+     * adres-id wordt meegegeven wordt geen adres gekopeld.
+     *
+     * @param nieuweKlant De gegevens van de nieuwe klant in een Klant-object
+     * @param adres_id Het adres-id van een mogelijk te koppelen adres.
+     * @return Het nieuwe klant-id wordt teruggegeven.
+     * @throws GeneriekeFoutmelding Foutmelding bij SQLException, info wordt meegegeven.
      */
     long nieuweKlant(Klant nieuweKlant,
                      long adres_id) throws GeneriekeFoutmelding;
@@ -160,37 +162,19 @@ public interface KlantDAO {
     /**
      * Methode om een klant met een bepaald klant_id zijn naamgegevens up te daten.
      *
-     * @param klantId Het klantId van de klant wiens gegevens gewijzigd dienen te worden.
-     * @param voornaam De 'gewijzigde' voornaam van de klant.
-     * @param achternaam De 'gewijzigde' achternaam van de klant.
-     * @param tussenvoegsel Het 'gewijzigde' tussenvoegsel van de klant.
-     * @param email Het gewijzigde emailadres van de klant.
+     * @param nieuweKlant De te updaten klant in Klant-object
      * @throws GeneriekeFoutmelding Foutmelding bij SQLException, info wordt meegegeven.
      */
-    void updateKlant(Long klantId,
-                     String voornaam,
-                     String achternaam,
-                     String tussenvoegsel,
-                     String email) throws GeneriekeFoutmelding;
+    void updateKlant(Klant nieuweKlant) throws GeneriekeFoutmelding;
 
     /**
-     * Methode om een klant met een bepaald klant_id zijn naam en tevens
-     * adres gegevens up te daten.
+     * Methode om een klant te updaten met een mogelijk los adres-object.
      *
-     * @param KlantId Het klantId van de klant wiens gegevens gewijzigd dienen te worden.
-     * @param voornaam De 'gewijzigde' voornaam van de klant.
-     * @param achternaam De 'gewijzigde' achternaam van de klant.
-     * @param tussenvoegsel Het 'gewijzigde' tussenvoegsel van de klant.
-     * @param email Het 'gewijzigde' emailadres van de klant.
+     * @param nieuweKlant De te updaten klant in Klant-object
      * @param adresgegevens De 'gewijzigde' adresgegevens van de klant in Klantobject.
      * @throws GeneriekeFoutmelding Foutmelding bij SQLException, info wordt meegegeven.
      */
-    void updateKlant(long KlantId,
-                     String voornaam,
-                     String achternaam,
-                     String tussenvoegsel,
-                     String email,
-                     long adres_id,
+    void updateKlant(Klant nieuweKlant,
                      Adres adresgegevens) throws GeneriekeFoutmelding;
 
     /** DELETE METHODS */
