@@ -189,125 +189,35 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
         }
     }
 
+
     /**
-     * Deze method haalt alle klanten op uit de database en stopt ze in een ArrayList waarna, zie @return.
+     * Deze method haalt klanten op uit de database op basis van een meegegeven Klant-Object.
      *
+     * @param klant Klant-object gevuld met zoek-parameters.
      * @return een ListIterator wordt teruggegeven van de ArrayList met daarin Klant-objecten.
      * @throws GeneriekeFoutmelding Foutmelding bij SQLException, info wordt meegegeven.
      */
     @Override
-    public ListIterator<Klant> getAlleKlanten() throws GeneriekeFoutmelding {
-        String query = "SELECT * FROM KLANT";
+    public ListIterator<Klant> getKlantOpKlant(Klant klant) throws GeneriekeFoutmelding {
+        query = queryGenerator.buildSelectStatement(klant);
+
         try (
                 Connection connection = connPool.verkrijgConnectie();
                 PreparedStatement statement = connection.prepareStatement(query);
-
         ) {
             try (
                     ResultSet resultSet = statement.executeQuery();
             ) {
                 klantenLijst = voegResultSetInLijst(resultSet);
-
                 return klantenLijst.listIterator();
             }
-
         } catch (SQLException ex) {
-            DeLogger.getLogger().error("SQL FOUT TIJDEN OPHALEN KLANTEN: " + ex.getMessage());
-            throw new GeneriekeFoutmelding("KlantDAOMySQL: SQL FOUT TIJDEN OPHALEN KLANTEN:" + ex.getMessage());
+            DeLogger.getLogger().error("SQL FOUT TIJDENS OPZOEKEN KLANT " + ex.getMessage());
+            throw new GeneriekeFoutmelding("KlantDAOMySQL: SQL FOUT TIJDENS OPZOEKEN KLANT " + ex.getMessage());
         }
     }
 
     /**
-     * HOOFD READ METHODE.
-     * <p>
-     * In deze methode kan een klant-object ontvangen en op basis van de ingevulde velden de klant(en)
-     * opzoeken.
-     *
-     * @param klant De klantgegevens in een Klant-Object dat opgezocht dient te worden.
-     * @return een ListIterator wordt teruggegeven van de ArrayList met daarin Klant-objecten.
-     * @throws GeneriekeFoutmelding
-     */
-    @Override
-    public ListIterator<Klant> getKlantOpKlant(Klant klant) throws GeneriekeFoutmelding {
-        if (klant != null && klant.getKlant_id() != -1) {
-            String query = "SELECT * FROM " +
-                    "KLANT WHERE " +
-                    "klant_id LIKE ? AND " +
-                    "voornaam LIKE ? AND " +
-                    "achternaam LIKE ? AND " +
-                    "tussenvoegsel LIKE ? " +
-                    "AND email LIKE ?";
-
-            try (
-                    Connection connection = connPool.verkrijgConnectie();
-                    PreparedStatement statement = connection.prepareStatement(query);
-            ) {
-                statement.setString(1, klant.getKlant_id() == 0 ? "%" : String.valueOf(klant.getKlant_id()));
-                statement.setString(2, klant.getVoornaam().equals("") | klant.getVoornaam() == null ? "%" : klant.getVoornaam());
-                statement.setString(3, klant.getAchternaam().equals("") ? "%" : klant.getAchternaam());
-                statement.setString(4, klant.getTussenvoegsel().equals("") ? "%" : klant.getTussenvoegsel());
-                statement.setString(5, klant.getEmail().equals("") ? "%" : klant.getEmail());
-
-                try (
-                        ResultSet resultSet = statement.executeQuery();
-                ) {
-                    klantenLijst = voegResultSetInLijst(resultSet);
-                    return klantenLijst.listIterator();
-                }
-            } catch (SQLException ex) {
-                DeLogger.getLogger().error("SQL FOUT TIJDENS OPZOEKEN KLANT " + ex.getMessage());
-                throw new GeneriekeFoutmelding("KlantDAOMySQL: SQL FOUT TIJDENS OPZOEKEN KLANT " + ex.getMessage());
-            }
-        } else {
-            DeLogger.getLogger().warn("ER DIENT EEN GEVULD KLANTOBJECT MEEGEGEVEN TE WORDEN OM EEN KLANT TE ZOEKEN");
-            throw new GeneriekeFoutmelding("KlantDAOMySQL: ER DIENT EEN GEVULD KLANTOBJECT MEEGEGEVEN TE WORDEN OM EEN KLANT TE ZOEKEN");
-        }
-    }
-
-    /**
-     * Deze methode haalt op basis van klantId klanten (als het goed is 1) op uit de database en geeft dit
-     * terug in en ListIterator van de ArrayList.
-     *
-     * @param klantId Het klantId van de op te zoeken klant.
-     * @return een ListIterator wordt teruggegeven van de ArrayList met daarin Klant-objecten.
-     * @throws GeneriekeFoutmelding Foutmelding bij SQLException, info wordt meegegeven.
-     */
-    @Override
-    public ListIterator<Klant> getKlantOpKlant(long klantId) throws GeneriekeFoutmelding {
-        return getKlantOpKlant(new Klant(klantId, "", "", "", "", null));
-    }
-
-    /**
-     * Deze methode haalt op basis van de voornaam van een klant informatie uit de database en geeft dit
-     * terug in en ListIterator van de ArrayList.
-     *
-     * @param voornaam Voornaam van de te zoeken klant(en).
-     * @return een ListIterator wordt teruggegeven van de ArrayList met daarin Klant-objecten.
-     * @throws GeneriekeFoutmelding Foutmelding bij SQLException, info wordt meegegeven.
-     */
-    @Override
-    public ListIterator<Klant> getKlantOpKlant(String voornaam) throws GeneriekeFoutmelding {
-        return getKlantOpKlant(new Klant(0, voornaam, "", "", "", null));
-    }
-
-    /**
-     * Deze methode haalt op basis van de voor- en achternaam an een klant informatie uit de database en geeft dit
-     * terug in en ListIterator van de ArrayList.
-     *
-     * @param voornaam   Voornaam van de te zoeken klant(en).
-     * @param achternaam Achternaam van de te zoeken klant(en).
-     * @return een ListIterator wordt teruggegeven van de ArrayList met daarin Klant-objecten.
-     * @throws GeneriekeFoutmelding Foutmelding bij SQLException, info wordt meegegeven.
-     */
-    @Override
-    public ListIterator<Klant> getKlantOpKlant(String voornaam,
-                                               String achternaam) throws GeneriekeFoutmelding {
-        return getKlantOpKlant(new Klant(0, voornaam, achternaam, "", "", null));
-    }
-
-    /**
-     * HOOFD-READMETHODE VAN getKlantOpAdres
-     * <p>
      * Deze methode haalt op basis van adresgegevens klanten op uit de database en geeft dit
      * terug in en ListIterator van de ArrayList.
      *
@@ -317,30 +227,17 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
      */
     @Override
     public ListIterator<Klant> getKlantOpAdres(Adres adresgegevens) throws GeneriekeFoutmelding {
-        String query = "SELECT KLANT.* " +
-                "FROM " +
-                "KLANT_HEEFT_ADRES, ADRES, KLANT " +
-                "WHERE " +
-                "straatnaam LIKE ? AND " +
-                "postcode LIKE ? AND " +
-                "toevoeging LIKE ? AND " +
-                "huisnummer LIKE ? AND " +
-                "woonplaats LIKE ? " +
-                "AND " +
-                "KLANT_HEEFT_ADRES.adres_id_adres = ADRES.ADRES_id AND " +
-                "KLANT_HEEFT_ADRES.klant_id_klant = KLANT.KLANT_ID " +
-                "GROUP BY klant_id " +
-                "ORDER BY klant_id;";
+
+        // Om een query te laten maken door de querygenerator die naar klanten zoekt op basis van een adres
+        // dient er een klant object gegeven te worden met een _notnull_ adresgegevens property.
+        Klant klantAdres = new Klant();
+        klantAdres.setAdresGegevens(adresgegevens);
+        query = queryGenerator.buildSelectStatement(klantAdres);
+
         try (
                 Connection connection = connPool.verkrijgConnectie();
                 PreparedStatement statement = connection.prepareStatement(query);
         ) {
-            statement.setString(1, adresgegevens.getStraatnaam().equals("") ? "%" : adresgegevens.getStraatnaam());
-            statement.setString(2, adresgegevens.getPostcode().equals("") ? "%" : adresgegevens.getPostcode());
-            statement.setString(3, adresgegevens.getToevoeging().equals("") ? "%" : adresgegevens.getToevoeging());
-            statement.setString(4, adresgegevens.getHuisnummer() == 0 ? "%" : String.valueOf(adresgegevens.getHuisnummer()));
-            statement.setString(5, adresgegevens.getWoonplaats().equals("") ? "%" : adresgegevens.getWoonplaats());
-
             try (
                     ResultSet resultSet = statement.executeQuery();) {
                 klantenLijst = voegResultSetInLijst(resultSet);
@@ -362,25 +259,6 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
      * @throws GeneriekeFoutmelding Foutmelding bij SQLException, info wordt meegegeven.
      */
 
-    @Override
-    public ListIterator<Klant> getKlantOpAdres(String straatnaam) throws GeneriekeFoutmelding {
-        return getKlantOpAdres(new Adres(straatnaam, "", "", 0, ""));
-    }
-
-    /**
-     * Deze methode haalt op basis van een postcode en huisnummer klanten op uit de database en geeft dit
-     * terug in en ListIterator van de ArrayList.
-     *
-     * @param postcode   De postcode van de te zoeken klant(en).
-     * @param huisnummer Het huisnummer van de te zoeken klant(en).
-     * @return een ListIterator wordt teruggegeven van de ArrayList met daarin Klant-objecten.
-     * @throws GeneriekeFoutmelding Foutmelding bij SQLException, info wordt meegegeven.
-     */
-    @Override
-    public ListIterator<Klant> getKlantOpAdres(String postcode,
-                                               int huisnummer) throws GeneriekeFoutmelding {
-        return getKlantOpAdres(new Adres("", postcode, "", huisnummer, ""));
-    }
 
     /**
      * Deze methode haalt op basis van bestelId klanten op uit de database en geeft dit
@@ -406,7 +284,9 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
                     ResultSet resultSet = statement.executeQuery();
             ) {
                 while (resultSet.next()) {
-                    return getKlantOpKlant((long) resultSet.getInt(1));
+                    Klant tijdelijkeKlant = new Klant();
+                    tijdelijkeKlant.setKlant_id((long)resultSet.getInt(1));
+                    return getKlantOpKlant(tijdelijkeKlant);
                 }
             }
         } catch (SQLException ex) {
@@ -511,7 +391,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
          * @throws GeneriekeFoutmelding Foutmelding bij SQLException, info wordt meegegeven.
          */
 
-        ListIterator<Klant> klantListIterator = getKlantOpKlant(voornaam, achternaam);
+        ListIterator<Klant> klantListIterator = getKlantOpKlant(new Klant(0, voornaam, achternaam, null, null, null));
 
         while (klantListIterator.hasNext()) {
             Klant tijdelijkeKlant = klantListIterator.next();

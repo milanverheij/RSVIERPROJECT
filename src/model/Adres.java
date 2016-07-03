@@ -23,11 +23,6 @@ public class Adres {
     public Adres() {
         //standaard een no-args constructor met lege gegevens. Komt enkel voor als er 'null' als Adres wordt
         // meegegeven in de updateMethode van de AdresDAO
-        straatnaam = "";
-        postcode = "";
-        toevoeging = "";
-        huisnummer = 0;
-        woonplaats = "";
     }
 
     // Constructor met basis gegevens

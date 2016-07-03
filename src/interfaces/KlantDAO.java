@@ -64,56 +64,13 @@ public interface KlantDAO {
                     String achternaam,
                     String email) throws GeneriekeFoutmelding;
     /**
-     * Deze method haalt alle klanten op uit de database en stopt ze in een ArrayList waarna, zie @return.
+     * Deze method haalt klanten op uit de database op basis van een meegegeven Klant-Object.
      *
+     * @param klant Klant-object gevuld met zoek-parameters.
      * @return een ListIterator wordt teruggegeven van de ArrayList met daarin Klant-objecten.
      * @throws GeneriekeFoutmelding Foutmelding bij SQLException, info wordt meegegeven.
-     */
-    ListIterator<Klant> getAlleKlanten() throws GeneriekeFoutmelding;
-
-    /**
-     * HOOFD READ METHODE.
-     *
-     * In deze methode kan een klant-object ontvangen en op basis van de ingevulde velden de klant(en)
-     * opzoeken.
-     *
-     * @param klant De klantgegevens in een Klant-Object dat opgezocht dient te worden.
-     * @return een ListIterator wordt teruggegeven van de ArrayList met daarin Klant-objecten.
-     * @throws GeneriekeFoutmelding
      */
     ListIterator<Klant> getKlantOpKlant(Klant klant) throws GeneriekeFoutmelding;
-
-    /**
-     * Deze methode haalt op basis van klantId klanten (als het goed is 1) op uit de database en geeft dit
-     * terug in en ListIterator van de ArrayList.
-     *
-     * @param klantId Het klantId van de op te zoeken klant.
-     * @return een ListIterator wordt teruggegeven van de ArrayList met daarin Klant-objecten.
-     * @throws GeneriekeFoutmelding Foutmelding bij SQLException, info wordt meegegeven.
-     */
-    ListIterator<Klant> getKlantOpKlant(long klantId) throws GeneriekeFoutmelding;
-
-    /**
-     * Deze methode haalt op basis van de voornaam van een klant informatie uit de database en geeft dit
-     * terug in en ListIterator van de ArrayList.
-     *
-     * @param voornaam Voornaam van de te zoeken klant(en).
-     * @return een ListIterator wordt teruggegeven van de ArrayList met daarin Klant-objecten.
-     * @throws GeneriekeFoutmelding Foutmelding bij SQLException, info wordt meegegeven.
-     */
-    ListIterator<Klant> getKlantOpKlant(String voornaam) throws GeneriekeFoutmelding;
-
-    /**
-     * Deze methode haalt op basis van de voor- en achternaam an een klant informatie uit de database en geeft dit
-     * terug in en ListIterator van de ArrayList.
-     *
-     * @param voornaam Voornaam van de te zoeken klant(en).
-     * @param achternaam Achternaam van de te zoeken klant(en).
-     * @return een ListIterator wordt teruggegeven van de ArrayList met daarin Klant-objecten.
-     * @throws GeneriekeFoutmelding Foutmelding bij SQLException, info wordt meegegeven.
-     */
-    ListIterator<Klant> getKlantOpKlant(String voornaam,
-                                        String achternaam) throws GeneriekeFoutmelding;
 
     /**
      * Deze methode haalt op basis van adresgegevens klanten op uit de database en geeft dit
@@ -124,28 +81,6 @@ public interface KlantDAO {
      * @throws GeneriekeFoutmelding Foutmelding bij SQLException, info wordt meegegeven.
      */
     ListIterator<Klant> getKlantOpAdres(Adres adresgegevens) throws GeneriekeFoutmelding;
-
-    /**
-     * Deze methode haalt op basis van adresgegevens klanten op uit de database en geeft dit
-     * terug in en ListIterator van de ArrayList.
-     *
-     * @param straatnaam Straatnaam van de te zoeken klant(en).
-     * @return een ListIterator wordt teruggegeven van de ArrayList met daarin Klant-objecten.
-     * @throws GeneriekeFoutmelding Foutmelding bij SQLException, info wordt meegegeven.
-     */
-    ListIterator<Klant> getKlantOpAdres(String straatnaam) throws GeneriekeFoutmelding;
-
-    /**
-     * Deze methode haalt op basis van een postcode en huisnummer klanten op uit de database en geeft dit
-     * terug in en ListIterator van de ArrayList.
-     *
-     * @param postcode De postcode van de te zoeken klant(en).
-     * @param huisnummer Het huisnummer van de te zoeken klant(en).
-     * @return een ListIterator wordt teruggegeven van de ArrayList met daarin Klant-objecten.
-     * @throws GeneriekeFoutmelding Foutmelding bij SQLException, info wordt meegegeven.
-     */
-    ListIterator<Klant> getKlantOpAdres(String postcode,
-                                        int huisnummer) throws GeneriekeFoutmelding;
 
     /**
      * Deze methode haalt op basis van bestelId klanten op uit de database en geeft dit
