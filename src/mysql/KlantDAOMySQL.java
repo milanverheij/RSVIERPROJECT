@@ -345,7 +345,8 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
         updateKlant(nieuweKlant);
     }
 
-    /** DELETE METHODS */
+    /** 'DELETE' METHODS */
+    /** In feite worden klanten niet verwijderd maar op non-actief gezet */
 
     /**
      * Methode om een klant te verwijderen op basis van ID. Alle bestellingen van de klant worden
@@ -354,7 +355,6 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
      * @param klantId Klant_id van de te verwijderen klant.
      * @throws GeneriekeFoutmelding Foutmelding bij SQLException, info wordt meegegeven.
      */
-
     @Override
     public void schakelStatusKlant(long klantId, int status) throws GeneriekeFoutmelding {
         String query =
@@ -381,40 +381,16 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
         }
     }
 
-    @Override
-    public void schakelStatusKlant(String voornaam, String achternaam) throws GeneriekeFoutmelding {
-        /**
-         * Methode om een klant zijn/haar status te switchen op basis van alleen voor- en achternaam;
-         *
-         * @param voornaam Voornaam van de te verwijderen
-         * @param achternaam Achternaam van de te verwijderen klant
-         * @throws GeneriekeFoutmelding Foutmelding bij SQLException, info wordt meegegeven.
-         */
-
-        ListIterator<Klant> klantListIterator = getKlantOpKlant(new Klant(0, voornaam, achternaam, null, null, null));
-
-        while (klantListIterator.hasNext()) {
-            Klant tijdelijkeKlant = klantListIterator.next();
-            schakelStatusKlant(tijdelijkeKlant.getKlant_id(),
-                    (tijdelijkeKlant.getKlantActief().charAt(0) == '0' ? 1 : 0));
-        }
-    }
-
     /**
-     * Methode om een klant zijn/haar status te switchen op basis van naamgegevens. Alle bestellingen van de klant worden
-     * tevens ook op non-actief gezet.
+     * Methode om een klant zijn/haar status te switchen op basis van klant-object.
      *
-     * @param voornaam      De voornaam van de te verwijderen klant.
-     * @param achternaam    De achternaam van de te verwijderen klant.
-     * @param tussenvoegsel Het tussenvoegsel van de te verwijderen klant.
+     * @param klant Klant-gegevens in klant-object
      * @throws GeneriekeFoutmelding Foutmelding bij SQLException, info wordt meegegeven.
      */
     @Override
-    public void schakelStatusKlant(String voornaam,
-                                   String achternaam,
-                                   String tussenvoegsel) throws GeneriekeFoutmelding {
-        ListIterator<Klant> klantListIterator =
-                getKlantOpKlant(new Klant(0, voornaam, achternaam, tussenvoegsel, "", null));
+    public void schakelStatusKlant(Klant klant) throws GeneriekeFoutmelding {
+
+        ListIterator<Klant> klantListIterator = getKlantOpKlant(klant);
 
         while (klantListIterator.hasNext()) {
             Klant tijdelijkeKlant = klantListIterator.next();
@@ -422,7 +398,6 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
                     (tijdelijkeKlant.getKlantActief().charAt(0) == '0' ? 1 : 0));
         }
     }
-
 
     /**
      * Methode om een klant te verwijderen op basis van een bestelnummer.
@@ -433,7 +408,6 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
     @Override
     public long verwijderKlantOpBestellingId(long bestellingId) throws GeneriekeFoutmelding {
 
-        //TODO: Aanpassen als bestelling weer klaar is
         // Klant wordt opgehaald uit de database om op basis van BestelID het klantID te vinden.
         ListIterator<Klant> klantenIterator = getKlantOpBestelling(bestellingId);
         long verwijderdId = -1;

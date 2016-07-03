@@ -130,21 +130,7 @@ public interface KlantDAO {
      * @param achternaam Achternaam van de te verwijderen klant
      * @throws GeneriekeFoutmelding Foutmelding bij SQLException, info wordt meegegeven.
      */
-    void schakelStatusKlant(String voornaam,
-                            String achternaam) throws GeneriekeFoutmelding;
-
-    /**
-     * Methode om een klant te verwijderen op basis van naamgegevens. Alle bestellingen van de klant worden
-     * tevens ook verwijderd.
-     *
-     * @param voornaam De voornaam van de te verwijderen klant.
-     * @param achternaam De achternaam van de te verwijderen klant.
-     * @param tussenvoegsel Het tussenvoegsel van de te verwijderen klant.
-     * @throws GeneriekeFoutmelding Foutmelding bij SQLException, info wordt meegegeven.
-     */
-    void schakelStatusKlant(String voornaam,
-                            String achternaam,
-                            String tussenvoegsel) throws GeneriekeFoutmelding;
+    void schakelStatusKlant(Klant klant) throws GeneriekeFoutmelding;
 
     /**
      * Methode om een klant te verwijderen op basis van een bestelnummer.

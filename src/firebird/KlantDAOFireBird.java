@@ -388,41 +388,16 @@ public class KlantDAOFireBird extends AbstractDAOFireBird implements KlantDAO {
             throw new GeneriekeFoutmelding("KlantDAOFireBird: SQL FOUT TIJDENS KLANT OP ID INACTIEF ZETTEN: " + ex.getMessage());
         }
     }
-
-    @Override
-    public void schakelStatusKlant(String voornaam, String achternaam) throws GeneriekeFoutmelding {
-        /**
-         * Methode om een klant zijn/haar status te switchen op basis van alleen voor- en achternaam;
-         *
-         * @param voornaam Voornaam van de te verwijderen
-         * @param achternaam Achternaam van de te verwijderen klant
-         * @throws GeneriekeFoutmelding Foutmelding bij SQLException, info wordt meegegeven.
-         */
-
-        ListIterator<Klant> klantListIterator = getKlantOpKlant(new Klant(0, voornaam, achternaam, null, null, null));
-
-        while (klantListIterator.hasNext()) {
-            Klant tijdelijkeKlant = klantListIterator.next();
-            schakelStatusKlant(tijdelijkeKlant.getKlant_id(),
-                    (tijdelijkeKlant.getKlantActief().charAt(0) == '0' ? 1 : 0));
-        }
-    }
-
     /**
-     * Methode om een klant zijn/haar status te switchen op basis van naamgegevens. Alle bestellingen van de klant worden
-     * tevens ook op non-actief gezet.
+     * Methode om een klant zijn/haar status te switchen op basis van klant-object.
      *
-     * @param voornaam De voornaam van de te verwijderen klant.
-     * @param achternaam De achternaam van de te verwijderen klant.
-     * @param tussenvoegsel Het tussenvoegsel van de te verwijderen klant.
+     * @param klant Klant-gegevens in klant-object
      * @throws GeneriekeFoutmelding Foutmelding bij SQLException, info wordt meegegeven.
      */
     @Override
-    public void schakelStatusKlant(String voornaam,
-                                   String achternaam,
-                                   String tussenvoegsel) throws GeneriekeFoutmelding {
-        ListIterator<Klant> klantListIterator =
-                getKlantOpKlant(new Klant(0, voornaam, achternaam, tussenvoegsel, "", null));
+    public void schakelStatusKlant(Klant klant) throws GeneriekeFoutmelding {
+
+        ListIterator<Klant> klantListIterator = getKlantOpKlant(klant);
 
         while (klantListIterator.hasNext()) {
             Klant tijdelijkeKlant = klantListIterator.next();
@@ -430,7 +405,6 @@ public class KlantDAOFireBird extends AbstractDAOFireBird implements KlantDAO {
                     (tijdelijkeKlant.getKlantActief().charAt(0) == '0' ? 1 : 0));
         }
     }
-
 
     /**
      * Methode om een klant te verwijderen op basis van een bestelnummer.
