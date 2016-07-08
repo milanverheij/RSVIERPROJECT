@@ -1,9 +1,0 @@
-<component name="libraryTable">
-  <library name="c3p0-0.9.5.2">
-    <CLASSES>
-      <root url="jar://$USER_HOME$/JAVA libraries/c3p0-0.9.5.2/lib/c3p0-0.9.5.2.jar!/" />
-    </CLASSES>
-    <JAVADOC />
-    <SOURCES />
-  </library>
-</component>
