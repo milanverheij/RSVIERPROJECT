@@ -269,7 +269,7 @@ public class AdresDAOFireBird extends AbstractDAOFireBird implements AdresDAO {
                     Adres tijdelijkAdres = new Adres();
                     // Adres aanmaken met lege waarden, default constructor.
 
-                    tijdelijkAdres.setAdres_id(rs.getLong(1));
+                    tijdelijkAdres.setAdresId(rs.getLong(1));
                     tijdelijkAdres.setStraatnaam(rs.getString(2));
                     tijdelijkAdres.setPostcode(rs.getString(3));
                     tijdelijkAdres.setToevoeging(rs.getString(4));

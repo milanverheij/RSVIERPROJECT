@@ -1,5 +1,9 @@
 package model;
 
+import annotations.Column;
+import annotations.Entity;
+import annotations.Id;
+
 /**
  * Created by Douwe_Jongeneel on 06-06-16.
  * Updated by Milan Verheij on 20-06-16 (nieuw DB-model).
@@ -7,16 +11,36 @@ package model;
  * Dit is de Adres POJO + GS
  */
 
+@Entity("adres")
 public class Adres {
     //Datafield
-    private long adres_id = 0;
+
+    @Id
+    @Column(values = "adresId")
+    private long adresId = 0;
+
+    @Column(values = "straatnaam")
     private String straatnaam;
+
+    @Column(values = "postcode")
     private String postcode;
+
+    @Column(values = "toevoeging")
     private String toevoeging;
+
+    @Column(values = "huisnummer")
     private int huisnummer;
+
+    @Column(values = "woonplaats")
     private String woonplaats;
+
+    @Column(values = "datumAanmaak")
     private String datumAanmaak;
+
+    @Column(values = "datumGewijzigd")
     private String datumGewijzigd;
+
+    @Column(values = "adresActief")
     private String adresActief;
 
     //Consturctors
@@ -66,8 +90,8 @@ public class Adres {
     public String getWoonplaats() {
         return woonplaats;
     }
-    public long getAdres_id() {
-        return adres_id;
+    public long getAdresId() {
+        return adresId;
     }
     public String getDatumAanmaak() {
         return datumAanmaak;
@@ -94,8 +118,8 @@ public class Adres {
     public void setWoonplaats(String woonplaats) {
         this.woonplaats = woonplaats;
     }
-    public void setAdres_id(long adres_id) {
-        this.adres_id = adres_id;
+    public void setAdresId(long adresId) {
+        this.adresId = adresId;
     }
     public void setDatumAanmaak(String datumAanmaak) {
         this.datumAanmaak = datumAanmaak;

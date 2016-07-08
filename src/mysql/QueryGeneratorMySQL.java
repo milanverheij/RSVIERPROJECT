@@ -139,7 +139,6 @@ public class QueryGeneratorMySQL extends QueryGenerator {
             return "SELECT * FROM " + sqlTableName + " WHERE " + columnsValues + ";";
     }
 
-
     @Override
     public String buildDeleteStatement(Object object) throws GeneriekeFoutmelding {
         return null;

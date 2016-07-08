@@ -291,7 +291,7 @@ public class KlantDAOFireBird extends AbstractDAOFireBird implements KlantDAO {
             ) {
                 while (resultSet.next()) {
                     Klant tijdelijkeKlant = new Klant();
-                    tijdelijkeKlant.setKlant_id((long)resultSet.getInt(1));
+                    tijdelijkeKlant.setKlantId((long)resultSet.getInt(1));
                     return getKlantOpKlant(tijdelijkeKlant);
                 }
             }
@@ -317,11 +317,11 @@ public class KlantDAOFireBird extends AbstractDAOFireBird implements KlantDAO {
         // behandeld en daarna op null gezet anders neemt de querygenerator deze foutief mee.
         if (nieuweKlant.getAdresGegevens() != null) {
             adresDAO = new AdresDAOFireBird();
-            adresDAO.updateAdres(nieuweKlant.getAdresGegevens().getAdres_id(), nieuweKlant.getAdresGegevens());
+            adresDAO.updateAdres(nieuweKlant.getAdresGegevens().getAdresId(), nieuweKlant.getAdresGegevens());
             nieuweKlant.setAdresGegevens(null);
         }
 
-        query = queryGenerator.buildUpdateStatement(nieuweKlant) + " klant_id = " + nieuweKlant.getKlant_id() + ";";
+        query = queryGenerator.buildUpdateStatement(nieuweKlant) + " klant_id = " + nieuweKlant.getKlantId() + ";";
 
         try (
                 Connection connection = connPool.verkrijgConnectie();
@@ -401,7 +401,7 @@ public class KlantDAOFireBird extends AbstractDAOFireBird implements KlantDAO {
 
         while (klantListIterator.hasNext()) {
             Klant tijdelijkeKlant = klantListIterator.next();
-            schakelStatusKlant(tijdelijkeKlant.getKlant_id(),
+            schakelStatusKlant(tijdelijkeKlant.getKlantId(),
                     (tijdelijkeKlant.getKlantActief().charAt(0) == '0' ? 1 : 0));
         }
     }
@@ -423,7 +423,7 @@ public class KlantDAOFireBird extends AbstractDAOFireBird implements KlantDAO {
         if (klantenIterator != null) {
             while (klantenIterator.hasNext()) {
                 Klant tijdelijkeKlant = klantenIterator.next();
-                schakelStatusKlant(tijdelijkeKlant.getKlant_id(), 0);
+                schakelStatusKlant(tijdelijkeKlant.getKlantId(), 0);
             }
         }
 
@@ -450,7 +450,7 @@ public class KlantDAOFireBird extends AbstractDAOFireBird implements KlantDAO {
                 // te zijn om een null pointer exception te voorkomen.
                 Klant tijdelijkeKlant = new Klant(0, "", "","","", new Adres());
 
-                tijdelijkeKlant.setKlant_id(resultSet.getLong(1));
+                tijdelijkeKlant.setKlantId(resultSet.getLong(1));
                 tijdelijkeKlant.setVoornaam(resultSet.getString(2));
                 tijdelijkeKlant.setAchternaam(resultSet.getString(3));
                 tijdelijkeKlant.setTussenvoegsel(resultSet.getString(4));
@@ -481,8 +481,8 @@ public class KlantDAOFireBird extends AbstractDAOFireBird implements KlantDAO {
         while (klantenIterator.hasNext()) {
             Klant tijdelijkeKlant = klantenIterator.next();
             if (tijdelijkeKlant.getKlantActief().charAt(0) == '1') {
-                System.out.println("\n\n\t------------------KLANT " + tijdelijkeKlant.getKlant_id() + " BEGIN---------------------------");
-                System.out.print("\n\tKLANTID:           " + tijdelijkeKlant.getKlant_id());
+                System.out.println("\n\n\t------------------KLANT " + tijdelijkeKlant.getKlantId() + " BEGIN---------------------------");
+                System.out.print("\n\tKLANTID:           " + tijdelijkeKlant.getKlantId());
                 System.out.print("\n\tVoornaam:          " + tijdelijkeKlant.getVoornaam());
                 System.out.print("\n\tAchternaam:        " + tijdelijkeKlant.getAchternaam());
                 System.out.print("\n\tTussenvoegsel:     " + tijdelijkeKlant.getTussenvoegsel());
@@ -496,14 +496,14 @@ public class KlantDAOFireBird extends AbstractDAOFireBird implements KlantDAO {
 
                 // DAO voor adres-acties. Lijst verkrijgen van alle adressen bijbehorend bij klant_id
                 adresDAO = new AdresDAOFireBird();
-                ListIterator<Adres> adresListIterator = adresDAO.getAdresOpKlantID(tijdelijkeKlant.getKlant_id());
+                ListIterator<Adres> adresListIterator = adresDAO.getAdresOpKlantID(tijdelijkeKlant.getKlantId());
                 while (adresListIterator.hasNext()) {
 
                     Adres tijdelijkAdres = adresListIterator.next();
 
                     if (tijdelijkAdres.getAdresActief().charAt(0) == '1') {
                         System.out.print("\n\t\t                   ");
-                        System.out.print("\n\t\tADRESID:           " + tijdelijkAdres.getAdres_id());
+                        System.out.print("\n\t\tADRESID:           " + tijdelijkAdres.getAdresId());
                         System.out.print("\n\t\tStraatnaam:        " + tijdelijkAdres.getStraatnaam());
                         System.out.print("\n\t\tPostcode:          " + tijdelijkAdres.getPostcode());
                         System.out.print("\n\t\tToevoeging:        " + tijdelijkAdres.getToevoeging());
@@ -514,14 +514,14 @@ public class KlantDAOFireBird extends AbstractDAOFireBird implements KlantDAO {
                     }
                     else
                     {
-                        System.out.println("\n\t\tADRESID: " + tijdelijkAdres.getAdres_id() + " INACTIEF");
+                        System.out.println("\n\t\tADRESID: " + tijdelijkAdres.getAdresId() + " INACTIEF");
                     }
                 }
-                System.out.println("\n\n\t------------------KLANT " + tijdelijkeKlant.getKlant_id() + " EIND----------------------------");
+                System.out.println("\n\n\t------------------KLANT " + tijdelijkeKlant.getKlantId() + " EIND----------------------------");
 
             }
             else {
-                System.out.println("\n\t------------------KLANT " + tijdelijkeKlant.getKlant_id() + " INACTIEF------------------------");
+                System.out.println("\n\t------------------KLANT " + tijdelijkeKlant.getKlantId() + " INACTIEF------------------------");
             }
         }
         System.out.println("\n");

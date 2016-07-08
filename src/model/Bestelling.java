@@ -2,17 +2,32 @@ package model;
 
 import java.util.ArrayList;
 
+import annotations.Column;
+import annotations.Entity;
+import annotations.Id;
+
+@Entity("Bestelling")
 public class Bestelling {
+
+	@Id
+	@Column(values = "bestelling_id")
 	private long bestelling_id;
+
+	@Column(values = "klant_id")
 	private long klant_id;
-	private String datumAanmaak;
+
+	@Column(values = "besteling_actief")
 	private boolean bestellingActief = true;
+
+	@Column(values = "datumAanmaak")
+	private String datumAanmaak;
+
 	private ArrayList<Artikel> artikelLijst;
 
 	public Bestelling(){
 		artikelLijst = new ArrayList<Artikel>();
 	}
-	
+
 	public Bestelling(long bestelling_id, long klant_id, ArrayList<Artikel> artikelLijst, String datumAanmaak){
 		this.bestelling_id = bestelling_id;
 		this.klant_id = klant_id;
@@ -46,13 +61,13 @@ public class Bestelling {
 	public ArrayList<Artikel> getArtikelLijst() {
 		return artikelLijst;
 	}
-	
+
 	public void voegArtikelToe(Artikel artikel){
 		if(artikelLijst == null)
 			artikelLijst = new ArrayList<Artikel>();
 		artikelLijst.add(artikel);
 	}
-	
+
 	public void verwijderArtikel(Artikel artikel){
 		if(artikelLijst.contains(artikel))
 			artikelLijst.remove(artikel);

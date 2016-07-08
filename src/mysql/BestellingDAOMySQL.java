@@ -52,7 +52,7 @@ public class BestellingDAOMySQL extends AbstractDAOMySQL implements BestellingDA
 			con.setAutoCommit(false);
 
 			statementBestelTabel.setLong(1, klantId);
-			statementBestelTabel.setBoolean(2, isActief);
+//			statementBestelTabel.setBoolean(2, isActief);
 			statementBestelTabel.executeUpdate();
 
 			long bestellingId = schrijfAlleArtikelenNaarDeDatabase(con, statementBestelTabel, artikelList);
@@ -135,7 +135,7 @@ public class BestellingDAOMySQL extends AbstractDAOMySQL implements BestellingDA
 	public void updateBestelling(Bestelling bestelling) throws GeneriekeFoutmelding{
 		try(Connection con = connPool.verkrijgConnectie();
 				PreparedStatement deleteStatement = con.prepareStatement("DELETE FROM `BESTELLING_HEEFT_ARTIKEL` WHERE bestelling_id_best = ?;");
-				PreparedStatement setActiefStatement = con.prepareStatement("UPDATE `BESTELLING` SET `bestellingActief`= true WHERE bestelling_id = ?;")
+				PreparedStatement setActiefStatement = con.prepareStatement("UPDATE `BESTELLING` SET `bestellingActief` = true WHERE bestelling_id = ?;")
 				){
 
 			con.setAutoCommit(false);

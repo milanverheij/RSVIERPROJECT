@@ -1,5 +1,10 @@
 package model;
 
+
+import annotations.Column;
+import annotations.Entity;
+import annotations.Id;
+
 /**
  * Created by Milan_Verheij on 06-06-16.
  * Updated by Milan Verheij on 20-06-16 (nieuw DB-model).
@@ -8,17 +13,37 @@ package model;
  * in de database.
  *
  */
+
+@Entity("klant")
 public class Klant {
     // Private variabelen zodat er controle wordt uitgeoefend over het verkrijgen en
     // muteren in de methods.
-    private long klant_id;
+
+    @Id
+    @Column(values = "klantId")
+    private long klantId;
+
+    @Column(values = "voornaam")
     private String voornaam;
+
+    @Column(values = "achternaam")
     private String achternaam;
+
+    @Column(values = "tussenvoegsel")
     private String tussenvoegsel;
+
+    @Column(values = "email")
     private String email;
+
+    @Column(values = "datumAanmaak")
     private String datumAanmaak;
+
+    @Column(values = "datumGewijzigd")
     private String datumGewijzigd;
+
+    @Column(values = "klantActief")
     private String klantActief;
+
     private Adres adresGegevens = null;
     private Bestelling bestellingGegevens;
 
@@ -27,7 +52,7 @@ public class Klant {
     }
 
     // Standaard public constructor met basis parameters
-    public Klant(long klant_id,
+    public Klant(long klantId,
                  String voornaam,
                  String achternaam,
                  String tussenvoegsel,
@@ -37,7 +62,7 @@ public class Klant {
         if (adresGegevens != null)
             this.adresGegevens = adresGegevens;
 
-        this.klant_id = klant_id;
+        this.klantId = klantId;
         this.voornaam = voornaam;
         this.achternaam = achternaam;
         this.tussenvoegsel = tussenvoegsel;
@@ -46,7 +71,7 @@ public class Klant {
 
     // Constructor voor alle variabelen, wordt over het algemeen gebruikt tijdens testwerkzaamheden
     // en bij het opvragen van gegevens via de DAO's
-    public Klant(long klant_id,
+    public Klant(long klantId,
                  String voornaam,
                  String achternaam,
                  String tussenvoegsel,
@@ -60,7 +85,7 @@ public class Klant {
         if (adresGegevens != null)
             this.adresGegevens = adresGegevens;
 
-        this.klant_id = klant_id;
+        this.klantId = klantId;
         this.voornaam = voornaam;
         this.achternaam = achternaam;
         this.tussenvoegsel = tussenvoegsel;
@@ -73,11 +98,11 @@ public class Klant {
 
 
     // Getters & setters
-    public long getKlant_id() {
-        return klant_id;
+    public long getKlantId() {
+        return klantId;
     }
-    public void setKlant_id(long klant_id) {
-        this.klant_id = klant_id;
+    public void setKlantId(long klantId) {
+        this.klantId = klantId;
     }
     public String getVoornaam() {
         return voornaam;
@@ -138,7 +163,7 @@ public class Klant {
 
     @Override
     public String toString() {
-        return "[" + klant_id + ", " +
+        return "[" + klantId + ", " +
                      voornaam + ", " +
                      achternaam + ", " +
                      tussenvoegsel + ", " +
@@ -149,14 +174,14 @@ public class Klant {
     }
 
     /**
-     * Een klant-object wordt geacht gelijk te zijn als het klant_id hetzelfde is.
+     * Een klant-object wordt geacht gelijk te zijn als het klantId hetzelfde is.
      *
      * @param obj Klant-Object om mee te vergelijken.
      * @return Een waarde true of false als de klant gelijk is.
      */
     @Override
     public boolean equals(Object obj) {
-        if (klant_id == ((Klant)obj).getKlant_id())
+        if (klantId == ((Klant)obj).getKlantId())
             return true;
         return false;
     }
