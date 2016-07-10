@@ -22,71 +22,44 @@ public class C3POConnectionPool {
     private static C3POConnectionPool C3POConnectionPool;
     private ComboPooledDataSource cpds;
 
-    // MySQL Settings
-    private static final String MYSQL_URL = "jdbc:mysql://milanverheij.nl/RSVIERPROJECTDEEL3";
-    private static final String MYSQL_USER = "rsvierproject";
-    private static final String MYSQL_PASSWORD = "slechtwachtwoord";
-    private static final String MYSQL_DRIVER_CLASS = "com.mysql.jdbc.Driver";
-
-    // FireBird settings
-    private static final String FIREBIRD_URL =
-            "jdbc:firebirdsql://milanverheij.nl:3050//var//lib//firebird//2.5//data//RSVIERPROJECTDEEL3.fdb";
-    private static final String FIREBIRD_USER = "rsvierproject";
-    private static final String FIREBIRD_PASSWORD = "slechtwachtwoord";
-    private static final String FIREBIRD_DRIVER_CLASS = "org.firebirdsql.jdbc.FBDriver";
-
     /**
      * Stelt de C3PO configuratie in op het gekozen DataBase type.
      *
-     * @param DBKeuze Keuze voor het type database (1 = MySQL, 2 = FireBird);
+     * @param configuratie Configuratiegegevens voor de verbinding.
      * @throws GeneriekeFoutmelding Foutmelding met gegevens.
      */
-    private C3POConnectionPool(String DBKeuze) throws GeneriekeFoutmelding {
-        if (DBKeuze.equals("MySQL")) {
-            try {
-                cpds = new ComboPooledDataSource();
+    private C3POConnectionPool(ConnectieConfiguratie configuratie) throws GeneriekeFoutmelding {
+        try {
+            System.out.println("IN C3PO");
+            cpds = new ComboPooledDataSource();
 
-                cpds.setDriverClass(MYSQL_DRIVER_CLASS);
-                cpds.setJdbcUrl(MYSQL_URL);
-                cpds.setUser(MYSQL_USER);
-                cpds.setPassword(MYSQL_PASSWORD);
+            Properties properties = new Properties();
+            properties.setProperty("charSet", "utf-8");
+            cpds.setProperties(properties);
 
-                DeLogger.getLogger().info("C3PO Geconfigureerd voor MySQL");
-            } catch (PropertyVetoException ex) {
-                DeLogger.getLogger().error("PropertyVetoExcepton in C3PO(MYSQL) connection pool: " + ex.getMessage());
-                throw new GeneriekeFoutmelding("PropertyVetoExcepton in C3PO connection pool");
-            }
-        }
-        else if (DBKeuze.equals("FireBird")) {
-            try {
-                cpds = new ComboPooledDataSource();
+            cpds.setDriverClass(configuratie.getCLASSDRIVER());
+            cpds.setJdbcUrl(configuratie.getSERVER_URL() + configuratie.getSERVER_PORT() + configuratie.getDATABASE_NAAM());
+            cpds.setUser(configuratie.getUSER());
+            cpds.setPassword(configuratie.getPASSWORD());
 
-                Properties properties = new Properties();
-                properties.setProperty("charSet", "utf-8");
-                cpds.setProperties(properties);
-                cpds.setDriverClass(FIREBIRD_DRIVER_CLASS);
-                cpds.setJdbcUrl(FIREBIRD_URL);
-                cpds.setUser(FIREBIRD_USER);
-                cpds.setPassword(FIREBIRD_PASSWORD);
-
-                DeLogger.getLogger().info("C3PO Geconfigureerd voor FireBird");
-            } catch (PropertyVetoException ex) {
-                DeLogger.getLogger().error("PropertyVetoExcepton in C3PO(FB) connection pool: " + ex.getMessage());
-                throw new GeneriekeFoutmelding("PropertyVetoExcepton in C3PO connection pool");
-            }
+            DeLogger.getLogger().info("C3PO Geconfigureerd");
+        } catch (PropertyVetoException ex) {
+            DeLogger.getLogger().error("PropertyVetoExcepton in C3PO(MYSQL) connection pool: " + ex.getMessage());
+            throw new GeneriekeFoutmelding("PropertyVetoExcepton in C3PO connection pool");
         }
     }
+
 
     /**
      * Retourneert een instance van C3POConnectionPool als deze nog niet bestond.
      *
-     * @param DBKeuze Keuze voor het type database (1 = MySQL, 2 = FireBird);
+     * @param configuratie Configuratiegegevens voor de verbinding.
      * @return C3PO Connection pool.
      * @throws GeneriekeFoutmelding Foutmelding met gegevens.
      */
-    public static C3POConnectionPool getInstance(String DBKeuze) throws GeneriekeFoutmelding {
+    public static C3POConnectionPool getInstance(ConnectieConfiguratie configuratie) throws GeneriekeFoutmelding {
         if (C3POConnectionPool == null) {
-            C3POConnectionPool = new C3POConnectionPool(DBKeuze);
+            C3POConnectionPool = new C3POConnectionPool(configuratie);
             return C3POConnectionPool;
         } else {
             return C3POConnectionPool;

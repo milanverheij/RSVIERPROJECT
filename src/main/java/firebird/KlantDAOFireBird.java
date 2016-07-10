@@ -138,15 +138,17 @@ public class KlantDAOFireBird extends AbstractDAOFireBird implements KlantDAO {
     @Override
     public long nieuweKlant(Klant nieuweKlant, long adres_id) throws GeneriekeFoutmelding {
 
-        // Als er geen klant wordt meegegeven wordt een fout gegooid.
-        if (nieuweKlant != null) {
-            long nieuwId =  nieuweKlant(nieuweKlant, adres_id, null, null);
-            return nieuwId;
+        Adres tijdelijkAdres = null;
+
+        // Als er een adres wordt meegegeven in de klant wordt deze als los adres meegegeven
+        // aan de main method en in het model weer op null gezet zodat de query goed
+        // gemaakt kan worden
+        if (nieuweKlant.getAdresGegevens() != null) {
+            tijdelijkAdres = nieuweKlant.getAdresGegevens();
+            nieuweKlant.setAdresGegevens(null);
         }
-        else {
-            DeLogger.getLogger().warn("KAN GEEN KLANT AANMAKEN MET NULL OBJECT");
-            throw new GeneriekeFoutmelding("KlantDAOFireBird: KAN GEEN KLANT AANMAKEN MET NULL OBJECT");
-        }
+
+        return nieuweKlant(nieuweKlant, adres_id, tijdelijkAdres, null);
     }
 
     /** READ METHODS */

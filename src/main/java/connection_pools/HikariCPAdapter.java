@@ -16,16 +16,16 @@ import java.sql.SQLException;
  *
  */
 public class HikariCPAdapter implements VerkrijgConnectie {
-    private String DBKeuze;
+    private ConnectieConfiguratie configuratie;
 
     /**
      * Standaard HikariCPAdater.
      *
-     * @param DBKeuze Keuze van het type database welke door de connection pool
+     * @param configuratie Keuze van het type database welke door de connection pool
      *                gebruikt moet worden.
      */
-    public HikariCPAdapter(String DBKeuze) {
-        this.DBKeuze = DBKeuze;
+    public HikariCPAdapter(ConnectieConfiguratie configuratie) {
+        this.configuratie = configuratie;
     }
 
     /**
@@ -38,9 +38,9 @@ public class HikariCPAdapter implements VerkrijgConnectie {
     @Override
     public Connection verkrijgConnectie() throws GeneriekeFoutmelding {
         try {
-            return HikariCPConnectionPool.getInstance(DBKeuze).getConnection();
+            return HikariCPConnectionPool.getInstance(configuratie).getConnection();
         } catch (SQLException ex) {
-            DeLogger.getLogger().error("Fout bij getInstance (DBKEUZE: " + DBKeuze + "): " + ex.getMessage());
+            DeLogger.getLogger().error("Fout bij getInstance (DBKEUZE: " + configuratie + "): " + ex.getMessage());
             throw new GeneriekeFoutmelding("C3POAdapter SQL Exception" + ex.getMessage());
         }
     }

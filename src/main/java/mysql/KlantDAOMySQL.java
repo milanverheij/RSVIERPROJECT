@@ -1,6 +1,5 @@
 package mysql;
 
-import com.mysql.cj.api.jdbc.Statement;
 import exceptions.GeneriekeFoutmelding;
 import interfaces.KlantDAO;
 import logger.DeLogger;
@@ -8,10 +7,7 @@ import model.Adres;
 import model.Bestelling;
 import model.Klant;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.ListIterator;
 
@@ -140,7 +136,17 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
      */
     @Override
     public long nieuweKlant(Klant nieuweKlant, long adres_id) throws GeneriekeFoutmelding {
-        return nieuweKlant(nieuweKlant, adres_id, null, null);
+        Adres tijdelijkAdres = null;
+
+        // Als er een adres wordt meegegeven in de klant wordt deze als los adres meegegeven
+        // aan de main method en in het model weer op null gezet zodat de query goed
+        // gemaakt kan worden
+        if (nieuweKlant.getAdresGegevens() != null) {
+            tijdelijkAdres = nieuweKlant.getAdresGegevens();
+            nieuweKlant.setAdresGegevens(null);
+        }
+
+        return nieuweKlant(nieuweKlant, adres_id, tijdelijkAdres, null);
     }
 
     /** READ METHODS */
@@ -156,8 +162,8 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
      */
     @Override
     public long getKlantID(String voornaam, String achternaam, String email) throws GeneriekeFoutmelding {
-        String query = "SELECT klant_id " +
-                "FROM KLANT " +
+        String query = "SELECT klantId " +
+                "FROM klant " +
                 "WHERE " +
                 "voornaam = ? AND " +
                 "achternaam = ? AND " +
@@ -269,9 +275,9 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
      */
     @Override
     public ListIterator<Klant> getKlantOpBestelling(long bestellingId) throws GeneriekeFoutmelding {
-        String query = "SELECT klant_id FROM " +
-                "BESTELLING WHERE " +
-                "bestelling_id = ? " +
+        String query = "SELECT klantId FROM " +
+                "bestelling WHERE " +
+                "bestellingId = ? " +
                 "LIMIT 1;";
         try (
                 Connection connection = connPool.verkrijgConnectie();
@@ -314,7 +320,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
             nieuweKlant.setAdresGegevens(null);
         }
 
-        query = queryGenerator.buildUpdateStatement(nieuweKlant) + " klant_id = " + nieuweKlant.getKlantId() + ";";
+        query = queryGenerator.buildUpdateStatement(nieuweKlant) + " klantId = " + nieuweKlant.getKlantId() + ";";
 
         try (
                 Connection connection = connPool.verkrijgConnectie();
@@ -357,11 +363,11 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
     @Override
     public void schakelStatusKlant(long klantId, int status) throws GeneriekeFoutmelding {
         String query =
-                "UPDATE KLANT " +
+                "UPDATE klant " +
                         "SET " +
                         "klantActief = ? " +
                         "WHERE " +
-                        "klant_id = ?";
+                        "klantId = ?";
 
         try (
                 Connection connection = connPool.verkrijgConnectie();

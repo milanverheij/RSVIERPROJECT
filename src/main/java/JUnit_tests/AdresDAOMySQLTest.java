@@ -47,7 +47,7 @@ public class AdresDAOMySQLTest {
     public void setUp() throws Exception {
         // Er dient een connectionPool gebruikt te worden om een verbinding te krijgen aangezien
         // alle DAO's gebruik maken van een gedeelde link naar een connection pool in de abstract DAO.
-        AbstractDAOMySQL.setConnPool(new HikariCPAdapter("MySQL"));
+//        AbstractDAOMySQL.setConnPool(new HikariCPAdapter("MySQL"));
 
         // Ik moet eerste een test-klant aanmaken voordat ik een adres kan koppelen en deze methode kan testen.
         // Derhalve eerste een nieuwe klant toevoegen en het klant_id achterhalen van deze klant

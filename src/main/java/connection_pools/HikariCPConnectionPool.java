@@ -39,55 +39,52 @@ public class HikariCPConnectionPool {
     /**
      * Stelt de HikariCP configuratie in op het gekozen DataBase type.
      *
-     * @param DBKeuze Keuze voor het type database (1 = MySQL, 2 = FireBird);
+     * @param configuratie Configuratiegegevens voor de verbinding.
      * @throws GeneriekeFoutmelding Foutmelding met gegevens.
      */
-    private HikariCPConnectionPool(String DBKeuze) throws GeneriekeFoutmelding {
-        if (DBKeuze.equals("MySQL")) {
-            hikariConfig = new HikariConfig();
-            hikariConfig.setMinimumIdle(1);
-            hikariConfig.setMaximumPoolSize(2);
-            hikariConfig.setInitializationFailFast(true);
+    private HikariCPConnectionPool(ConnectieConfiguratie configuratie) throws GeneriekeFoutmelding {
+        hikariConfig = new HikariConfig();
+        hikariConfig.setMinimumIdle(1);
+        hikariConfig.setMaximumPoolSize(2);
+        hikariConfig.setInitializationFailFast(true);
 
-            hikariConfig.setDataSourceClassName(MYSQL_DRIVER_CLASS);
-            hikariConfig.addDataSourceProperty("serverName", MYSQL_SERVERURL);
-            hikariConfig.addDataSourceProperty("port", MYSQL_SERVERPORT);
-            hikariConfig.addDataSourceProperty("databaseName", MYSQL_DATABASE);
-            hikariConfig.addDataSourceProperty("user", MYSQL_USER);
-            hikariConfig.addDataSourceProperty("password", MYSQL_PASSWORD);
+        if (configuratie.getCLASSDRIVER().contains("firebird")) {
+            hikariConfig.setDataSourceClassName(configuratie.getCLASSDRIVER());
+            hikariConfig.addDataSourceProperty("database", configuratie.getSERVER_URL() + configuratie.getSERVER_PORT() +
+                    configuratie.getDATABASE_NAAM());
+            hikariConfig.addDataSourceProperty("userName", configuratie.getUSER());
+            hikariConfig.addDataSourceProperty("password", configuratie.getPASSWORD());
 
             hikariDataSource = new HikariDataSource(hikariConfig);
 
-            DeLogger.getLogger().info("HikariCP geconfigureerd voor MySQL");
+            DeLogger.getLogger().info("HikariCP FireBird geconfigureerd");
         }
 
-        if (DBKeuze.equals("FireBird")) {
-            hikariConfig = new HikariConfig();
-            hikariConfig.setMinimumIdle(1);
-            hikariConfig.setMaximumPoolSize(2);
-            hikariConfig.setInitializationFailFast(true);
+        if (configuratie.getCLASSDRIVER().contains("mysql")) {
 
-            hikariConfig.setDataSourceClassName(FIREBIRD_DRIVER_CLASS);
-            hikariConfig.addDataSourceProperty("database", FIREBIRD_DATABASE);
-            hikariConfig.addDataSourceProperty("userName", FIREBIRD_USER);
-            hikariConfig.addDataSourceProperty("password", FIREBIRD_PASSWORD);
+            hikariConfig.setDataSourceClassName(configuratie.getCLASSDRIVER());
+            hikariConfig.addDataSourceProperty("serverName", configuratie.getSERVER_URL());
+            hikariConfig.addDataSourceProperty("port", configuratie.getSERVER_PORT());
+            hikariConfig.addDataSourceProperty("databaseName", configuratie.getDATABASE_NAAM());
+            hikariConfig.addDataSourceProperty("user", configuratie.getUSER());
+            hikariConfig.addDataSourceProperty("password", configuratie.getPASSWORD());
 
             hikariDataSource = new HikariDataSource(hikariConfig);
 
-            DeLogger.getLogger().info("HikariCP geconfigureerd voor FireBird");
+            DeLogger.getLogger().info("HikariCP MySQL geconfigureerd");
         }
     }
 
     /**
      * Retourneert een instance van HikariCPConnectionPool als deze nog niet bestond.
      *
-     * @param DBKeuze Keuze voor het type database (1 = MySQL, 2 = FireBird);
+     * @param configuratie Configuratiegegevens voor de verbinding.
      * @return HikariCP Connection pool.
      * @throws GeneriekeFoutmelding Foutmelding met gegevens.
      */
-    public static HikariCPConnectionPool getInstance(String DBKeuze) throws GeneriekeFoutmelding {
+    public static HikariCPConnectionPool getInstance(ConnectieConfiguratie configuratie) throws GeneriekeFoutmelding {
         if (hikariCPConnectionPool == null) {
-            hikariCPConnectionPool = new HikariCPConnectionPool(DBKeuze);
+            hikariCPConnectionPool = new HikariCPConnectionPool(configuratie);
             return hikariCPConnectionPool;
         } else {
             return hikariCPConnectionPool;

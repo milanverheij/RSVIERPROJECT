@@ -1,5 +1,6 @@
 package mysql;
 
+import annotations.Entity;
 import exceptions.GeneriekeFoutmelding;
 import interfaces.QueryGenerator;
 import logger.DeLogger;
@@ -19,7 +20,14 @@ public class QueryGeneratorMySQL extends QueryGenerator {
     public String buildInsertStatement(Object object) throws GeneriekeFoutmelding {
         int variableToInsert = 0;
         Class className = object.getClass();
-        String sqlTableName = className.getSimpleName().toUpperCase();
+
+        // Table name via annotations
+        if (!object.getClass().isAnnotationPresent(Entity.class)) {
+            DeLogger.getLogger().error("Entity annotation niet aanwezig in: " + className);
+            throw new GeneriekeFoutmelding("QueryGenerator: Entity annotation niet aanwezig in: " + className);
+        }
+        String sqlTableName = object.getClass().getAnnotation(Entity.class).value();
+
         StringBuilder columns = new StringBuilder();
         StringBuilder values = new StringBuilder();
         Field[] declaredFields = className.getDeclaredFields();
@@ -64,7 +72,14 @@ public class QueryGeneratorMySQL extends QueryGenerator {
     public String buildUpdateStatement(Object object) throws GeneriekeFoutmelding {
         int variableToUpdate = 0;
         Class className = object.getClass();
-        String sqlTableName = className.getSimpleName().toUpperCase();
+
+        // Table name via annotations
+        if (!object.getClass().isAnnotationPresent(Entity.class)) {
+            DeLogger.getLogger().error("Entity annotation niet aanwezig in: " + className);
+            throw new GeneriekeFoutmelding("QueryGenerator: Entity annotation niet aanwezig in: " + className);
+        }
+        String sqlTableName = object.getClass().getAnnotation(Entity.class).value();
+
         StringBuilder columnsValues = new StringBuilder();
         Field[] declaredFields = className.getDeclaredFields();
 
@@ -106,7 +121,13 @@ public class QueryGeneratorMySQL extends QueryGenerator {
     @Override
     public String buildSelectStatement(Object object) throws GeneriekeFoutmelding {
         Class className = object.getClass();
-        String sqlTableName = className.getSimpleName().toUpperCase();
+
+        if (!object.getClass().isAnnotationPresent(Entity.class)) {
+            DeLogger.getLogger().error("Entity annotation niet aanwezig in: " + className);
+            throw new GeneriekeFoutmelding("QueryGenerator: Entity annotation niet aanwezig in: " + className);
+        }
+
+        String sqlTableName = object.getClass().getAnnotation(Entity.class).value();
 
         // Als er een klant-object wordt meegegeven met een ingevuld Adres-object wordt geacht
         // dat er gezocht wordt op een klant op basis van bepaalde adresgegevens. Dit vereist
@@ -118,15 +139,15 @@ public class QueryGeneratorMySQL extends QueryGenerator {
 
             // Als er een leeg adres wordt meegegeven, dan worden alle klanten geselecteerd
             if (columnsValues.length() == 0)
-                return "SELECT * FROM KLANT;";
+                return "SELECT * FROM klant;";
 
-            return "SELECT KLANT.* FROM KLANT_HEEFT_ADRES, ADRES, KLANT WHERE " +
+            return "SELECT klant.* FROM klantHeeftAdres, adres, klant WHERE " +
                     columnsValues +
                     " AND " +
-                    "KLANT_HEEFT_ADRES.adres_id_adres = ADRES.ADRES_id AND " +
-                    "KLANT_HEEFT_ADRES.klant_id_klant = KLANT.KLANT_ID " +
-                    "GROUP BY klant_id " +
-                    "ORDER BY klant_id;";
+                    "klantHeeftAdres.adresIdAdres = adres.adresId AND " +
+                    "klantHeeftAdres.klantIdKlant = klant.klantId " +
+                    "GROUP BY klantId " +
+                    "ORDER BY klantId;";
         }
 
         // Haal de kolommen op waar naar gezocht moet worden

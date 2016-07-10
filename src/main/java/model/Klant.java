@@ -95,7 +95,6 @@ public class Klant {
         this.bestellingGegevens = bestellingGegevens;
     }
 
-
     // Getters & setters
     public long getKlantId() {
         return klantId;

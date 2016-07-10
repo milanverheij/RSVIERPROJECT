@@ -44,7 +44,7 @@ public class AdresDAOMySQL extends AbstractDAOMySQL implements AdresDAO {
         if (klantWordtGetest)
             aangeroepenAdresInTest = adresgegevens;
 
-        String query = "UPDATE ADRES " +
+        String query = "UPDATE adres " +
                 "SET " +
                 "straatnaam = ?, " +
                 "postcode = ?, " +
@@ -52,7 +52,7 @@ public class AdresDAOMySQL extends AbstractDAOMySQL implements AdresDAO {
                 "huisnummer = ?, " +
                 "woonplaats = ?, " +
                 "datumGewijzigd = CURRENT_TIMESTAMP " +
-                "WHERE adres_id = ?;";
+                "WHERE adresId = ?;";
 
         try (
                 Connection connection = connPool.verkrijgConnectie();
@@ -83,8 +83,8 @@ public class AdresDAOMySQL extends AbstractDAOMySQL implements AdresDAO {
     @Override
     public void koppelAdresAanKlant(long klant_id, long adres_id) throws GeneriekeFoutmelding {
         String query = "INSERT INTO " +
-                "KLANT_HEEFT_ADRES " +
-                "(klant_id_klant, adres_id_adres) " +
+                "klantHeeftAdres " +
+                "(klantIdKlant, adresIdAdres) " +
                 "VALUES " +
                 "(?,              ?);";
 
@@ -123,13 +123,13 @@ public class AdresDAOMySQL extends AbstractDAOMySQL implements AdresDAO {
      */
     @Override
     public long nieuwAdres(long klant_id, Adres adresgegevens) throws GeneriekeFoutmelding {
-        String queryNieuwAdres = "INSERT INTO ADRES " +
+        String queryNieuwAdres = "INSERT INTO adres " +
                 "(straatnaam, postcode, toevoeging, huisnummer, woonplaats) " +
                 "VALUES " +
                 "(?,        ?,          ?,          ?,          ?);";
 
-        String queryAdresKlantKoppeling = "INSERT INTO KLANT_HEEFT_ADRES " +
-                "(klant_id_klant, adres_id_adres) " +
+        String queryAdresKlantKoppeling = "INSERT INTO klantHeeftAdres " +
+                "(klantIdKlant, adresIdAdres) " +
                 "VALUES " +
                 "(?,        ?);";
 
@@ -194,8 +194,8 @@ public class AdresDAOMySQL extends AbstractDAOMySQL implements AdresDAO {
      */
     @Override
     public long getAdresID(String postcode, int huisnummer, String toevoeging) throws GeneriekeFoutmelding {
-        String query = "SELECT adres_id " +
-                "FROM ADRES " +
+        String query = "SELECT adresId " +
+                "FROM adres " +
                 "WHERE " +
                 "postcode = ? AND " +
                 "huisnummer = ? AND " +
@@ -237,12 +237,12 @@ public class AdresDAOMySQL extends AbstractDAOMySQL implements AdresDAO {
      */
     @Override
     public ListIterator<Adres> getAdresOpKlantID(long klant_id) throws GeneriekeFoutmelding {
-        String query = "SELECT ADRES.* " +
-                "FROM ADRES, KLANT_HEEFT_ADRES " +
+        String query = "SELECT adres.* " +
+                "FROM adres, klantHeeftAdres " +
                 "WHERE " +
-                "KLANT_HEEFT_ADRES.adres_id_adres = ADRES.adres_id " +
+                "klantHeeftAdres.adresIdAdres = adres.adresId " +
                 "AND " +
-                "KLANT_HEEFT_ADRES.klant_id_klant = ?;";
+                "klantHeeftAdres.klantIdKlant = ?;";
 
         try (
                 Connection connection = connPool.verkrijgConnectie();
@@ -296,9 +296,9 @@ public class AdresDAOMySQL extends AbstractDAOMySQL implements AdresDAO {
         Adres tijdelijkAdres;
 
         String query = "SELECT * " +
-                "FROM ADRES " +
+                "FROM adres " +
                 "WHERE " +
-                "adres_id = ?;";
+                "adresId = ?;";
         try (
                 Connection connection = connPool.verkrijgConnectie();
                 PreparedStatement statement = connection.prepareStatement(query);
@@ -344,11 +344,11 @@ public class AdresDAOMySQL extends AbstractDAOMySQL implements AdresDAO {
     @Override
     public void schakelStatusAdres(long adres_id, int status) throws GeneriekeFoutmelding {
         String query =
-                "UPDATE ADRES " +
+                "UPDATE adres " +
                         "SET " +
                         "adresActief = ? " +
                         "WHERE " +
-                        "adres_id = ?";
+                        "adresId = ?";
 
         try (
                 Connection connection = connPool.verkrijgConnectie();

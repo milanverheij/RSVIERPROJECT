@@ -5,7 +5,6 @@ import interfaces.VerkrijgConnectie;
 import logger.DeLogger;
 
 import java.sql.Connection;
-import java.sql.SQLException;
 
 /**
  * Created by Milan_Verheij on 19-06-16.
@@ -16,17 +15,17 @@ import java.sql.SQLException;
  *
  */
 public class C3POAdapter implements VerkrijgConnectie {
-    private String DBKeuze;
+    private ConnectieConfiguratie configuratie;
 
     /**
      * Standaard C3PO Adapter.
      *
-     * @param DBKeuze Keuze van het type database welke door de connection pool
+     * @param configuratie Keuze van het type database welke door de connection pool
      *                gebruikt moet worden.
      * @throws GeneriekeFoutmelding Geeft een foutmelding met bijhorende melding.
      */
-    public C3POAdapter(String DBKeuze) throws GeneriekeFoutmelding {
-        this.DBKeuze = DBKeuze;
+    public C3POAdapter(ConnectieConfiguratie configuratie) throws GeneriekeFoutmelding {
+        this.configuratie = configuratie;
     }
 
     /**
@@ -39,10 +38,10 @@ public class C3POAdapter implements VerkrijgConnectie {
     @Override
     public Connection verkrijgConnectie() throws GeneriekeFoutmelding {
         try {
-        return C3POConnectionPool.getInstance(DBKeuze).getConnection();
-        } catch (SQLException ex) {
-            DeLogger.getLogger().error("Fout bij getInstance (DBKEUZE: " + DBKeuze + "): " + ex.getMessage());
-            throw new GeneriekeFoutmelding("C3POAdapter SQL Exception" + ex.getMessage());
+            return C3POConnectionPool.getInstance(configuratie).getConnection();
+        } catch (Exception ex) {
+            DeLogger.getLogger().error("Fout bij getInstance (DBKEUZE: " + configuratie + "): " + ex.getMessage());
+            throw new GeneriekeFoutmelding("C3POAdapter: " + ex.getMessage());
         }
     }
 }
