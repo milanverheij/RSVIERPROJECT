@@ -27,15 +27,15 @@ public class AdresDAOFireBird extends AbstractDAOFireBird implements AdresDAO {
 
 
     /**
-     * Update een adres bij een klant op basis van een Adres-object en adres_id.
+     * Update een adres bij een klant op basis van een Adres-object en adresId.
      *
-     * @param adres_id Het adres_id om up te daten.
+     * @param adresId Het adresId om up te daten.
      * @param adresgegevens De adresgegevens om te updaten in Adres object formaat
      * @throws GeneriekeFoutmelding Als er een fout is wordt deze doorgestuurd naar de GeneriekeFoutmelding met de message van
      * de exception.
      */
     @Override
-    public void updateAdres(long adres_id, Adres adresgegevens) throws GeneriekeFoutmelding {
+    public void updateAdres(long adresId, Adres adresgegevens) throws GeneriekeFoutmelding {
 
         // Als er null wordt meegegeven als Adres wordt er een standaard leeg-adres geschrevne.
         if (adresgegevens == null) {
@@ -64,7 +64,7 @@ public class AdresDAOFireBird extends AbstractDAOFireBird implements AdresDAO {
             statement.setString(3, adresgegevens.getToevoeging());
             statement.setInt(4, adresgegevens.getHuisnummer());
             statement.setString(5, adresgegevens.getWoonplaats());
-            statement.setLong(6, adres_id);
+            statement.setLong(6, adresId);
             statement.execute();
 
         }  catch (SQLException ex) {
@@ -76,13 +76,13 @@ public class AdresDAOFireBird extends AbstractDAOFireBird implements AdresDAO {
     /**
      * Koppelt een bestaand adres aan een klant.
      *
-     * @param klant_id Het klant_id waaraan een adres gekoppeld dient te worden
-     * @param adres_id Het adres_id van het te koppelen adres.
+     * @param klantId Het klantId waaraan een adres gekoppeld dient te worden
+     * @param adresId Het adresId van het te koppelen adres.
      * @throws GeneriekeFoutmelding Als er een fout is wordt deze doorgestuurd naar de GeneriekeFoutmelding met de message van
      * de exception.
      */
     @Override
-    public void koppelAdresAanKlant(long klant_id, long adres_id) throws GeneriekeFoutmelding {
+    public void koppelAdresAanKlant(long klantId, long adresId) throws GeneriekeFoutmelding {
         String query = "INSERT INTO " +
                 "KLANT_HEEFT_ADRES " +
                 "(klant_id_klant, adres_id_adres) " +
@@ -94,14 +94,14 @@ public class AdresDAOFireBird extends AbstractDAOFireBird implements AdresDAO {
                 PreparedStatement statement = connection.prepareStatement(query);
         )
         {
-            statement.setLong(1, klant_id);
-            statement.setLong(2, adres_id);
+            statement.setLong(1, klantId);
+            statement.setLong(2, adresId);
             statement.execute();
 
         } catch (SQLException ex) {
             if (ex.getMessage().contains("Duplicate entry")) {
-                DeLogger.getLogger().warn("ADRES IS REEDS GEKOPPELD AAN DEZE KLANT, klantid: " + klant_id +
-                        "adresid: " + adres_id);
+                DeLogger.getLogger().warn("ADRES IS REEDS GEKOPPELD AAN DEZE KLANT, klantid: " + klantId +
+                        "adresid: " + adresId);
                 throw new GeneriekeFoutmelding("AdresDAOFireBird: DIT ADRES IS REEDS GEKOPPELD AAN DEZE KLANT");
             }
             else {
@@ -116,14 +116,14 @@ public class AdresDAOFireBird extends AbstractDAOFireBird implements AdresDAO {
     /**
      * Maakt een nieuw adres aan en koppelt deze aan de klant.
      *
-     * @param klant_id Klant_id behorende bij het adres.
+     * @param klantId KlantId behorende bij het adres.
      * @param adresgegevens De adresgegevens die nieuw in de database dienen te worden opgenomen.
-     * @return Het adres_id van het nieuw aangemaakte adres.
+     * @return Het adresId van het nieuw aangemaakte adres.
      * @throws GeneriekeFoutmelding Als er een fout is wordt deze doorgestuurd naar de GeneriekeFoutmelding met de message van
      * de exception.
      */
     @Override
-    public long nieuwAdres(long klant_id, Adres adresgegevens) throws GeneriekeFoutmelding {
+    public long nieuwAdres(long klantId, Adres adresgegevens) throws GeneriekeFoutmelding {
         String queryNieuwAdres = "INSERT INTO ADRES " +
                 "(straatnaam, postcode, toevoeging, huisnummer, woonplaats) " +
                 "VALUES " +
@@ -148,22 +148,22 @@ public class AdresDAOFireBird extends AbstractDAOFireBird implements AdresDAO {
             statementNieuwAdres.setInt(4, adresgegevens.getHuisnummer());
             statementNieuwAdres.setString(5, adresgegevens.getWoonplaats());
 
-            // Ophalen van de laatste genegeneerde sleutel uit de generatedkeys (de nieuwe klant_id)
-            long nieuw_adres_id = 0;
+            // Ophalen van de laatste genegeneerde sleutel uit de generatedkeys (de nieuwe klantId)
+            long nieuw_adresId = 0;
             try (
                     ResultSet resultSet = statementNieuwAdres.executeQuery();
             ) {
                 while (resultSet.next()) {
-                    nieuw_adres_id = resultSet.getInt("adres_id");
+                    nieuw_adresId = resultSet.getInt("adresId");
                 }
             }
 
-            // Koppelingstabel BESTELLING_HEEFT_ARTIKEL updaten met de juiste klant_id en adres_id
-            statementAdresKlantKoppeling.setLong(1, klant_id);
-            statementAdresKlantKoppeling.setLong(2, nieuw_adres_id);
+            // Koppelingstabel BESTELLING_HEEFT_ARTIKEL updaten met de juiste klantId en adresId
+            statementAdresKlantKoppeling.setLong(1, klantId);
+            statementAdresKlantKoppeling.setLong(2, nieuw_adresId);
             statementAdresKlantKoppeling.execute();
 
-            return nieuw_adres_id;
+            return nieuw_adresId;
         } catch (SQLException ex) {
             if (ex.getMessage().contains("Duplicate entry")) { // TODO: Is anders in FB
                 DeLogger.getLogger().warn("DIT ADRES BESTAAT AL IN DE DATABASE MET ID: " +
@@ -180,12 +180,12 @@ public class AdresDAOFireBird extends AbstractDAOFireBird implements AdresDAO {
 
     /**
      * Geeft op basis van de unieke gegevens van een adres (conform de equalsmethode in Adres)
-     * het corresponderende adres_id terug.
+     * het corresponderende adresId terug.
      *
      * @param postcode Postcode om op te zoeken.
      * @param huisnummer Huisnummer om op te zoeken.
      * @param toevoeging Toevoeging van adres om op te zoeken.
-     * @return Het adres_id behorend bij dit adres.
+     * @return Het adresId behorend bij dit adres.
      * @throws GeneriekeFoutmelding Als er een fout is wordt deze doorgestuurd naar de GeneriekeFoutmelding met de message van
      * de exception.
      */
@@ -225,26 +225,26 @@ public class AdresDAOFireBird extends AbstractDAOFireBird implements AdresDAO {
     /**
      * Geeft een specifiek adres terug in een Adres_Object
      *
-     * @param adres_id Adres_id van het adres dat opgezocht dient te worden.
+     * @param adresId AdresId van het adres dat opgezocht dient te worden.
      * @return Een Adres_object van het adres.
      * @throws GeneriekeFoutmelding Als er een fout is wordt deze doorgestuurd naar de GeneriekeFoutmelding met de message van
      * de exception.
      */
     @Override
-    public Adres getAdresOpAdresID(long adres_id) throws GeneriekeFoutmelding {
+    public Adres getAdresOpAdresID(long adresId) throws GeneriekeFoutmelding {
         return null; // TODO
     }
 
     /**
      * Geeft de adressen terug van een bepaalde klant.
      *
-     * @param klant_id Klant_id van de klant waarvan de adressen opgezocht dienen te worden.
+     * @param klantId KlantId van de klant waarvan de adressen opgezocht dienen te worden.
      * @return Een ListIterator van de ArrayList met daarin Klant objecten.
      * @throws GeneriekeFoutmelding Als er een fout is wordt deze doorgestuurd naar de GeneriekeFoutmelding met de message van
      * de exception.
      */
     @Override
-    public ListIterator<Adres> getAdresOpKlantID(long klant_id) throws GeneriekeFoutmelding {
+    public ListIterator<Adres> getAdresOpKlantID(long klantId) throws GeneriekeFoutmelding {
         String query = "SELECT ADRES.* " +
                 "FROM ADRES, KLANT_HEEFT_ADRES " +
                 "WHERE " +
@@ -256,7 +256,7 @@ public class AdresDAOFireBird extends AbstractDAOFireBird implements AdresDAO {
                 Connection connection = connPool.verkrijgConnectie();
                 PreparedStatement statement = connection.prepareStatement(query);
         ) {
-            statement.setLong(1, klant_id);
+            statement.setLong(1, klantId);
 
             try (
                     ResultSet rs = statement.executeQuery();
@@ -294,13 +294,13 @@ public class AdresDAOFireBird extends AbstractDAOFireBird implements AdresDAO {
     /**
      * Stelt de status is van een adres (0 = inactief, 1 = actief)
      *
-     * @param adres_id Het adres_id van het adres dat geschakeld dient te worden.
+     * @param adresId Het adresId van het adres dat geschakeld dient te worden.
      * @param status De nieuwe gewenste status van het adres.
      * @throws GeneriekeFoutmelding Als er een fout is wordt deze doorgestuurd naar de GeneriekeFoutmelding met de message van
      * de exception.
      */
     @Override
-    public void schakelStatusAdres(long adres_id, int status) throws GeneriekeFoutmelding {
+    public void schakelStatusAdres(long adresId, int status) throws GeneriekeFoutmelding {
         String query =
                 "UPDATE ADRES " +
                         "SET " +
@@ -313,7 +313,7 @@ public class AdresDAOFireBird extends AbstractDAOFireBird implements AdresDAO {
                 PreparedStatement statement = connection.prepareStatement(query)
         ) {
             statement.setInt(1, status);
-            statement.setLong(2, adres_id);
+            statement.setLong(2, adresId);
             statement.execute();
 
         } catch (SQLException ex) {

@@ -1,4 +1,4 @@
-package mysql;
+package gui.bewerkingen;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -6,7 +6,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 
 import exceptions.GeneriekeFoutmelding;
-import gui.ErrorBox;
+import gui.gui.ErrorBox;
 import interfaces.GuiBewerkingen;
 import javafx.scene.control.ListView;
 import model.Artikel;
@@ -14,7 +14,7 @@ import model.Bestelling;
 import model.GuiPojo;
 import model.Klant;
 
-public abstract class AbstractGuiBewerkingen implements GuiBewerkingen {
+public abstract class AbstractGuiBewerkingen implements GuiBewerkingen{
 	ErrorBox errorBox = new ErrorBox();
 
 	public void leegKlantBestellingArtikel(){
@@ -42,14 +42,14 @@ public abstract class AbstractGuiBewerkingen implements GuiBewerkingen {
 		GuiPojo.artikelLijst = GuiPojo.bestelling.getArtikelLijst();
 	}
 
-	public void populateBestellingListView(ListView<Long> bestellingListView, Iterator<Bestelling> it) throws GeneriekeFoutmelding {
+	public void populateBestellingListView(ListView<Long> bestellingListView, Iterator<Bestelling> it) throws GeneriekeFoutmelding{
 		if(it == null)
 			it = GuiPojo.bestellingLijst.values().iterator();
 		while(it.hasNext()){
 			Bestelling bestelling = it.next();
-			if(!bestellingListView.getItems().contains(bestelling.getBestelling_id()) && bestelling.getBestelling_id() != 0){
-				bestellingListView.getItems().add(bestelling.getBestelling_id());
-				GuiPojo.bestellingLijst.put(bestelling.getBestelling_id(), bestelling);
+			if(!bestellingListView.getItems().contains(bestelling.getBestellingId()) && bestelling.getBestellingId() != 0){
+				bestellingListView.getItems().add(bestelling.getBestellingId());
+				GuiPojo.bestellingLijst.put(bestelling.getBestellingId(), bestelling);
 			}
 		}
 	}
@@ -58,9 +58,9 @@ public abstract class AbstractGuiBewerkingen implements GuiBewerkingen {
 		Iterator<Bestelling> it = GuiPojo.bestellingLijst.values().iterator();
 		while(it.hasNext()){
 			Bestelling bestelling = it.next();
-			if(!bestellingListView.getItems().contains(bestelling.getBestelling_id()) && bestelling.getBestelling_id() != 0){
-				bestellingListView.getItems().add(bestelling.getBestelling_id());
-				GuiPojo.bestellingLijst.put(bestelling.getBestelling_id(), bestelling);
+			if(!bestellingListView.getItems().contains(bestelling.getBestellingId()) && bestelling.getBestellingId() != 0){
+				bestellingListView.getItems().add(bestelling.getBestellingId());
+				GuiPojo.bestellingLijst.put(bestelling.getBestellingId(), bestelling);
 			}
 		}
 	}
@@ -81,13 +81,13 @@ public abstract class AbstractGuiBewerkingen implements GuiBewerkingen {
 	}
 
 	public void setArtikelLijstInNieuweBestelling(){
-		long bestellingId = GuiPojo.bestelling.getBestelling_id();
-		long klantId = GuiPojo.bestelling.getKlant_id();
+		long bestellingId = GuiPojo.bestelling.getBestellingId();
+		long klantId = GuiPojo.bestelling.getKlantId();
 
 		GuiPojo.bestelling = new Bestelling();
 
-		GuiPojo.bestelling.setBestelling_id(bestellingId);
-		GuiPojo.bestelling.setKlant_id(klantId);
+		GuiPojo.bestelling.setBestellingId(bestellingId);
+		GuiPojo.bestelling.setKlantId(klantId);
 
 		GuiPojo.bestelling.setArtikelLijst(GuiPojo.artikelLijst);;
 	}
@@ -104,5 +104,5 @@ public abstract class AbstractGuiBewerkingen implements GuiBewerkingen {
 
 	public abstract void updateBestelling() throws SQLException, GeneriekeFoutmelding;
 
-	public abstract void verwijderEnkeleBestelling() throws GeneriekeFoutmelding, SQLException;
+	public abstract void verwijderEnkeleBestelling(ListView<Long> bestellingListView) throws GeneriekeFoutmelding, SQLException;
 }

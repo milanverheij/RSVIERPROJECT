@@ -1,22 +1,22 @@
 package model;
 
+import java.util.ArrayList;
+
 import annotations.Column;
 import annotations.Entity;
 import annotations.Id;
-
-import java.util.ArrayList;
 
 @Entity("Bestelling")
 public class Bestelling {
 
 	@Id
-	@Column(values = "bestelling_id")
-	private long bestelling_id;
+	@Column(values = "bestellingId")
+	private long bestellingId;
 
-	@Column(values = "klant_id")
-	private long klant_id;
+	@Column(values = "klantId")
+	private long klantId;
 
-	@Column(values = "besteling_actief")
+	@Column(values = "bestelingActief")
 	private boolean bestellingActief = true;
 
 	@Column(values = "datumAanmaak")
@@ -28,35 +28,35 @@ public class Bestelling {
 		artikelLijst = new ArrayList<Artikel>();
 	}
 
-	public Bestelling(long bestelling_id, long klant_id, ArrayList<Artikel> artikelLijst, String datumAanmaak){
-		this.bestelling_id = bestelling_id;
-		this.klant_id = klant_id;
+	public Bestelling(long bestellingId, long klantId, ArrayList<Artikel> artikelLijst, String datumAanmaak){
+		this.bestellingId = bestellingId;
+		this.klantId = klantId;
 		this.artikelLijst = artikelLijst;
 		this.datumAanmaak = datumAanmaak;
 		bestellingActief = true;
 	}
 
-	public Bestelling(long bestelling_id, long klant_id, ArrayList<Artikel> artikelLijst){
-		this.bestelling_id = bestelling_id;
-		this.klant_id = klant_id;
+	public Bestelling(long bestellingId, long klantId, ArrayList<Artikel> artikelLijst){
+		this.bestellingId = bestellingId;
+		this.klantId = klantId;
 		this.artikelLijst = artikelLijst;
 		bestellingActief = true;
 	}
 
-	public void setBestelling_id(long bestelling_id) {
-		this.bestelling_id = bestelling_id;
+	public void setBestellingId(long bestellingId) {
+		this.bestellingId = bestellingId;
 	}
-	public void setKlant_id(long klant_id) {
-		this.klant_id = klant_id;
+	public void setKlantId(long klantId) {
+		this.klantId = klantId;
 	}
 	public void setArtikelLijst(ArrayList<Artikel> artikelLijst) {
 		this.artikelLijst = artikelLijst;
 	}
-	public long getBestelling_id() {
-		return bestelling_id;
+	public long getBestellingId() {
+		return bestellingId;
 	}
-	public long getKlant_id() {
-		return klant_id;
+	public long getKlantId() {
+		return klantId;
 	}
 	public ArrayList<Artikel> getArtikelLijst() {
 		return artikelLijst;

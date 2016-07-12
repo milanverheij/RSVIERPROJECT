@@ -33,5 +33,5 @@ public interface GuiBewerkingen {
 
 	void updateBestelling() throws SQLException, GeneriekeFoutmelding;
 
-	void verwijderEnkeleBestelling() throws GeneriekeFoutmelding, SQLException;
+	void verwijderEnkeleBestelling(ListView<Long> bestellingListView) throws GeneriekeFoutmelding, SQLException;
 }

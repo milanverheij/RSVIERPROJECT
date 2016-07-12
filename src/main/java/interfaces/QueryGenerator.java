@@ -41,7 +41,7 @@ public abstract class QueryGenerator {
 
     public boolean isExcluded(Field declaredField) {
         boolean isExcluded = false;
-        String[] excludedColumns = {"klant_id", "adres_id", "artikel_id", "bestelling_id", "prijs_id"};
+        String[] excludedColumns = {"klantId", "adresId", "artikelId", "bestellingId", "prijsId"};
 
         for (String excludedColumn : excludedColumns) {
             if (declaredField.getType().equals(long.class) && declaredField.getName().equals(excludedColumn))

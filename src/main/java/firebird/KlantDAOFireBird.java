@@ -40,7 +40,7 @@ public class KlantDAOFireBird extends AbstractDAOFireBird implements KlantDAO {
      * Maakt een nieuwe klant aan in de database met alle naamgegevens.
      * Als er adres en/of bestelgegevens aanwezig zijn worden deze tevens ook toegevoegd.
      * Er wordt in de database automatisch een uniek ID gegenereerd welke automatisch verhoogd wordt.
-     * Het is mogelijk door middel van een adres_id mee te geven geen nieuw adres aan te maken maar
+     * Het is mogelijk door middel van een adresId mee te geven geen nieuw adres aan te maken maar
      * deze te koppelen aan de klant.
      *
      //     * @param voornaam De voornaam van de klant (max 50 karakters).
@@ -54,11 +54,11 @@ public class KlantDAOFireBird extends AbstractDAOFireBird implements KlantDAO {
 
     @Override
     public long nieuweKlant(Klant nieuweKlant,
-                            long adres_id,
+                            long adresId,
                             Adres adresgegevens,
                             Bestelling bestelGegevens) throws GeneriekeFoutmelding {
 
-        query = queryGenerator.buildInsertStatement(nieuweKlant) + " RETURNING klant_id;";
+        query = queryGenerator.buildInsertStatement(nieuweKlant) + " RETURNING klantId;";
 
         try (
                 Connection connection = connPool.verkrijgConnectie();
@@ -66,40 +66,40 @@ public class KlantDAOFireBird extends AbstractDAOFireBird implements KlantDAO {
         ) {
 //            statement.execute();
 
-            // Ophalen van de laatste genegeneerde sleutel (de nieuwe klant_id)
+            // Ophalen van de laatste genegeneerde sleutel (de nieuwe klantId)
             long nieuwId = 0;
             try (
                     ResultSet resultSet = statement.executeQuery();
             ) {
                 while (resultSet.next()) {
-                    nieuwId = resultSet.getInt("klant_id");
+                    nieuwId = resultSet.getInt("klantId");
                 }
 
-                // Als er een adres_id wordt meegegeven betekent dit dat er een bestaand adres gekoppeled wordt
+                // Als er een adresId wordt meegegeven betekent dit dat er een bestaand adres gekoppeled wordt
                 // aan een nieuwe klant
-                if (adres_id > 0 && adresgegevens == null) {
+                if (adresId > 0 && adresgegevens == null) {
                     adresDAO = new AdresDAOFireBird();
-                    adresDAO.koppelAdresAanKlant(nieuwId, adres_id);
+                    adresDAO.koppelAdresAanKlant(nieuwId, adresId);
                 }
 
                 // Als er adresgegeven worden meegegeven wordt er een adres aangemaakt op basis van het nieuwe klantId
-                else if (adresgegevens != null && adres_id == 0) {
+                else if (adresgegevens != null && adresId == 0) {
                     adresDAO = new AdresDAOFireBird();
                     adresDAO.nieuwAdres(nieuwId, adresgegevens);
                 }
 
-                // Als er adresgegeven worden meegegeven en een adres_id wordt er zowel een nieuw adres aangemaakt
+                // Als er adresgegeven worden meegegeven en een adresId wordt er zowel een nieuw adres aangemaakt
                 // en tevens het bestaande adres gekoppeld.
-                else if (adresgegevens != null && adres_id > 0) {
+                else if (adresgegevens != null && adresId > 0) {
                     adresDAO = new AdresDAOFireBird();
                     adresDAO.nieuwAdres(nieuwId, adresgegevens);
-                    adresDAO.koppelAdresAanKlant(nieuwId, adres_id);
+                    adresDAO.koppelAdresAanKlant(nieuwId, adresId);
                 }
 
                 // Als er bestegegevens zijn meegegeven worden deze bijgevoegd
                 if (bestelGegevens != null) {
                     bestellingDAO = new BestellingDAOFireBird();
-                    bestelGegevens.setKlant_id(nieuwId);
+                    bestelGegevens.setKlantId(nieuwId);
                     bestellingDAO.nieuweBestelling(bestelGegevens);
                 }
 
@@ -127,16 +127,16 @@ public class KlantDAOFireBird extends AbstractDAOFireBird implements KlantDAO {
      * klant aan in de database. Adres-object en bestelling-object mogen null zijn.
      * Zie verder de overloaded nieuweKlant methods.
      *
-     * Als een bestaand adres gekoppeld dient te worden kan er een adres_id worden meegegeven.
+     * Als een bestaand adres gekoppeld dient te worden kan er een adresId worden meegegeven.
      * Er wordt dan geen nieuw adres meer aangemaakt.
      *
      * @param nieuweKlant Klantobject van de klant die gemaakt dient te worden.
-     * @param adres_id Er kan een adres_id worden meegegeven om een bestaand adres te koppelen.
-     * @return klant_id van de nieuwe klant.
+     * @param adresId Er kan een adresId worden meegegeven om een bestaand adres te koppelen.
+     * @return klantId van de nieuwe klant.
      * @throws GeneriekeFoutmelding
      */
     @Override
-    public long nieuweKlant(Klant nieuweKlant, long adres_id) throws GeneriekeFoutmelding {
+    public long nieuweKlant(Klant nieuweKlant, long adresId) throws GeneriekeFoutmelding {
 
         Adres tijdelijkAdres = null;
 
@@ -148,23 +148,23 @@ public class KlantDAOFireBird extends AbstractDAOFireBird implements KlantDAO {
             nieuweKlant.setAdresGegevens(null);
         }
 
-        return nieuweKlant(nieuweKlant, adres_id, tijdelijkAdres, null);
+        return nieuweKlant(nieuweKlant, adresId, tijdelijkAdres, null);
     }
 
     /** READ METHODS */
 
     /**
-     * Zoekt het klant_id op van de klant.
+     * Zoekt het klantId op van de klant.
      * De uniekheid van een klant is op basis van voornaam, achternaam en email, hier kan er dus maar 1 van bestaan.
      *
      * @param voornaam De te zoeken voornaam
      * @param achternaam De te zoeken achternaam
      * @param email De te zoeken email van de klant
-     * @return Het klant_id van de klant
+     * @return Het klantId van de klant
      */
     @Override
     public long getKlantID(String voornaam, String achternaam, String email) throws GeneriekeFoutmelding {
-        String query = "SELECT klant_id " +
+        String query = "SELECT klantId " +
                 "FROM KLANT " +
                 "WHERE " +
                 "voornaam = ? AND " +
@@ -197,6 +197,10 @@ public class KlantDAOFireBird extends AbstractDAOFireBird implements KlantDAO {
         }
     }
 
+    @Override
+    public ListIterator<Klant> getAlleKlanten() throws GeneriekeFoutmelding {
+        return getKlantOpKlant(new Klant());
+    }
 
     /**
      * Deze method haalt klanten op uit de database op basis van een meegegeven Klant-Object.
@@ -278,9 +282,9 @@ public class KlantDAOFireBird extends AbstractDAOFireBird implements KlantDAO {
      */
     @Override
     public ListIterator<Klant> getKlantOpBestelling(long bestellingId) throws GeneriekeFoutmelding {
-        String query = "SELECT klant_id FROM " +
+        String query = "SELECT klantId FROM " +
                 "BESTELLING WHERE " +
-                "bestelling_id = ? " +
+                "bestellingId = ? " +
                 "LIMIT 1;";
         try (
                 Connection connection = connPool.verkrijgConnectie();
@@ -308,7 +312,7 @@ public class KlantDAOFireBird extends AbstractDAOFireBird implements KlantDAO {
     /** UPDATE METHODS */
 
     /**
-     * Methode om een klant met een bepaald klant_id zijn naamgegevens up te daten.
+     * Methode om een klant met een bepaald klantId zijn naamgegevens up te daten.
      *
      * @param nieuweKlant De te updaten klant in Klant-object
      * @throws GeneriekeFoutmelding Foutmelding bij SQLException, info wordt meegegeven.
@@ -323,7 +327,7 @@ public class KlantDAOFireBird extends AbstractDAOFireBird implements KlantDAO {
             nieuweKlant.setAdresGegevens(null);
         }
 
-        query = queryGenerator.buildUpdateStatement(nieuweKlant) + " klant_id = " + nieuweKlant.getKlantId() + ";";
+        query = queryGenerator.buildUpdateStatement(nieuweKlant) + " klantId = " + nieuweKlant.getKlantId() + ";";
 
         try (
                 Connection connection = connPool.verkrijgConnectie();
@@ -359,7 +363,7 @@ public class KlantDAOFireBird extends AbstractDAOFireBird implements KlantDAO {
      * Methode om een klant te verwijderen op basis van ID. Alle bestellingen van de klant worden
      * tevens ook op non-actief gezet.
      *
-     * @param klantId Klant_id van de te verwijderen klant.
+     * @param klantId KlantId van de te verwijderen klant.
      * @throws GeneriekeFoutmelding Foutmelding bij SQLException, info wordt meegegeven.
      */
 
@@ -370,7 +374,7 @@ public class KlantDAOFireBird extends AbstractDAOFireBird implements KlantDAO {
                         "SET " +
                         "klantActief = ? " +
                         "WHERE " +
-                        "klant_id = ?";
+                        "klantId = ?";
 
         long verwijderdID = -1;
 
@@ -496,7 +500,7 @@ public class KlantDAOFireBird extends AbstractDAOFireBird implements KlantDAO {
                 System.out.print("\n\tADRES(SEN)");
                 System.out.print("\n\t----------");
 
-                // DAO voor adres-acties. Lijst verkrijgen van alle adressen bijbehorend bij klant_id
+                // DAO voor adres-acties. Lijst verkrijgen van alle adressen bijbehorend bij klantId
                 adresDAO = new AdresDAOFireBird();
                 ListIterator<Adres> adresListIterator = adresDAO.getAdresOpKlantID(tijdelijkeKlant.getKlantId());
                 while (adresListIterator.hasNext()) {

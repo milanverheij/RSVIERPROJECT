@@ -85,6 +85,11 @@ public class KlantDAOXML implements KlantDAO {
     }
 
     @Override
+    public ListIterator<Klant> getAlleKlanten() throws GeneriekeFoutmelding {
+        return getKlantOpKlant(null);
+    }
+
+    @Override
     public ListIterator<Klant> getKlantOpKlant(Klant klant) throws GeneriekeFoutmelding {
         // Check of de database reeds is ingelezen, zo niet wordt deze ingelezen.
         controleerDatabaseIngelezen();

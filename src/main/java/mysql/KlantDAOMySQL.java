@@ -38,7 +38,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
      * Maakt een nieuwe klant aan in de database met alle naamgegevens.
      * Als er adres en/of bestelgegevens aanwezig zijn worden deze tevens ook toegevoegd.
      * Er wordt in de database automatisch een uniek ID gegenereerd welke automatisch verhoogd wordt.
-     * Het is mogelijk door middel van een adres_id mee te geven geen nieuw adres aan te maken maar
+     * Het is mogelijk door middel van een adresId mee te geven geen nieuw adres aan te maken maar
      * deze te koppelen aan de klant.
      *
      * @param nieuweKlant Nieuwe klantgegevens in een Klant-object.
@@ -48,7 +48,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
      */
     @Override
     public long nieuweKlant(Klant nieuweKlant,
-                            long adres_id,
+                            long adresId,
                             Adres adresgegevens,
                             Bestelling bestelGegevens) throws GeneriekeFoutmelding {
 
@@ -74,7 +74,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
             // Voer query uit en haal de gegenereerde sleutels op bij deze query
             statement.execute();
 
-            // Ophalen van de laatste genegeneerde sleutel uit de generatedkeys (de nieuwe klant_id)
+            // Ophalen van de laatste genegeneerde sleutel uit de generatedkeys (de nieuwe klantId)
             long nieuwId = 0;
             try (
                     ResultSet generatedKeys = statement.getGeneratedKeys();
@@ -82,31 +82,31 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
                 if (generatedKeys.next())
                     nieuwId = generatedKeys.getInt(1);
 
-                // Als er een adres_id wordt meegegeven betekent dit dat er een bestaand adres gekoppeled wordt
+                // Als er een adresId wordt meegegeven betekent dit dat er een bestaand adres gekoppeled wordt
                 // aan een nieuwe klant
-                if (adres_id > 0 && adresgegevens == null) {
+                if (adresId > 0 && adresgegevens == null) {
                     adresDAO = new AdresDAOMySQL();
-                    adresDAO.koppelAdresAanKlant(nieuwId, adres_id);
+                    adresDAO.koppelAdresAanKlant(nieuwId, adresId);
                 }
 
                 // Als er adresgegeven worden meegegeven wordt er een adres aangemaakt op basis van het nieuwe klantId
-                else if (adresgegevens != null && adres_id == 0) {
+                else if (adresgegevens != null && adresId == 0) {
                     adresDAO = new AdresDAOMySQL();
                     adresDAO.nieuwAdres(nieuwId, adresgegevens);
                 }
 
-                // Als er adresgegeven worden meegegeven en een adres_id wordt er zowel een nieuw adres aangemaakt
+                // Als er adresgegeven worden meegegeven en een adresId wordt er zowel een nieuw adres aangemaakt
                 // en tevens het bestaande adres gekoppeld.
-                else if (adresgegevens != null && adres_id > 0) {
+                else if (adresgegevens != null && adresId > 0) {
                     adresDAO = new AdresDAOMySQL();
                     adresDAO.nieuwAdres(nieuwId, adresgegevens);
-                    adresDAO.koppelAdresAanKlant(nieuwId, adres_id);
+                    adresDAO.koppelAdresAanKlant(nieuwId, adresId);
                 }
 
                 // Als er bestegegevens zijn meegegeven worden deze bijgevoegd
                 if (bestelGegevens != null) {
                     bestellingDAO = new BestellingDAOMySQL();
-                    bestelGegevens.setKlant_id(nieuwId);
+                    bestelGegevens.setKlantId(nieuwId);
                     bestellingDAO.nieuweBestelling(bestelGegevens);
                 }
             }
@@ -130,12 +130,12 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
      * adres-id wordt meegegeven wordt geen adres gekopeld.
      *
      * @param nieuweKlant De gegevens van de nieuwe klant in een Klant-object
-     * @param adres_id Het adres-id van een mogelijk te koppelen adres.
+     * @param adresId Het adres-id van een mogelijk te koppelen adres.
      * @return Het nieuwe klant-id wordt teruggegeven.
      * @throws GeneriekeFoutmelding Foutmelding bij SQLException, info wordt meegegeven.
      */
     @Override
-    public long nieuweKlant(Klant nieuweKlant, long adres_id) throws GeneriekeFoutmelding {
+    public long nieuweKlant(Klant nieuweKlant, long adresId) throws GeneriekeFoutmelding {
         Adres tijdelijkAdres = null;
 
         // Als er een adres wordt meegegeven in de klant wordt deze als los adres meegegeven
@@ -146,19 +146,19 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
             nieuweKlant.setAdresGegevens(null);
         }
 
-        return nieuweKlant(nieuweKlant, adres_id, tijdelijkAdres, null);
+        return nieuweKlant(nieuweKlant, adresId, tijdelijkAdres, null);
     }
 
     /** READ METHODS */
 
     /**
-     * Zoekt het klant_id op van de klant.
+     * Zoekt het klantId op van de klant.
      * De uniekheid van een klant is op basis van voornaam, achternaam en email, hier kan er dus maar 1 van bestaan.
      *
      * @param voornaam   De te zoeken voornaam
      * @param achternaam De te zoeken achternaam
      * @param email      De te zoeken email van de klant
-     * @return Het klant_id van de klant
+     * @return Het klantId van de klant
      */
     @Override
     public long getKlantID(String voornaam, String achternaam, String email) throws GeneriekeFoutmelding {
@@ -194,6 +194,15 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
         }
     }
 
+    /**
+     * BLAH TODO
+     * @return
+     * @throws GeneriekeFoutmelding
+     */
+    @Override
+    public ListIterator<Klant> getAlleKlanten() throws GeneriekeFoutmelding {
+        return getKlantOpKlant(new Klant());
+    }
 
     /**
      * Deze method haalt klanten op uit de database op basis van een meegegeven Klant-Object.
@@ -305,7 +314,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
     /** UPDATE METHODS */
 
     /**
-     * Methode om een klant met een bepaald klant_id zijn naamgegevens up te daten.
+     * Methode om een klant met een bepaald klantId zijn naamgegevens up te daten.
      *
      * @param nieuweKlant De te updaten klant in Klant-object
      * @throws GeneriekeFoutmelding Foutmelding bij SQLException, info wordt meegegeven.
@@ -357,7 +366,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
      * Methode om een klant te verwijderen op basis van ID. Alle bestellingen van de klant worden
      * tevens ook op non-actief gezet.
      *
-     * @param klantId Klant_id van de te verwijderen klant.
+     * @param klantId KlantId van de te verwijderen klant.
      * @throws GeneriekeFoutmelding Foutmelding bij SQLException, info wordt meegegeven.
      */
     @Override
@@ -493,7 +502,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
                 System.out.print("\n\tADRES(SEN)");
                 System.out.print("\n\t----------");
 
-                // DAO voor adres-acties. Lijst verkrijgen van alle adressen bijbehorend bij klant_id
+                // DAO voor adres-acties. Lijst verkrijgen van alle adressen bijbehorend bij klantId
                 adresDAO = new AdresDAOMySQL();
                 ListIterator<Adres> adresListIterator = adresDAO.getAdresOpKlantID(tijdelijkeKlant.getKlantId());
                 while (adresListIterator.hasNext()) {

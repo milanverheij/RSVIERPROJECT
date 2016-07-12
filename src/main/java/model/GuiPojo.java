@@ -1,6 +1,6 @@
 package model;
 
-import gui.ErrorBox;
+import gui.gui.ErrorBox;
 import interfaces.AdresDAO;
 import interfaces.ArtikelDAO;
 import interfaces.BestellingDAO;

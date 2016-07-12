@@ -2,36 +2,49 @@ package model;
 
 import java.math.BigDecimal;
 
+import annotations.Column;
+import annotations.Id;
+import annotations.Entity;
+
 /*
  * Created by Douwe_Jongeneel on 06-06-16.
- * 
+ *
  * Dit is de Artikel Pojo + GS zodat er Artikel objecten
  * in een LinkedHasMap kunnen worden opgeslagen in de database.
  */
-
+@Entity("artikel")
 public class Artikel implements Comparable{
 	//Data field
+	@Id
+	@Column(values = "artikel_id")
 	private int artikelId = 0;
+	@Column(values = "omschrijving")
 	private String artikelNaam;
 	private int aantalBesteld;
-	private BigDecimal artikelPrijs;//TODO
+	@Column(values = "prijs")
+	private BigDecimal artikelPrijs;
+	@Id
+	@Column(values = "prijs_id")
 	private int prijsId;
+	@Column(values = "datumAanmaak")
 	private String datumAanmaak;
+	@Column(values = "verwachteLevertijd")
 	private int verwachteLevertijd;
+	@Column(values = "inAssortiment")
 	private boolean inAssortiment;
-	
+
 	//Constructors
 	public Artikel() {
 	}
-	public Artikel(String artikelNaam, BigDecimal artikelPrijs, 
-			String datumAanmaak, int verwachteLevertijd, boolean inAssortiment) {
+	public Artikel(String artikelNaam, BigDecimal artikelPrijs,
+				   String datumAanmaak, int verwachteLevertijd, boolean inAssortiment) {
 		this.artikelNaam = artikelNaam;
 		this.artikelPrijs = artikelPrijs;
 		this.datumAanmaak = datumAanmaak;
 		this.verwachteLevertijd = verwachteLevertijd;
 		this.inAssortiment = inAssortiment;
 	}
-	
+
 	//Getters and Setters
 	public int getArtikelId() {
 		return artikelId;
@@ -82,10 +95,10 @@ public class Artikel implements Comparable{
 	public void setInAssortiment(boolean inAssortiment) {
 		this.inAssortiment = inAssortiment;
 	}
-	
+
 	// Methodes die overschreven worden
 	@Override
-	public int hashCode(){ 
+	public int hashCode(){
 		return artikelNaam.hashCode();
 	}
 
@@ -96,7 +109,7 @@ public class Artikel implements Comparable{
 
 	@Override
 	public String toString(){
-		return "artikel " + artikelId + "\t " + artikelNaam + "\t $" + artikelPrijs.toPlainString() 
+		return "artikel " + artikelId + "\t " + artikelNaam + "\t $" + artikelPrijs.toPlainString()
 				+ "\t prijs id " + prijsId + "\t " + datumAanmaak + "\t " + verwachteLevertijd + "\t "
 				+ inAssortiment;
 	}

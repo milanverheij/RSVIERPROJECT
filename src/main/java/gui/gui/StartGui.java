@@ -1,4 +1,4 @@
-package gui;
+package gui.gui;
 
 import javafx.application.Application;
 import javafx.beans.property.BooleanProperty;
@@ -138,7 +138,7 @@ public class StartGui extends Application{
 	}
 
 	private void setStageProperties(){
-		stage.getIcons().add(new Image("/images/icon.jpg"));
+		stage.getIcons().add(new Image("/images/icon.png"));
 		stage.setTitle("Harrie's Tweedehands Beessies");
 	}
 

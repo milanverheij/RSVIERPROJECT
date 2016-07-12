@@ -1,6 +1,7 @@
-package gui;
+package gui.gui;
 
 import exceptions.GeneriekeFoutmelding;
+import gui.bewerkingen.GuiBewerkingenMySQL;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
@@ -18,11 +19,7 @@ import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import model.Artikel;
-import model.Bestelling;
 import model.GuiPojo;
-import mysql.GuiBewerkingenMySQL;
-
-import java.util.LinkedHashMap;
 
 public class HoofdGui extends Application{
 	private final Insets INSET = new Insets(6);
@@ -98,7 +95,7 @@ public class HoofdGui extends Application{
 		Scene scene = new Scene(verticalBox);
 		stage.setScene(scene);
 		stage.setTitle("Exotische Dieren Emporium");
-		stage.getIcons().add(new Image("/images/icon.jpg"));
+		stage.getIcons().add(new Image("/images/icon.png"));
 		stage.setTitle("Harrie's Tweedehands Beessies");
 		stage.show();
 	}
@@ -151,36 +148,14 @@ public class HoofdGui extends Application{
 
 		updateBestellingButton.setOnAction(e -> updateBestelling());
 		nieuweBestellingButton.setOnAction(e -> nieuweBestelling());
-		verwijderBestelling.setOnAction(e -> verwijderBestelling());
+		verwijderBestelling.setOnAction(e -> guiBewerkingen.verwijderEnkeleBestelling(bestellingListView));
 
 		nieuweKlantButton.setOnAction(e -> nieuweKlant());
 		updateKlantButton.setOnAction(e -> updateKlant());
 	}
 
 	private void nieuwArtikel() {
-		try {
-			GuiVoorArtikelBewerkingen artikelGui = new GuiVoorArtikelBewerkingen();
-			artikelGui.setAndRun(GuiPojo.artikelDAO.getAlleArtikelen(false));
-		} catch (GeneriekeFoutmelding e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-	}
-
-	/* Verwijdert een enkele bestelling uit de database */
-	private void verwijderBestelling(){
-		GuiPojo.bestellingLijst.remove(GuiPojo.bestelling.getBestelling_id());
-		guiBewerkingen.verwijderEnkeleBestelling();
-		bestellingListView.getItems().clear();
-		try {
-			guiBewerkingen.populateBestellingListView(bestellingListView);
-		} catch (GeneriekeFoutmelding e) {
-			errorBox.setMessageAndStart(e.getMessage());
-		}
+		guiBewerkingen.maakArtikelGui();
 	}
 
 	//zoekGrid bevat alle velden met info waarop gezocht kan worden
@@ -292,8 +267,7 @@ public class HoofdGui extends Application{
 	private void leegAlleVelden(){
 		leegKlantVelden();
 		leegAdresVelden();
-		GuiPojo.bestelling = new Bestelling();
-		GuiPojo.bestellingLijst = new LinkedHashMap<Long, Bestelling>();
+		guiBewerkingen.resetBestelling();
 	}
 
 	private void leegAdresVelden() {
@@ -322,14 +296,14 @@ public class HoofdGui extends Application{
 			bestellingListView.getItems().clear();
 			artikelListView.getItems().clear();
 
-			if(GuiPojo.klant.getKlantId() != 0){
+			if(GuiPojo.klant.getKlantId() > 0){
 				klantIdField.setText("" + GuiPojo.klant.getKlantId());
 				voorNaamField.setText(GuiPojo.klant.getVoornaam());
 				achterNaamField.setText(GuiPojo.klant.getAchternaam());
 				tussenVoegselField.setText(GuiPojo.klant.getTussenvoegsel());
 				emailField.setText(GuiPojo.klant.getEmail());
 
-				guiBewerkingen.getAdres(actieveItems.isSelected());				
+				guiBewerkingen.getAdres(actieveItems.isSelected());
 
 				straatnaamField.setText(GuiPojo.klant.getAdresGegevens().getStraatnaam());
 				if(GuiPojo.klant.getAdresGegevens().getHuisnummer() != 0)
@@ -362,10 +336,10 @@ public class HoofdGui extends Application{
 		if(GuiPojo.artikel != null){
 			artikelListView.getItems().clear();
 
-			if(GuiPojo.bestelling.getKlant_id() != 0)
-				klantIdField.setText("" + GuiPojo.bestelling.getKlant_id());
-			if(GuiPojo.bestelling.getBestelling_id() != 0)
-				bestellingIdField.setText("" + GuiPojo.bestelling.getBestelling_id());
+			if(GuiPojo.bestelling.getKlantId() != 0)
+				klantIdField.setText("" + GuiPojo.bestelling.getKlantId());
+			if(GuiPojo.bestelling.getBestellingId() != 0)
+				bestellingIdField.setText("" + GuiPojo.bestelling.getBestellingId());
 
 			guiBewerkingen.setArtikelLijst();
 
@@ -395,17 +369,7 @@ public class HoofdGui extends Application{
 	 * veranderen. Een bestaande bestelling moet geselecteerd zijn
 	 */
 	private void updateBestelling(){
-		if(!(GuiPojo.bestelling.getBestelling_id() == 0)){
-			GuiVoorBestellingBewerkingen bestellingBewerken = new GuiVoorBestellingBewerkingen();
-			bestellingBewerken.setBestelling(GuiPojo.bestelling);
-			try {
-				bestellingBewerken.start(new Stage());
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}else{
-			errorBox.setMessageAndStart("Selecteer eerst een bestelling");
-		}
+		guiBewerkingen.updateBestelling();
 	}
 
 	/* Lanceert een nieuw Stage waar een nieuwe bestelling gemaakt kan worden
@@ -413,17 +377,7 @@ public class HoofdGui extends Application{
 	 * veranderen. Een bestaande klant moet geselecteerd zijn
 	 */
 	private void nieuweBestelling(){
-		if(!klantIdField.getText().isEmpty()){
-			GuiVoorBestellingBewerkingen bestellingBewerken = new GuiVoorBestellingBewerkingen();
-			try {
-				bestellingBewerken.setAndRun(GuiPojo.klant.getKlantId(), bestellingListView);
-			} catch (Exception e) {
-				e.printStackTrace();
-				errorBox.setMessageAndStart(e.getMessage());
-			}
-		}else{
-			errorBox.setMessageAndStart("Selecteer eerst een klant");
-		}
+		guiBewerkingen.nieuweBestelling(bestellingListView, klantIdField.getText());
 	}
 
 	/* Lanceert een nieuw Stage waar een klant aangepast kan worden.
@@ -431,29 +385,12 @@ public class HoofdGui extends Application{
 	 * veranderen. Een bestaande klant moet geselecteerd zijn
 	 */
 	private void updateKlant(){
-		try {
-			if(GuiPojo.klant.getKlantId() == 0)
-				errorBox.setMessageAndStart("Selecteer eerst een klant");
-			else{
-				GuiVoorKlantBewerkingen nieuweKlant = new GuiVoorKlantBewerkingen();
-				nieuweKlant.start(new Stage());
-			}
-		}catch(GeneriekeFoutmelding e){
-			errorBox.setMessageAndStart(e.getMessage());
-		}catch(NullPointerException e){
-			e.printStackTrace();
-		}catch (Exception e) {
-			errorBox.setMessageAndStart(e.getMessage());
-		}
+		guiBewerkingen.updateKlant();
 	}
 
 	/* Lanceert een nieuw Stage waar een nieuwe klant gemaakt kan worden.*/
 	private void nieuweKlant(){
-		try {
-			new GuiVoorKlantBewerkingen().start(new Stage());
-		} catch (Exception e) {
-			errorBox.setMessageAndStart(e.getMessage());
-		}
+		guiBewerkingen.nieuweKlant();
 	}
 
 	public void setConnection(String databaseSelected, String connectionSelected) {

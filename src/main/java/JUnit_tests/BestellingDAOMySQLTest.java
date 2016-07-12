@@ -62,14 +62,14 @@ public class BestellingDAOMySQLTest {
 		artikelLijst1.add(a1);
 		artikelLijst1.add(a2);
 		artikelLijst1.add(a3);
-		bestelling1.setKlant_id(1);
+		bestelling1.setKlantId(1);
 		bestelling1.setArtikelLijst(artikelLijst1);
 		bestelling1.setBestellingActief(true);
 
 		ArrayList<Artikel> artikelLijst2 = new ArrayList<Artikel>();
 		artikelLijst2.add(a1);
 		artikelLijst2.add(a2);
-		bestelling2.setKlant_id(1);
+		bestelling2.setKlantId(1);
 		bestelling2.setArtikelLijst(artikelLijst2);
 		bestelling2.setBestellingActief(false);
 
@@ -168,7 +168,7 @@ public class BestellingDAOMySQLTest {
 		artikelLijst.add(a2);
 		artikelLijst.add(a3);
 		bestelling2.setArtikelLijst(artikelLijst);
-		bestelling2.setBestelling_id(id2);
+		bestelling2.setBestellingId(id2);
 		dao.updateBestelling(bestelling2);
 
 		ArrayList<Artikel> bList = dao.getBestellingOpBestellingId(id2, false).next().getArtikelLijst();

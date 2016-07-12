@@ -21,7 +21,7 @@ public class BestellingDAOFireBird extends AbstractDAOFireBird implements Bestel
 
 			con.setAutoCommit(false);
 
-			statementBestelTabel.setLong(1, bestelling.getKlant_id());
+			statementBestelTabel.setLong(1, bestelling.getKlantId());
 			statementBestelTabel.setBoolean(2, bestelling.getBestellingActief());
 
 			long bestellingId = schrijfAlleArtikelenNaarDeDatabase(con, statementBestelTabel, bestelling.getArtikelLijst());
@@ -137,16 +137,16 @@ public class BestellingDAOFireBird extends AbstractDAOFireBird implements Bestel
 			con.setAutoCommit(false);
 
 			// Verwijder alle oude artikelen van de bestelling uit BESTELLING_HEEFT_ARTIKEL
-			deleteStatement.setLong(1, bestelling.getBestelling_id());
+			deleteStatement.setLong(1, bestelling.getBestellingId());
 			deleteStatement.executeUpdate();
 
 			// Zet de bestelling als actief, je gaat geen inactieve bestellingen updaten
-			setActiefStatement.setLong(1, bestelling.getBestelling_id());
+			setActiefStatement.setLong(1, bestelling.getBestellingId());
 			setActiefStatement.executeUpdate();
 			
 			// Schrijf alle nieuwe artikelen naar BESTELLING_HEEFT_ARTIKEL
 			System.out.println(bestelling.getArtikelLijst().toString());
-			schrijfAlleArtikelenNaarDeDatabase(con, bestelling.getBestelling_id(), bestelling.getArtikelLijst());
+			schrijfAlleArtikelenNaarDeDatabase(con, bestelling.getBestellingId(), bestelling.getArtikelLijst());
 
 			con.commit();
 		}catch (SQLException e){
@@ -302,13 +302,13 @@ public class BestellingDAOFireBird extends AbstractDAOFireBird implements Bestel
 			// die op de vorige rij van de ResultSet, maak anders een nieuwe Bestelling aan
 			while(rs.next()){
 				// Kijk of het de eerste bestelling is
-				if(best.getBestelling_id() == 0){
+				if(best.getBestellingId() == 0){
 					setBestellingGegevens(rs, best);
 				}
 
 				// Wanneer er een volgende bestelling is, schrijf de vorige naar de ArrayList
 				// en maak een nieuwe bestelling aan
-				if(best.getBestelling_id() != (rs.getLong("bestelling_id"))){
+				if(best.getBestellingId() != (rs.getLong("bestelling_id"))){
 					bestellingSet.add(best);
 					best = new Bestelling();
 					setBestellingGegevens(rs, best);
@@ -342,8 +342,8 @@ public class BestellingDAOFireBird extends AbstractDAOFireBird implements Bestel
 
 	private void setBestellingGegevens(ResultSet rs, Bestelling best) throws GeneriekeFoutmelding{
 		try{
-			best.setBestelling_id(rs.getLong("bestelling_id"));
-			best.setKlant_id(rs.getLong("klant_id"));
+			best.setBestellingId(rs.getLong("bestelling_id"));
+			best.setKlantId(rs.getLong("klant_id"));
 			best.setDatumAanmaak(rs.getString("datumAanmaak"));
 			best.setBestellingActief(rs.getBoolean("bestellingActief"));
 		}catch (SQLException e){

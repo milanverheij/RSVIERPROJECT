@@ -33,7 +33,7 @@ public class ArtikelDAOFireBird extends AbstractDAOFireBird implements ArtikelDA
 	//Create
 
 	// Onderstaande methode maakt een nieuw artikel aan in de ARTIKEL tabel, zet de prijs gegevens van het artikel in de PRIJS
-	// tabel en zorgt ervoor dat de ARTIKEL tabel het juiste prijs_id heeft.
+	// tabel en zorgt ervoor dat de ARTIKEL tabel het juiste prijsId heeft.
 	@Override 
 	public int nieuwArtikel(Artikel aNieuw) throws GeneriekeFoutmelding {
 
@@ -72,7 +72,7 @@ public class ArtikelDAOFireBird extends AbstractDAOFireBird implements ArtikelDA
 				}
 			}
 
-			//Zet artikel_id in PRIJS tabel
+			//Zet artikelId in PRIJS tabel
 			updateStatement.setInt(1, aNieuw.getArtikelId());
 			updateStatement.setInt(2, aNieuw.getPrijsId());
 			updateStatement.executeUpdate();
@@ -212,7 +212,7 @@ public class ArtikelDAOFireBird extends AbstractDAOFireBird implements ArtikelDA
 				+ "inAssortiment = ? "
 				+ "WHERE artikel_id = ? ;";
 
-		// Met onderstaande join tables wordt het artikel_id en daarbij behorende prijs verkregen
+		// Met onderstaande join tables wordt het artikelId en daarbij behorende prijs verkregen
 		prijsQuery = "SELECT ARTIKEL.prijs_id, PRIJS.prijs "
 				+ "FROM ARTIKEL "
 				+ "LEFT JOIN PRIJS "
@@ -251,8 +251,8 @@ public class ArtikelDAOFireBird extends AbstractDAOFireBird implements ArtikelDA
 					if (prijsRset.getInt(1) != aNieuw.getPrijsId() && !dePrijsIsVerandert) {
 
 						aNieuw.setPrijsId(prijsRset.getInt(1));
-						String dataInconsistentie = "Data inconsistentie: Het prijs_id van aNieuw(" + aNieuw.toString() + ")\n "
-								+ "verschilt van het prijs_id uit de DB " + prijsIdUitDataBase + " terwijl "
+						String dataInconsistentie = "Data inconsistentie: Het prijsId van aNieuw(" + aNieuw.toString() + ")\n "
+								+ "verschilt van het prijsId uit de DB " + prijsIdUitDataBase + " terwijl "
 								+ "de prijs niet verandert is!!!";
 						DeLogger.getLogger().info(dataInconsistentie);
 					}
@@ -293,8 +293,8 @@ public class ArtikelDAOFireBird extends AbstractDAOFireBird implements ArtikelDA
 
 		}
 		catch (SQLException ex) {
-			DeLogger.getLogger().error("SQL fout tijdens updaten van artikel met artikel_id " + artikelId);
-			throw new GeneriekeFoutmelding("SQL fout tijdens updaten van artikel met artikel_id " + artikelId);
+			DeLogger.getLogger().error("SQL fout tijdens updaten van artikel met artikelId " + artikelId);
+			throw new GeneriekeFoutmelding("SQL fout tijdens updaten van artikel met artikelId " + artikelId);
 		}
 
 	}

@@ -1,10 +1,5 @@
 package mysql;
 
-import exceptions.GeneriekeFoutmelding;
-import interfaces.BestellingDAO;
-import model.Artikel;
-import model.Bestelling;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -13,19 +8,24 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 
-public class BestellingDAOMySQL extends AbstractDAOMySQL implements BestellingDAO {
+import exceptions.GeneriekeFoutmelding;
+import interfaces.BestellingDAO;
+import model.Artikel;
+import model.Bestelling;
+
+public class BestellingDAOMySQL extends AbstractDAOMySQL implements BestellingDAO{
 	public static boolean bestellingWordGetest = false; //Kijken of een JUnit test loopt
 	public static Bestelling aangeroepenBestellingInTest; //TODO nieuwe bestelling voor test maken
 
-	public long nieuweBestelling(Bestelling bestelling) throws GeneriekeFoutmelding {
+	public long nieuweBestelling(Bestelling bestelling) throws GeneriekeFoutmelding{
 		try (Connection con = connPool.verkrijgConnectie();
-				PreparedStatement statementBestelTabel = con.prepareStatement(
-						"INSERT INTO `BESTELLING` (klant_id, bestellingActief) VALUES (?, ?)",
-						PreparedStatement.RETURN_GENERATED_KEYS);){
+			 PreparedStatement statementBestelTabel = con.prepareStatement(
+					 "INSERT INTO `bestelling` (klantId, bestellingActief) VALUES (?, ?)",
+					 PreparedStatement.RETURN_GENERATED_KEYS);){
 
 			con.setAutoCommit(false);
 
-			statementBestelTabel.setLong(1, bestelling.getKlant_id());
+			statementBestelTabel.setLong(1, bestelling.getKlantId());
 			statementBestelTabel.setBoolean(2, bestelling.getBestellingActief());
 			statementBestelTabel.executeUpdate();
 
@@ -43,16 +43,16 @@ public class BestellingDAOMySQL extends AbstractDAOMySQL implements BestellingDA
 
 		// De eerste try haalt het id van de nieuwe bestelling op, in de tweede try word de lijst met artikelen verwerkt
 		try (Connection con = connPool.verkrijgConnectie();
-				PreparedStatement statementBestelTabel = con.prepareStatement(
-						"INSERT INTO `BESTELLING` (klant_id) VALUES (?)",
-						PreparedStatement.RETURN_GENERATED_KEYS);){
+			 PreparedStatement statementBestelTabel = con.prepareStatement(
+					 "INSERT INTO `bestelling` (klantId, isActief) VALUES (?, ?)",
+					 PreparedStatement.RETURN_GENERATED_KEYS);){
 
 			// Auto-commit uit om alles tegelijk door te voeren, voorkomt fouten in de database wanneer
 			// de bestelling en de artikellijst niet beide goed gaan
 			con.setAutoCommit(false);
 
 			statementBestelTabel.setLong(1, klantId);
-//			statementBestelTabel.setBoolean(2, isActief);
+			statementBestelTabel.setBoolean(2, isActief);
 			statementBestelTabel.executeUpdate();
 
 			long bestellingId = schrijfAlleArtikelenNaarDeDatabase(con, statementBestelTabel, artikelList);
@@ -68,17 +68,17 @@ public class BestellingDAOMySQL extends AbstractDAOMySQL implements BestellingDA
 	@Override
 	public Iterator<Bestelling> getBestellingOpKlantId(long klantId, boolean bestellingActief) throws GeneriekeFoutmelding{
 		try(Connection con = connPool.verkrijgConnectie();
-				PreparedStatement statement = con.prepareStatement(
-						"SELECT `BESTELLING`.klant_id, `BESTELLING`.bestelling_id, `BESTELLING`.bestellingActief, `ARTIKEL`.artikel_id, `ARTIKEL`.omschrijving, `BESTELLING_HEEFT_ARTIKEL`.aantal, "
-								+ "`BESTELLING_HEEFT_ARTIKEL`.prijs_id_prijs, `PRIJS`.prijs, `BESTELLING`.datumAanmaak"
+			PreparedStatement statement = con.prepareStatement(
+					"SELECT `bestelling`.klantId, `bestelling`.bestellingId, `bestelling`.bestellingActief, `artikel`.artikelId, `artikel`.omschrijving, `bestellingHeeftArtikel`.aantal, "
+							+ "`bestellingHeeftArtikel`.prijsIdPrijs, `prijs`.prijs, `bestelling`.datumAanmaak"
 
-							+ " FROM `BESTELLING_HEEFT_ARTIKEL`, `ARTIKEL`, `BESTELLING`, `PRIJS`"
+							+ " FROM `bestellingHeeftArtikel`, `artikel`, `bestelling`, `prijs`"
 
-							+ " WHERE `BESTELLING`.klant_id = ? AND `BESTELLING`.bestellingActief LIKE ?"
-							+ " AND `BESTELLING_HEEFT_ARTIKEL`.prijs_id_prijs = `PRIJS`.prijs_id"
-							+ " AND `BESTELLING_HEEFT_ARTIKEL`.bestelling_id_best = `BESTELLING`.bestelling_id"
-							+ " AND `BESTELLING_HEEFT_ARTIKEL`.artikel_id_art = `ARTIKEL`.artikel_id;"
-						);){
+							+ " WHERE `bestelling`.klantId = ? AND `bestelling`.bestellingActief LIKE ?"
+							+ " AND `bestellingHeeftArtikel`.prijsIdPrijs = `prijs`.prijsId"
+							+ " AND `bestellingHeeftArtikel`.bestellingIdBest = `bestelling`.bestellingId"
+							+ " AND `bestellingHeeftArtikel`.artikelIdArt = `artikel`.artikelId;"
+			);){
 
 			statement.setLong(1, klantId);
 
@@ -86,9 +86,9 @@ public class BestellingDAOMySQL extends AbstractDAOMySQL implements BestellingDA
 				statement.setBoolean(2, bestellingActief);
 			else
 				statement.setString(2, "%");
-			
+
 			LinkedHashSet<Bestelling> set = verwerkResultSetGetBestelling(statement);
-			
+
 			if(set == null)
 				return null;
 			else
@@ -101,19 +101,19 @@ public class BestellingDAOMySQL extends AbstractDAOMySQL implements BestellingDA
 	@Override
 	public Iterator<Bestelling> getBestellingOpBestellingId(long bestellingId, boolean bestellingActief) throws GeneriekeFoutmelding{
 		try(Connection con = connPool.verkrijgConnectie();
-				PreparedStatement statement = con.prepareStatement(
-						"SELECT `BESTELLING`.klant_id, `BESTELLING`.bestelling_id, `BESTELLING`.bestellingActief, `ARTIKEL`.artikel_id, "
-								+ "`ARTIKEL`.omschrijving, `BESTELLING_HEEFT_ARTIKEL`.aantal, "
-								+ "`BESTELLING_HEEFT_ARTIKEL`.prijs_id_prijs, `PRIJS`.prijs, "
-								+ "`BESTELLING`.datumAanmaak"
+			PreparedStatement statement = con.prepareStatement(
+					"SELECT `bestelling`.klantId, `bestelling`.bestellingId, `bestelling`.bestellingActief, `artikel`.artikelId, "
+							+ "`artikel`.omschrijving, `bestellingHeeftArtikel`.aantal, "
+							+ "`bestellingHeeftArtikel`.prijsIdPrijs, `prijs`.prijs, "
+							+ "`bestelling`.datumAanmaak"
 
-						+ " FROM `BESTELLING_HEEFT_ARTIKEL`, `ARTIKEL`, `BESTELLING`, `PRIJS`"
+							+ " FROM `bestellingHeeftArtikel`, `artikel`, `bestelling`, `prijs`"
 
-						+ " WHERE `BESTELLING`.bestelling_id = ? AND `BESTELLING`.bestellingActief LIKE ?"
-						+ " AND `BESTELLING_HEEFT_ARTIKEL`.prijs_id_prijs = `PRIJS`.prijs_id"
-						+ " AND `BESTELLING_HEEFT_ARTIKEL`.bestelling_id_best = `BESTELLING`.bestelling_id"
-						+ " AND `BESTELLING_HEEFT_ARTIKEL`.artikel_id_art = `ARTIKEL`.artikel_id;"
-						);){
+							+ " WHERE `bestelling`.bestellingId = ? AND `bestelling`.bestellingActief LIKE ?"
+							+ " AND `bestellingHeeftArtikel`.prijsIdPrijs = `prijs`.prijsId"
+							+ " AND `bestellingHeeftArtikel`.bestellingIdBest = `bestelling`.bestellingId"
+							+ " AND `bestellingHeeftArtikel`.artikelIdArt = `artikel`.artikelId;"
+			);){
 
 			statement.setLong(1, bestellingId);
 
@@ -134,21 +134,21 @@ public class BestellingDAOMySQL extends AbstractDAOMySQL implements BestellingDA
 	@Override
 	public void updateBestelling(Bestelling bestelling) throws GeneriekeFoutmelding{
 		try(Connection con = connPool.verkrijgConnectie();
-				PreparedStatement deleteStatement = con.prepareStatement("DELETE FROM `BESTELLING_HEEFT_ARTIKEL` WHERE bestelling_id_best = ?;");
-				PreparedStatement setActiefStatement = con.prepareStatement("UPDATE `BESTELLING` SET `bestellingActief` = true WHERE bestelling_id = ?;")
-				){
+			PreparedStatement deleteStatement = con.prepareStatement("DELETE FROM `bestellingHeeftArtikel` WHERE bestellingIdBest = ?;");
+			PreparedStatement setActiefStatement = con.prepareStatement("UPDATE `bestelling` SET `bestellingActief` = true WHERE bestellingId = ?;")
+		){
 
 			con.setAutoCommit(false);
 
-			// Verwijder alle oude artikelen van de bestelling uit BESTELLING_HEEFT_ARTIKEL
-			deleteStatement.setLong(1, bestelling.getBestelling_id());
+			// Verwijder alle oude artikelen van de bestelling uit bestellingHeeftArtikel
+			deleteStatement.setLong(1, bestelling.getBestellingId());
 			deleteStatement.executeUpdate();
 
-			setActiefStatement.setLong(1, bestelling.getBestelling_id());
+			setActiefStatement.setLong(1, bestelling.getBestellingId());
 			setActiefStatement.executeUpdate();
-			
-			// Schrijf alle nieuwe artikelen naar BESTELLING_HEEFT_ARTIKEL
-			schrijfAlleArtikelenNaarDeDatabase(con, bestelling.getBestelling_id(), bestelling.getArtikelLijst());
+
+			// Schrijf alle nieuwe artikelen naar bestellingHeeftArtikel
+			schrijfAlleArtikelenNaarDeDatabase(con, bestelling.getBestellingId(), bestelling.getArtikelLijst());
 			con.commit();
 		}catch (SQLException e){
 			e.printStackTrace();
@@ -159,10 +159,10 @@ public class BestellingDAOMySQL extends AbstractDAOMySQL implements BestellingDA
 	@Override
 	public void setAlsInactiefAlleBestellingenKlant(long klantId) throws GeneriekeFoutmelding{
 		try(Connection con = connPool.verkrijgConnectie();
-				PreparedStatement updateStatement = con.prepareStatement(
-						"UPDATE `BESTELLING` "
-								+ "SET bestellingActief = 0 "
-								+ "WHERE klant_id = ?;");){
+			PreparedStatement updateStatement = con.prepareStatement(
+					"UPDATE `bestelling` "
+							+ "SET bestellingActief = 0 "
+							+ "WHERE klantId = ?;");){
 			updateStatement.setLong(1, klantId);
 			updateStatement.executeUpdate();
 		}catch (SQLException e){
@@ -173,26 +173,26 @@ public class BestellingDAOMySQL extends AbstractDAOMySQL implements BestellingDA
 	@Override
 	public void verwijderAlleBestellingenKlant(long klantId) throws GeneriekeFoutmelding{
 		try(Connection con = connPool.verkrijgConnectie();
-				PreparedStatement statement = con.prepareStatement(
-						"DELETE `BESTELLING_HEEFT_ARTIKEL` "
-								+ "FROM `BESTELLING_HEEFT_ARTIKEL` "
-								+ "INNER JOIN `BESTELLING` "
-								+ "ON `BESTELLING_HEEFT_ARTIKEL`.bestelling_id_best = `BESTELLING`.bestelling_id "
-								+ "WHERE `BESTELLING`.klant_id = ?;");){
+			PreparedStatement statement = con.prepareStatement(
+					"DELETE `bestellingHeeftArtikel` "
+							+ "FROM `bestellingHeeftArtikel` "
+							+ "INNER JOIN `bestelling` "
+							+ "ON `bestellingHeeftArtikel`.bestellingIdBest = `bestelling`.bestellingId "
+							+ "WHERE `bestelling`.klantId = ?;");){
 
 			// Auto-commit uit want we werken op 2 tabellen
 			// Dus het moet allebei goed gaan
 			con.setAutoCommit(false);
 
-			//Verwijder alle items met het klantId uit BESTELLING_HEEFT_ARTIKEL
+			//Verwijder alle items met het klantId uit bestellingHeeftArtikel
 			statement.setLong(1, klantId);
 			statement.executeUpdate();
 
 			// Verwijder bestelling
 			try(PreparedStatement updateStatement = con.prepareStatement(
-					"DELETE `BESTELLING` "
-							+ "FROM `BESTELLING`"
-							+ "WHERE klant_id = ?;");){
+					"DELETE `bestelling` "
+							+ "FROM `bestelling`"
+							+ "WHERE klantId = ?;");){
 				updateStatement.setLong(1, klantId);
 				updateStatement.executeUpdate();
 			}
@@ -206,8 +206,8 @@ public class BestellingDAOMySQL extends AbstractDAOMySQL implements BestellingDA
 	@Override
 	public void setEnkeleBestellingInactief(long bestellingId) throws GeneriekeFoutmelding{
 		try(Connection con = connPool.verkrijgConnectie();
-				PreparedStatement statement = con.prepareStatement(
-						"UPDATE `BESTELLING` SET bestellingActief = 0 WHERE bestelling_id = ?")){
+			PreparedStatement statement = con.prepareStatement(
+					"UPDATE `bestelling` SET bestellingActief = 0 WHERE bestellingId = ?")){
 			statement.setLong(1, bestellingId);
 			statement.executeUpdate();
 		}catch (SQLException e){
@@ -218,18 +218,18 @@ public class BestellingDAOMySQL extends AbstractDAOMySQL implements BestellingDA
 	public void verwijderEnkeleBestelling(long bestellingId) throws GeneriekeFoutmelding{
 		try(Connection con = connPool.verkrijgConnectie();
 			PreparedStatement statement = con.prepareStatement(
-					"DELETE FROM `BESTELLING` WHERE bestelling_id = ?");
-					PreparedStatement statement2 = con.prepareStatement(
-					"DELETE FROM `BESTELLING_HEEFT_ARTIKEL` WHERE bestelling_id_best = ?")){
+					"DELETE FROM `bestelling` WHERE bestellingId = ?");
+			PreparedStatement statement2 = con.prepareStatement(
+					"DELETE FROM `bestellingHeeftArtikel` WHERE bestellingIdBest = ?")){
 
 			con.setAutoCommit(false);
-			
+
 			statement2.setLong(1, bestellingId);
 			statement2.executeUpdate();
-			
+
 			statement.setLong(1, bestellingId);
 			statement.executeUpdate();
-			
+
 			con.commit();
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
@@ -242,7 +242,7 @@ public class BestellingDAOMySQL extends AbstractDAOMySQL implements BestellingDA
 
 	private long schrijfAlleArtikelenNaarDeDatabase(Connection con, long bestellingId, List<Artikel> artikelList) throws GeneriekeFoutmelding{
 		try(PreparedStatement statementBestelHeeftArtikelTabel = con.prepareStatement(
-				"INSERT INTO `BESTELLING_HEEFT_ARTIKEL` (bestelling_id_best, artikel_id_art, prijs_id_prijs, aantal)"
+				"INSERT INTO `bestellingHeeftArtikel` (bestellingIdBest, artikelIdArt, prijsIdPrijs, aantal)"
 						+ " VALUES (?, ?, ?, ?)");){
 
 			// Nieuw aangemaakte bestellingId ophalen
@@ -262,9 +262,9 @@ public class BestellingDAOMySQL extends AbstractDAOMySQL implements BestellingDA
 
 	private long schrijfAlleArtikelenNaarDeDatabase(Connection con, PreparedStatement statement, List<Artikel> artikelList) throws GeneriekeFoutmelding{
 		try(ResultSet rs = statement.getGeneratedKeys();
-				PreparedStatement statementBestelHeeftArtikelTabel = con.prepareStatement(
-						"INSERT INTO `BESTELLING_HEEFT_ARTIKEL` (bestelling_id_best, artikel_id_art, prijs_id_prijs, aantal)"
-								+ " VALUES (?, ?, ?, ?)");){
+			PreparedStatement statementBestelHeeftArtikelTabel = con.prepareStatement(
+					"INSERT INTO `bestellingHeeftArtikel` (bestellingIdBest, artikelIdArt, prijsIdPrijs, aantal)"
+							+ " VALUES (?, ?, ?, ?)");){
 
 
 			// Nieuw aangemaakte bestellingId ophalen
@@ -298,13 +298,13 @@ public class BestellingDAOMySQL extends AbstractDAOMySQL implements BestellingDA
 			// die op de vorige rij van de ResultSet, maak anders een nieuwe Bestelling aan
 			while(rs.next()){
 				// Kijk of het de eerste bestelling is
-				if(best.getBestelling_id() == 0){
+				if(best.getBestellingId() == 0){
 					setBestellingGegevens(rs, best);
 				}
 
 				// Wanneer er een volgende bestelling is, schrijf de vorige naar de ArrayList
 				// en maak een nieuwe bestelling aan
-				if(best.getBestelling_id() != (rs.getLong("bestelling_id"))){
+				if(best.getBestellingId() != (rs.getLong("bestellingId"))){
 					bestellingSet.add(best);
 					best = new Bestelling();
 					setBestellingGegevens(rs, best);
@@ -314,20 +314,20 @@ public class BestellingDAOMySQL extends AbstractDAOMySQL implements BestellingDA
 				// met Artikel objecten in Bestelling
 				art = new Artikel();
 
-				art.setArtikelId(rs.getInt("artikel_id"));
+				art.setArtikelId(rs.getInt("artikelId"));
 				art.setArtikelNaam(rs.getString("omschrijving"));
 				art.setArtikelPrijs(rs.getBigDecimal("prijs"));
-				art.setPrijsId(rs.getInt("prijs_id_prijs"));
+				art.setPrijsId(rs.getInt("prijsIdPrijs"));
 				art.setAantalBesteld(rs.getInt("aantal"));
 				best.voegArtikelToe(art);
-			
+
 			}
 			//Laatste bestelling ook toevoegen aan de ArrayList
 			if(!(best.getArtikelLijst() == null)){
 				bestellingSet.add(best);
 				return bestellingSet;
 			}
-			
+
 		} catch (SQLException e) {
 			throw new GeneriekeFoutmelding("Error in: " + this.getClass() + ": verwerkResultSetGetBestelling(con, statement, artikelList: " + e.getMessage());
 		} catch(Exception e){
@@ -338,8 +338,8 @@ public class BestellingDAOMySQL extends AbstractDAOMySQL implements BestellingDA
 
 	private void setBestellingGegevens(ResultSet rs, Bestelling best) throws GeneriekeFoutmelding{
 		try{
-			best.setBestelling_id(rs.getLong("bestelling_id"));
-			best.setKlant_id(rs.getLong("klant_id"));
+			best.setBestellingId(rs.getLong("bestellingId"));
+			best.setKlantId(rs.getLong("klantId"));
 			best.setDatumAanmaak(rs.getString("datumAanmaak"));
 			best.setBestellingActief(rs.getBoolean("bestellingActief"));
 		}catch (SQLException e){

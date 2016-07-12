@@ -26,7 +26,7 @@ public interface KlantDAO {
      * Maakt een nieuwe klant aan in de database met alle naamgegevens.
      * Als er adres en/of bestelgegevens aanwezig zijn worden deze tevens ook toegevoegd.
      * Er wordt in de database automatisch een uniek ID gegenereerd welke automatisch verhoogd wordt.
-     * Het is mogelijk door middel van een adres_id mee te geven geen nieuw adres aan te maken maar
+     * Het is mogelijk door middel van een adresId mee te geven geen nieuw adres aan te maken maar
      * deze te koppelen aan de klant.
      *
      * @param nieuweKlant Nieuwe klantgegevens in een Klant-object.
@@ -35,7 +35,7 @@ public interface KlantDAO {
      * @throws GeneriekeFoutmelding Foutmelding bij SQLException, info wordt meegegeven.
      */
     long nieuweKlant(Klant nieuweKlant,
-                     long adres_id,
+                     long adresId,
                      Adres adresgegevens,
                      Bestelling bestelGegevens) throws GeneriekeFoutmelding;
 
@@ -44,12 +44,12 @@ public interface KlantDAO {
      * adres-id wordt meegegeven wordt geen adres gekopeld.
      *
      * @param nieuweKlant De gegevens van de nieuwe klant in een Klant-object
-     * @param adres_id Het adres-id van een mogelijk te koppelen adres.
+     * @param adresId Het adres-id van een mogelijk te koppelen adres.
      * @return Het nieuwe klant-id wordt teruggegeven.
      * @throws GeneriekeFoutmelding Foutmelding bij SQLException, info wordt meegegeven.
      */
     long nieuweKlant(Klant nieuweKlant,
-                     long adres_id) throws GeneriekeFoutmelding;
+                     long adresId) throws GeneriekeFoutmelding;
 
     /** READ METHODS */
 
@@ -59,11 +59,20 @@ public interface KlantDAO {
      * @param voornaam De te zoeken voornaam
      * @param achternaam De te zoeken achternaam
      * @param email De te zoeken email van de klant
-     * @return Het klant_id van de klant
+     * @return Het klantId van de klant
      */
     long getKlantID(String voornaam,
                     String achternaam,
                     String email) throws GeneriekeFoutmelding;
+
+    /**
+     * DOet blahblah enzo //TODO
+     *
+     * @return
+     * @throws GeneriekeFoutmelding
+     */
+    ListIterator<Klant> getAlleKlanten() throws GeneriekeFoutmelding ;
+
     /**
      * Deze method haalt klanten op uit de database op basis van een meegegeven Klant-Object.
      *
@@ -96,7 +105,7 @@ public interface KlantDAO {
     /** UPDATE METHODS */
 
     /**
-     * Methode om een klant met een bepaald klant_id zijn naamgegevens up te daten.
+     * Methode om een klant met een bepaald klantId zijn naamgegevens up te daten.
      *
      * @param nieuweKlant De te updaten klant in Klant-object
      * @throws GeneriekeFoutmelding Foutmelding bij SQLException, info wordt meegegeven.
@@ -119,7 +128,7 @@ public interface KlantDAO {
      * Methode om een klant te verwijderen op basis van ID. Alle bestellingen van de klant worden
      * tevens ook verwijderd.
      *
-     * @param klantId Klant_id van de te verwijderen klant.
+     * @param klantId KlantId van de te verwijderen klant.
      * @throws GeneriekeFoutmelding Foutmelding bij SQLException, info wordt meegegeven.
      */
     void schakelStatusKlant(long klantId, int status) throws GeneriekeFoutmelding;

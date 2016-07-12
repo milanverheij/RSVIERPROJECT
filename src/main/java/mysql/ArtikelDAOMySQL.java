@@ -31,8 +31,8 @@ public class ArtikelDAOMySQL extends AbstractDAOMySQL implements ArtikelDAO {
 
 	//Create
 
-	// Onderstaande methode maakt een nieuw artikel aan in de ARTIKEL tabel, zet de prijs gegevens van het artikel in de PRIJS
-	// tabel en zorgt ervoor dat de ARTIKEL tabel het juiste prijs_id heeft.
+	// Onderstaande methode maakt een nieuw artikel aan in de artikel tabel, zet de prijs gegevens van het artikel in de prijs
+	// tabel en zorgt ervoor dat de artikel tabel het juiste prijsId heeft.
 	@Override 
 	public int nieuwArtikel(Artikel aNieuw) throws GeneriekeFoutmelding {
 		
@@ -40,10 +40,10 @@ public class ArtikelDAOMySQL extends AbstractDAOMySQL implements ArtikelDAO {
 			DeLogger.getLogger().error("Fout: Null waarde voor aNieuw in de methode nieuwArtikel");
 		}
 		
-		prijsQuery = "INSERT INTO PRIJS (prijs) VALUES (?);";
-		artikelQuery = "INSERT INTO ARTIKEL (omschrijving, prijs_id, verwachteLevertijd, inAssortiment)"
+		prijsQuery = "INSERT INTO prijs (prijs) VALUES (?);";
+		artikelQuery = "INSERT INTO artikel (omschrijving, prijsId, verwachteLevertijd, inAssortiment)"
 				+ "VALUES (?, ?, ?, ?);";
-		String queryUpdate = "UPDATE PRIJS SET artikel_id = ? WHERE prijs_id = ?;";
+		String queryUpdate = "UPDATE prijs SET artikelId = ? WHERE prijsId = ?;";
 
 		try (Connection connection = connPool.verkrijgConnectie();
 				PreparedStatement prijsStatement = connection.prepareStatement(prijsQuery, Statement.RETURN_GENERATED_KEYS);
@@ -52,7 +52,7 @@ public class ArtikelDAOMySQL extends AbstractDAOMySQL implements ArtikelDAO {
 
 			connection.setAutoCommit(false);
 
-			//Zet de prijs gegevens in de PRIJS tabel
+			//Zet de prijs gegevens in de prijs tabel
 			prijsStatement.setBigDecimal(1, aNieuw.getArtikelPrijs());
 			prijsStatement.executeUpdate();
 
@@ -62,7 +62,7 @@ public class ArtikelDAOMySQL extends AbstractDAOMySQL implements ArtikelDAO {
 				}
 			}
 
-			//Zet de artikel gegevens in de ARTIKEL tabel
+			//Zet de artikel gegevens in de artikel tabel
 			artikelStatement.setString(1, aNieuw.getArtikelNaam());
 			artikelStatement.setInt(2, aNieuw.getPrijsId());
 			artikelStatement.setInt(3, aNieuw.getVerwachteLevertijd());
@@ -75,7 +75,7 @@ public class ArtikelDAOMySQL extends AbstractDAOMySQL implements ArtikelDAO {
 				}
 			}
 
-			//Zet artikel_id in PRIJS tabel
+			//Zet artikelId in prijs tabel
 			updateStatement.setInt(1, aNieuw.getArtikelId());
 			updateStatement.setInt(2, aNieuw.getPrijsId());
 			updateStatement.executeUpdate();
@@ -98,8 +98,8 @@ public class ArtikelDAOMySQL extends AbstractDAOMySQL implements ArtikelDAO {
 	@Override
 	public Artikel getArtikel(int artikelId) throws GeneriekeFoutmelding {
 
-		artikelQuery = "SELECT * FROM ARTIKEL WHERE artikel_id = ? ;";
-		prijsQuery	= "SELECT prijs FROM PRIJS WHERE prijs_id = ? ;";
+		artikelQuery = "SELECT * FROM artikel WHERE artikelId = ? ;";
+		prijsQuery	= "SELECT prijs FROM prijs WHERE prijsId = ? ;";
 
 		try (Connection connection = connPool.verkrijgConnectie();
 				PreparedStatement artikelStatement = connection.prepareStatement(artikelQuery);
@@ -152,11 +152,11 @@ public class ArtikelDAOMySQL extends AbstractDAOMySQL implements ArtikelDAO {
 		// Alle artikelen worden in een Set opgeslagen
 		LinkedHashSet<Artikel> artikelSet = new LinkedHashSet<>()	;
 
-		// Onderstaande query combineert de ARTIKEL en PRIJS tabel zodat alle artikel gegevens in een
+		// Onderstaande query combineert de artikel en prijs tabel zodat alle artikel gegevens in een
 		// keer uitgelezen kunnen worden, tevens kan er geselecteerd worden op alle of alleen actieve artikelen.
-		artikelQuery = "SELECT ARTIKEL.artikel_id, ARTIKEL.omschrijving, ARTIKEL.prijs_id, PRIJS.prijs, "
-				+ "ARTIKEL.datumAanmaak, ARTIKEL.verwachteLevertijd, ARTIKEL.inAssortiment FROM ARTIKEL "
-				+ "LEFT JOIN PRIJS ON ARTIKEL.prijs_id = PRIJS.prijs_id WHERE inAssortiment LIKE ?;";
+		artikelQuery = "SELECT artikel.artikelId, artikel.omschrijving, artikel.prijsId, prijs.prijs, "
+				+ "artikel.datumAanmaak, artikel.verwachteLevertijd, artikel.inAssortiment FROM artikel "
+				+ "LEFT JOIN prijs ON artikel.prijsId = prijs.prijsId WHERE inAssortiment LIKE ?;";
 
 		try (Connection connection = connPool.verkrijgConnectie();
 
@@ -204,21 +204,21 @@ public class ArtikelDAOMySQL extends AbstractDAOMySQL implements ArtikelDAO {
 		boolean dePrijsIsVerandert = false;
 		int prijsIdUitDataBase = 0;
 
-		artikelQuery = "UPDATE ARTIKEL SET "
+		artikelQuery = "UPDATE artikel SET "
 				+ "omschrijving = ?, "
-				+ "prijs_id = ?, "
+				+ "prijsId = ?, "
 				+ "verwachteLevertijd = ?, "
 				+ "inAssortiment = ? "
-				+ "WHERE artikel_id = ? ;";
+				+ "WHERE artikelId = ? ;";
 
-		// Met onderstaande join tables wordt het artikel_id en daarbij behorende prijs verkregen
-		prijsQuery = "SELECT ARTIKEL.prijs_id, PRIJS.prijs "
-				+ "FROM ARTIKEL "
-				+ "LEFT JOIN PRIJS "
-				+ "ON ARTIKEL.prijs_id = PRIJS.prijs_id "
-				+ "WHERE ARTIKEL.artikel_id = ? ;";
+		// Met onderstaande join tables wordt het artikelId en daarbij behorende prijs verkregen
+		prijsQuery = "SELECT artikel.prijsId, prijs.prijs "
+				+ "FROM artikel "
+				+ "LEFT JOIN prijs "
+				+ "ON artikel.prijsId = prijs.prijsId "
+				+ "WHERE artikel.artikelId = ? ;";
 
-		String nieuwePrijsQuery = "INSERT INTO PRIJS (prijs, artikel_id) "
+		String nieuwePrijsQuery = "INSERT INTO prijs (prijs, artikelId) "
 				+ "VALUES (?, ?);";
 
 		try (Connection connection = connPool.verkrijgConnectie();
@@ -250,8 +250,8 @@ public class ArtikelDAOMySQL extends AbstractDAOMySQL implements ArtikelDAO {
 					if (prijsRset.getInt(1) != aNieuw.getPrijsId() && !dePrijsIsVerandert) {
 
 						aNieuw.setPrijsId(prijsRset.getInt(1));
-						String dataInconsistentie = "Data inconsistentie: Het prijs_id van aNieuw(" + aNieuw.toString() + ")\n "
-								+ "verschilt van het prijs_id uit de DB " + prijsIdUitDataBase + " terwijl "
+						String dataInconsistentie = "Data inconsistentie: Het prijsId van aNieuw(" + aNieuw.toString() + ")\n "
+								+ "verschilt van het prijsId uit de DB " + prijsIdUitDataBase + " terwijl "
 								+ "de prijs niet verandert is!!!";
 						DeLogger.getLogger().info(dataInconsistentie);
 					}
@@ -291,8 +291,8 @@ public class ArtikelDAOMySQL extends AbstractDAOMySQL implements ArtikelDAO {
 
 		}
 		catch (SQLException ex) {
-			DeLogger.getLogger().error("SQL fout tijdens updaten van artikel met artikel_id " + artikelId);
-			throw new GeneriekeFoutmelding("SQL fout tijdens updaten van artikel met artikel_id " + artikelId);
+			DeLogger.getLogger().error("SQL fout tijdens updaten van artikel met artikelId " + artikelId);
+			throw new GeneriekeFoutmelding("SQL fout tijdens updaten van artikel met artikelId " + artikelId);
 		}
 
 	}
@@ -301,7 +301,7 @@ public class ArtikelDAOMySQL extends AbstractDAOMySQL implements ArtikelDAO {
 	@Override
 	public void verwijderArtikel(int artikelId) throws GeneriekeFoutmelding {
 
-		artikelQuery = "UPDATE ARTIKEL SET inAssortiment = 0 WHERE artikel_id = ?;";
+		artikelQuery = "UPDATE artikel SET inAssortiment = 0 WHERE artikelId = ?;";
 
 		try(Connection connection = connPool.verkrijgConnectie();
 
@@ -321,8 +321,8 @@ public class ArtikelDAOMySQL extends AbstractDAOMySQL implements ArtikelDAO {
 	}
 	
 	public void verWijderVoorHetEchie(long artikelId) throws GeneriekeFoutmelding{
-		artikelQuery = "DELETE FROM ARTIKEL WHERE artikel_id = ?;";
-		prijsQuery = "DELETE FROM PRIJS WHERE artikel_id = ?;";
+		artikelQuery = "DELETE FROM artikel WHERE artikelId = ?;";
+		prijsQuery = "DELETE FROM prijs WHERE artikelId = ?;";
 
 		try (Connection connection = connPool.verkrijgConnectie();
 				PreparedStatement verwijderArtikelStatement = connection.prepareStatement(artikelQuery);
