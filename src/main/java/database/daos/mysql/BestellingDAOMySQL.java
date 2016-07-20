@@ -242,7 +242,7 @@ public class BestellingDAOMySQL extends AbstractDAOMySQL implements BestellingDA
 		try(PreparedStatement statementBestelHeeftArtikelTabel = con.prepareStatement(
 				"INSERT INTO `bestellingHeeftArtikel` (bestellingIdBest, artikelIdArt, prijsIdPrijs, aantal)"
 						+ " VALUES (?, ?, ?, ?)");){
-			System.out.println(bestellingId);
+//			System.out.println(bestellingId);
 			// Nieuw aangemaakte bestellingId ophalen
 			for(Artikel artikel : artikelList){
 				statementBestelHeeftArtikelTabel.setLong(1, bestellingId);

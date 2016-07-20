@@ -24,6 +24,8 @@ import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import logger.DeLogger;
 
+import java.awt.*;
+
 public class StartGui extends Application{
 	Stage stage;
 	VBox vbox;
@@ -35,6 +37,8 @@ public class StartGui extends Application{
 	Label issues;
 
 	MenuBar menuBar;
+
+	Image backgroundImage = new Image("/images/achtergrond.jpg");
 
 	String databaseSelected = "MySQL";
 	String connectionSelected = "HikariCP";
@@ -57,8 +61,10 @@ public class StartGui extends Application{
 
 		VBox box = new VBox();
 		box.getChildren().addAll(menuBar, stackPane);
-		Scene scene = new Scene(box, 400, 300); // TODO: Dynamic size
 
+		Scene scene = new Scene(box, stage.getWidth(), stage.getHeight());
+
+		stage.setResizable(false);
 		stage.setScene(scene);
 		stage.show();
 		haalFocusVanTextField();
@@ -123,7 +129,7 @@ public class StartGui extends Application{
 
 	private void populateStackPane(){
 		stackPane = new StackPane();
-		Rectangle rect = new Rectangle(400, 300);
+		Rectangle rect = new Rectangle(backgroundImage.getWidth(), backgroundImage.getHeight());
 		rect.setFill(Color.WHITE);
 
 		stackPane.getChildren().add(rect);
@@ -133,13 +139,16 @@ public class StartGui extends Application{
 	}
 
 	private ImageView getAchtergrond(){
-		Image image = new Image("/gui/images/achtergrond.jpg", 300, 300, false, false);
+		Image image = backgroundImage;
 		return new ImageView(image);
 	}
 
 	private void setStageProperties(){
-		stage.getIcons().add(new Image("/gui/images/icon.jpg"));
+		stage.getIcons().add(new Image("/images/icon.png"));
 		stage.setTitle("Harrie's Tweedehands Beessies");
+
+		stage.setWidth(backgroundImage.getWidth());
+		stage.setHeight(backgroundImage.getHeight() + 60);
 	}
 
 	private void populateVbox(){
@@ -153,7 +162,7 @@ public class StartGui extends Application{
 	}
 
 	private void controleerGegevens(){
-		if(inlogNaamField.getText().equals("") && wachtwoordField.getText().equals("")){
+		if(inlogNaamField.getText().equals("Harrie") && wachtwoordField.getText().equals("1234")){
 			HoofdGui hoofd = new HoofdGui();
 			try {
 				hoofd.setConnection(databaseSelected, connectionSelected);

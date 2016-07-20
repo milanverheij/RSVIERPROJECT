@@ -24,7 +24,7 @@ import model.Artikel;
 import model.Klant;
 
 public class HoofdGui extends Application{
-	private final Insets INSET = new Insets(6);
+	private final Insets INSET = new Insets(13);
 
 	ErrorBox errorBox = new ErrorBox();
 
@@ -79,7 +79,7 @@ public class HoofdGui extends Application{
 		HBox gridBox = new HBox();
 		gridBox.getChildren().add(zoekGrid);
 		gridBox.getChildren().add(displayGrid);
-		gridBox.setSpacing(5);
+		gridBox.setSpacing(10);
 
 		HBox knoppenBox = new HBox();
 		knoppenBox.getChildren().addAll(zoekButton,
@@ -91,25 +91,24 @@ public class HoofdGui extends Application{
 
 		VBox verticalBox = new VBox();
 		verticalBox.getChildren().addAll(gridBox, knoppenBox);
-		verticalBox.setSpacing(2);
+		verticalBox.setSpacing(10);
 		verticalBox.setPadding(INSET);
 
 		Scene scene = new Scene(verticalBox);
 		stage.setScene(scene);
-		stage.setTitle("Exotische Dieren Emporium");
-		stage.getIcons().add(new Image("/gui/images/icon.jpg"));
+		stage.getIcons().add(new Image("/images/icon.png"));
 		stage.setTitle("Harrie's Tweedehands Beessies");
 		stage.show();
 	}
 
 	private void maakListViewsAan(){
-		klantListView = new ListView<String>();
+		klantListView = new ListView<>();
 		klantListView.setOnMouseClicked(e -> getItemVanKlantenLijst());
 
-		bestellingListView = new ListView<Long>();
+		bestellingListView = new ListView<>();
 		bestellingListView.setOnMouseClicked(e -> getItemVanBestellingLijst());
 
-		artikelListView = new ListView<String>();
+		artikelListView = new ListView<>();
 		artikelListView.setOnMouseClicked(e -> getItemVanArtikelLijst());
 	}
 
@@ -134,22 +133,22 @@ public class HoofdGui extends Application{
 		zoekButton = new Button("Zoeken");
 		leegButton = new Button("Leeg velden");
 
-		updateBestellingButton = new Button("Update bestelling");
-		nieuweBestellingButton = new Button("Nieuwe bestelling");
-		verwijderBestelling = new Button("Verwijder bestelling");
+		nieuweBestellingButton = new Button("Bestelling aanmaken");
+		updateBestellingButton = new Button("Bestelling aanpassen");
+		verwijderBestelling = new Button("Bestelling verwijderen");
 
-		updateArtikelButton = new Button("Update Artikel");
+		updateArtikelButton = new Button("Artikel aanpassen");
 
-		nieuweKlantButton = new Button("Nieuwe klant");
-		updateKlantButton = new Button("Update klant");
+		nieuweKlantButton = new Button("Klant aanmaken");
+		updateKlantButton = new Button("Klant aanpassen");
 
 		zoekButton.setOnAction(e -> zoekKnopKlik());
 		leegButton.setOnAction(E -> leegAlles());
 
 		updateArtikelButton.setOnAction(e -> nieuwArtikel());
 
-		updateBestellingButton.setOnAction(e -> updateBestelling());
 		nieuweBestellingButton.setOnAction(e -> nieuweBestelling());
+		updateBestellingButton.setOnAction(e -> updateBestelling());
 		verwijderBestelling.setOnAction(e -> guiBewerkingen.verwijderEnkeleBestelling(bestellingListView));
 
 		nieuweKlantButton.setOnAction(e -> nieuweKlant());
@@ -164,7 +163,7 @@ public class HoofdGui extends Application{
 	private void populateZoekGrid(){
 		zoekGrid = new GridPane();
 
-		Text zoekOp = new Text("Zoeken op");
+		Text zoekOp = new Text("Zoeken:");
 		zoekOp.setFont(Font.font(Font.getDefault().getName(), FontWeight.BOLD, Font.getDefault().getSize()));
 
 		actieveItems = new CheckBox("Alleen actieve items tonen");
@@ -177,11 +176,11 @@ public class HoofdGui extends Application{
 		zoekGrid.add(new Label("Achternaam"), 0, 4);
 		zoekGrid.add(new Label("E-mail"), 0, 5);
 		zoekGrid.add(new Label(" "), 0, 6);
-		zoekGrid.add(new Label("Bestelling Id"), 0, 7);
+		zoekGrid.add(new Label("Bestelling ID"), 0, 7);
 		zoekGrid.add(new Label(" "), 0, 8);
 		zoekGrid.add(new Label("Straatnaam"), 0, 9);
 		zoekGrid.add(new Label("Huisnummer"), 0, 10);
-		zoekGrid.add(new Label("toevoeging"), 0, 11);
+		zoekGrid.add(new Label("Toevoeging"), 0, 11);
 		zoekGrid.add(new Label("Postcode"), 0, 12);
 		zoekGrid.add(new Label("Woonplaats"), 0, 13);
 		zoekGrid.add(new Label(" "), 0, 14);
