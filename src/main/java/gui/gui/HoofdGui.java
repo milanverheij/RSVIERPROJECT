@@ -137,7 +137,7 @@ public class HoofdGui extends Application{
 		updateBestellingButton = new Button("Bestelling aanpassen");
 		verwijderBestelling = new Button("Bestelling verwijderen");
 
-		updateArtikelButton = new Button("Artikel aanpassen");
+		updateArtikelButton = new Button("Artikel module");
 
 		nieuweKlantButton = new Button("Klant aanmaken");
 		updateKlantButton = new Button("Klant aanpassen");

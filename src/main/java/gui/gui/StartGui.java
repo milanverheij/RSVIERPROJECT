@@ -67,6 +67,7 @@ public class StartGui extends Application{
 		stage.setResizable(false);
 		stage.setScene(scene);
 		stage.show();
+		System.out.println(menuBar.getHeight());
 		haalFocusVanTextField();
 	}
 
