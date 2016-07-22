@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<class-diagram version="1.1.10" icons="true" always-add-relationships="false" generalizations="true" realizations="true" 
+  associations="true" dependencies="false" nesting-relationships="false" router="FAN">  
+  <class id="1" language="java" name="connection_pools.HikariCPAdapter" project="RSvierWorkshop2" 
+    file="/RSvierWorkshop2/src/main/java/connection_pools/HikariCPAdapter.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="41" width="262" x="852" y="296"/>    
+    <display autosize="false" stereotype="true" package="false" initial-value="false" signature="false" 
+      sort-features="false" accessors="true" visibility="false">      
+      <attributes public="false" package="false" protected="false" private="false" static="false"/>      
+      <operations public="false" package="false" protected="false" private="false" static="false"/>    
+    </display>  
+  </class>  
+  <class id="2" language="java" name="connection_pools.OudeMySQLConnectorAdapter" project="RSvierWorkshop2" 
+    file="/RSvierWorkshop2/src/main/java/connection_pools/OudeMySQLConnectorAdapter.java" binary="false" 
+    corner="BOTTOM_RIGHT">    
+    <position height="41" width="263" x="258" y="416"/>    
+    <display autosize="false" stereotype="true" package="false" initial-value="false" signature="false" 
+      sort-features="false" accessors="true" visibility="false">      
+      <attributes public="false" package="false" protected="false" private="false" static="false"/>      
+      <operations public="false" package="false" protected="false" private="false" static="false"/>    
+    </display>  
+  </class>  
+  <class id="3" language="java" name="connection_pools.ConnectieConfiguratie" project="RSvierWorkshop2" 
+    file="/RSvierWorkshop2/src/main/java/connection_pools/ConnectieConfiguratie.java" binary="false" 
+    corner="BOTTOM_RIGHT">    
+    <position height="41" width="261" x="710" y="185"/>    
+    <display autosize="false" stereotype="true" package="false" initial-value="false" signature="false" 
+      sort-features="false" accessors="true" visibility="false">      
+      <attributes public="false" package="false" protected="false" private="false" static="false"/>      
+      <operations public="false" package="false" protected="false" private="false" static="false"/>    
+    </display>  
+  </class>  
+  <class id="4" language="java" name="connection_pools.HikariCPConnectionPool" project="RSvierWorkshop2" 
+    file="/RSvierWorkshop2/src/main/java/connection_pools/HikariCPConnectionPool.java" binary="false" 
+    corner="BOTTOM_RIGHT">    
+    <position height="41" width="260" x="1155" y="296"/>    
+    <display autosize="false" stereotype="true" package="false" initial-value="false" signature="false" 
+      sort-features="false" accessors="true" visibility="false">      
+      <attributes public="false" package="false" protected="false" private="false" static="false"/>      
+      <operations public="false" package="false" protected="false" private="false" static="false"/>    
+    </display>  
+  </class>  
+  <class id="5" language="java" name="connection_pools.ConnectiePropertyLader" project="RSvierWorkshop2" 
+    file="/RSvierWorkshop2/src/main/java/connection_pools/ConnectiePropertyLader.java" binary="false" 
+    corner="BOTTOM_RIGHT">    
+    <position height="41" width="258" x="709" y="22"/>    
+    <display autosize="false" stereotype="true" package="false" initial-value="false" signature="false" 
+      sort-features="false" accessors="true" visibility="false">      
+      <attributes public="false" package="false" protected="false" private="false" static="false"/>      
+      <operations public="false" package="false" protected="false" private="false" static="false"/>    
+    </display>  
+  </class>  
+  <class id="6" language="java" name="connection_pools.C3POAdapter" project="RSvierWorkshop2" 
+    file="/RSvierWorkshop2/src/main/java/connection_pools/C3POAdapter.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="41" width="261" x="555" y="295"/>    
+    <display autosize="false" stereotype="true" package="false" initial-value="false" signature="false" 
+      sort-features="false" accessors="true" visibility="false">      
+      <attributes public="false" package="false" protected="false" private="false" static="false"/>      
+      <operations public="false" package="false" protected="false" private="false" static="false"/>    
+    </display>  
+  </class>  
+  <class id="7" language="java" name="connection_pools.ConnectieConfiguratie.ConnectieConfiguratieBuilder" 
+    project="RSvierWorkshop2" file="/RSvierWorkshop2/src/main/java/connection_pools/ConnectieConfiguratie.java" 
+    binary="false" corner="BOTTOM_RIGHT">    
+    <position height="41" width="263" x="1012" y="149"/>    
+    <display autosize="false" stereotype="true" package="false" initial-value="false" signature="false" 
+      sort-features="false" accessors="true" visibility="false">      
+      <attributes public="false" package="false" protected="false" private="false" static="false"/>      
+      <operations public="false" package="false" protected="false" private="false" static="false"/>    
+    </display>  
+  </class>  
+  <class id="8" language="java" name="connection_pools.C3POConnectionPool" project="RSvierWorkshop2" 
+    file="/RSvierWorkshop2/src/main/java/connection_pools/C3POConnectionPool.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="41" width="263" x="259" y="294"/>    
+    <display autosize="false" stereotype="true" package="false" initial-value="false" signature="false" 
+      sort-features="false" accessors="true" visibility="false">      
+      <attributes public="false" package="false" protected="false" private="false" static="false"/>      
+      <operations public="false" package="false" protected="false" private="false" static="false"/>    
+    </display>  
+  </class>  
+  <class id="9" language="java" name="factories.ConnectionPoolFactory" project="RSvierWorkshop2" 
+    file="/RSvierWorkshop2/src/main/java/factories/ConnectionPoolFactory.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="41" width="259" x="711" y="104"/>    
+    <display autosize="false" stereotype="true" package="false" initial-value="false" signature="false" 
+      sort-features="false" accessors="true" visibility="false">      
+      <attributes public="false" package="false" protected="false" private="false" static="false"/>      
+      <operations public="false" package="false" protected="false" private="false" static="false"/>    
+    </display>  
+  </class>  
+  <interface id="10" language="java" name="interfaces.VerkrijgConnectie" project="RSvierWorkshop2" 
+    file="/RSvierWorkshop2/src/main/java/interfaces/VerkrijgConnectie.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="41" width="264" x="715" y="412"/>    
+    <display autosize="false" stereotype="true" package="false" initial-value="false" signature="false" 
+      sort-features="false" accessors="true" visibility="false">      
+      <attributes public="false" package="false" protected="false" private="false" static="false"/>      
+      <operations public="false" package="false" protected="false" private="false" static="false"/>    
+    </display>  
+  </interface>  
+  <class id="11" language="java" name="mysql.MySQLConnectieLeverancier" project="RSvierWorkshop2" 
+    file="/RSvierWorkshop2/src/main/java/mysql/MySQLConnectieLeverancier.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="41" width="259" x="258" y="496"/>    
+    <display autosize="false" stereotype="true" package="false" initial-value="false" signature="false" 
+      sort-features="false" accessors="true" visibility="false">      
+      <attributes public="false" package="false" protected="false" private="false" static="false"/>      
+      <operations public="false" package="false" protected="false" private="false" static="false"/>    
+    </display>  
+  </class>  
+  <class id="12" language="java" name="firebird.AbstractDAOFireBird" project="RSvierWorkshop2" 
+    file="/RSvierWorkshop2/src/main/java/firebird/AbstractDAOFireBird.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="41" width="267" x="860" y="597"/>    
+    <display autosize="false" stereotype="true" package="false" initial-value="false" signature="false" 
+      sort-features="false" accessors="true" visibility="false">      
+      <attributes public="false" package="false" protected="false" private="false" static="false"/>      
+      <operations public="false" package="false" protected="false" private="false" static="false"/>    
+    </display>  
+  </class>  
+  <class id="13" language="java" name="mysql.AbstractDAOMySQL" project="RSvierWorkshop2" 
+    file="/RSvierWorkshop2/src/main/java/mysql/AbstractDAOMySQL.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="41" width="266" x="560" y="598"/>    
+    <display autosize="false" stereotype="true" package="false" initial-value="false" signature="false" 
+      sort-features="false" accessors="true" visibility="false">      
+      <attributes public="false" package="false" protected="false" private="false" static="false"/>      
+      <operations public="false" package="false" protected="false" private="false" static="false"/>    
+    </display>  
+  </class>  
+  <realization id="14">    
+    <end type="SOURCE" refId="2"/>    
+    <end type="TARGET" refId="10"/>  
+  </realization>  
+  <association id="15">    
+    <end type="SOURCE" refId="11" navigable="false">      
+      <attribute id="16" name="instance"/>      
+      <multiplicity id="17" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="11" navigable="true"/>    
+    <display labels="false" multiplicity="false"/>  
+  </association>  
+  <dependency id="18">    
+    <end type="SOURCE" refId="8"/>    
+    <end type="TARGET" refId="3"/>  
+  </dependency>  
+  <association id="19">    
+    <end type="SOURCE" refId="9" navigable="false">      
+      <attribute id="20" name="connectieConfiguratie"/>      
+      <multiplicity id="21" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="3" navigable="true"/>    
+    <display labels="false" multiplicity="false"/>  
+  </association>  
+  <dependency id="22">    
+    <end type="SOURCE" refId="2"/>    
+    <end type="TARGET" refId="11"/>  
+  </dependency>  
+  <realization id="23">    
+    <end type="SOURCE" refId="6"/>    
+    <end type="TARGET" refId="10"/>  
+  </realization>  
+  <association id="24">    
+    <end type="SOURCE" refId="1" navigable="false">      
+      <attribute id="25" name="configuratie"/>      
+      <multiplicity id="26" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="3" navigable="true"/>    
+    <display labels="false" multiplicity="false"/>  
+  </association>  
+  <association id="27">    
+    <end type="SOURCE" refId="13" navigable="false">      
+      <attribute id="28" name="connPool"/>      
+      <multiplicity id="29" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="10" navigable="true"/>    
+    <display labels="false" multiplicity="false"/>  
+  </association>  
+  <association id="30">    
+    <end type="SOURCE" refId="8" navigable="false">      
+      <attribute id="31" name="C3POConnectionPool"/>      
+      <multiplicity id="32" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="8" navigable="true"/>    
+    <display labels="false" multiplicity="false"/>  
+  </association>  
+  <dependency id="33">    
+    <end type="SOURCE" refId="9"/>    
+    <end type="TARGET" refId="5"/>  
+  </dependency>  
+  <dependency id="34">    
+    <end type="SOURCE" refId="1"/>    
+    <end type="TARGET" refId="4"/>  
+  </dependency>  
+  <dependency id="35">    
+    <bendpoint x="1144" y="206"/>    
+    <end type="SOURCE" refId="7"/>    
+    <end type="TARGET" refId="3"/>  
+  </dependency>  
+  <association id="36">    
+    <end type="SOURCE" refId="6" navigable="false">      
+      <attribute id="37" name="configuratie"/>      
+      <multiplicity id="38" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="3" navigable="true"/>    
+    <display labels="false" multiplicity="false"/>  
+  </association>  
+  <dependency id="39">    
+    <bendpoint x="1184" y="281"/>    
+    <end type="SOURCE" refId="4"/>    
+    <end type="TARGET" refId="3"/>  
+  </dependency>  
+  <association id="40">    
+    <end type="SOURCE" refId="12" navigable="false">      
+      <attribute id="41" name="connPool"/>      
+      <multiplicity id="42" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="10" navigable="true"/>    
+    <display labels="false" multiplicity="false"/>  
+  </association>  
+  <association id="43">    
+    <end type="SOURCE" refId="4" navigable="false">      
+      <attribute id="44" name="hikariCPConnectionPool"/>      
+      <multiplicity id="45" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="4" navigable="true"/>    
+    <display labels="false" multiplicity="false"/>  
+  </association>  
+  <realization id="46">    
+    <end type="SOURCE" refId="1"/>    
+    <end type="TARGET" refId="10"/>  
+  </realization>  
+  <dependency id="47">    
+    <bendpoint x="1145" y="123"/>    
+    <end type="SOURCE" refId="9"/>    
+    <end type="TARGET" refId="7"/>  
+  </dependency>  
+  <dependency id="48">    
+    <end type="SOURCE" refId="6"/>    
+    <end type="TARGET" refId="8"/>  
+  </dependency>  
+  <classifier-display autosize="false" stereotype="true" package="false" initial-value="false" signature="false" 
+    sort-features="false" accessors="true" visibility="false">    
+    <attributes public="false" package="false" protected="false" private="false" static="false"/>    
+    <operations public="false" package="false" protected="false" private="false" static="false"/>  
+  </classifier-display>  
+  <association-display labels="false" multiplicity="false"/>
+</class-diagram>
