@@ -41,17 +41,13 @@ public abstract class AbstractGuiBewerkingen implements GuiBewerkingen{
 		GuiPojo.artikelLijst = GuiPojo.bestelling.getArtikelLijst();
 	}
 
-	public void populateBestellingListView(ListView<Long> bestellingListView, Iterator<Bestelling> it) throws GeneriekeFoutmelding{
-		if(it == null)
-			it = GuiPojo.bestellingLijst.values().iterator();
-		while(it.hasNext()){
-			Bestelling bestelling = it.next();
+	public void populateBestellingListView(ListView<Long> bestellingListView, ArrayList<Bestelling> list) throws GeneriekeFoutmelding{
+		for(Bestelling bestelling : list)
 			if(!bestellingListView.getItems().contains(bestelling.getBestellingId()) && bestelling.getBestellingId() != 0){
 				bestellingListView.getItems().add(bestelling.getBestellingId());
 				GuiPojo.bestellingLijst.put(bestelling.getBestellingId(), bestelling);
 			}
 		}
-	}
 
 	public void populateBestellingListView(ListView<Long> bestellingListView) throws GeneriekeFoutmelding{
 		Iterator<Bestelling> it = GuiPojo.bestellingLijst.values().iterator();

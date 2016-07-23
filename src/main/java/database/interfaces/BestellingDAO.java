@@ -4,7 +4,7 @@ import exceptions.GeneriekeFoutmelding;
 import model.Artikel;
 import model.Bestelling;
 
-import java.util.Iterator;
+import java.util.ArrayList;
 import java.util.List;
 
 public interface BestellingDAO {
@@ -14,8 +14,8 @@ public interface BestellingDAO {
 	long nieuweBestelling(long klantId, List<Artikel> artikelLijst, boolean isActief) throws GeneriekeFoutmelding;
 
 	//Read
-	Iterator<Bestelling> getBestellingOpKlantId(long klantId, boolean bestellingActief) throws GeneriekeFoutmelding;
-	Iterator<Bestelling> getBestellingOpBestellingId(long bestellingId, boolean bestellingActief) throws GeneriekeFoutmelding;
+	ArrayList<Bestelling> getBestellingOpKlantId(long klantId, boolean bestellingActief) throws GeneriekeFoutmelding;
+	ArrayList<Bestelling> getBestellingOpBestellingId(long bestellingId, boolean bestellingActief) throws GeneriekeFoutmelding;
 	
 	//Update
 	void updateBestelling(Bestelling bestelling) throws GeneriekeFoutmelding;

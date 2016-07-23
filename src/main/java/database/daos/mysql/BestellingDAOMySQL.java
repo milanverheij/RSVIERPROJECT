@@ -4,8 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
+import java.util.ArrayList;
 import java.util.List;
 
 import database.interfaces.BestellingDAO;
@@ -66,7 +65,7 @@ public class BestellingDAOMySQL extends AbstractDAOMySQL implements BestellingDA
 	}
 
 	@Override
-	public Iterator<Bestelling> getBestellingOpKlantId(long klantId, boolean bestellingActief) throws GeneriekeFoutmelding{
+	public ArrayList<Bestelling> getBestellingOpKlantId(long klantId, boolean bestellingActief) throws GeneriekeFoutmelding{
 		try(Connection con = connPool.verkrijgConnectie();
 			PreparedStatement statement = con.prepareStatement(
 					"SELECT `bestelling`.klantId, `bestelling`.bestellingId, `bestelling`.bestellingActief, `artikel`.artikelId, `artikel`.omschrijving, `bestellingHeeftArtikel`.aantal, "
@@ -87,19 +86,19 @@ public class BestellingDAOMySQL extends AbstractDAOMySQL implements BestellingDA
 			else
 				statement.setString(2, "%");
 
-			LinkedHashSet<Bestelling> set = verwerkResultSetGetBestelling(statement);
+			ArrayList<Bestelling> set = verwerkResultSetGetBestelling(statement);
 
 			if(set == null)
 				return null;
 			else
-				return set.iterator();
+				return set;
 		}catch (SQLException e){
 			throw new GeneriekeFoutmelding("Error in: " + this.getClass() + ": getBestellingOpKlantId: " + e.getMessage());
 		}
 	}
 
 	@Override
-	public Iterator<Bestelling> getBestellingOpBestellingId(long bestellingId, boolean bestellingActief) throws GeneriekeFoutmelding{
+	public ArrayList<Bestelling> getBestellingOpBestellingId(long bestellingId, boolean bestellingActief) throws GeneriekeFoutmelding{
 		try(Connection con = connPool.verkrijgConnectie();
 			PreparedStatement statement = con.prepareStatement(
 					"SELECT `bestelling`.klantId, `bestelling`.bestellingId, `bestelling`.bestellingActief, `artikel`.artikelId, "
@@ -121,11 +120,11 @@ public class BestellingDAOMySQL extends AbstractDAOMySQL implements BestellingDA
 				statement.setBoolean(2, bestellingActief);
 			else
 				statement.setString(2, "%");
-			LinkedHashSet<Bestelling> set = verwerkResultSetGetBestelling(statement);
+			ArrayList<Bestelling> set = verwerkResultSetGetBestelling(statement);
 			if(set == null)
 				return null;
 			else
-				return set.iterator();
+				return set;
 		}catch (SQLException e){
 			throw new GeneriekeFoutmelding("Error in: " + this.getClass() + ": getBestellingOpBestellingId: " + e.getMessage());
 		}
@@ -283,9 +282,9 @@ public class BestellingDAOMySQL extends AbstractDAOMySQL implements BestellingDA
 		}
 	}
 
-	private LinkedHashSet<Bestelling> verwerkResultSetGetBestelling(PreparedStatement statement) throws GeneriekeFoutmelding{
+	private ArrayList<Bestelling> verwerkResultSetGetBestelling(PreparedStatement statement) throws GeneriekeFoutmelding{
 		try(ResultSet rs = statement.executeQuery();){
-			LinkedHashSet<Bestelling> bestellingSet = new LinkedHashSet<Bestelling>();
+			ArrayList<Bestelling> bestellingSet = new ArrayList<Bestelling>();
 
 			// Eerste rij verwerken tot bestelling zodat ik straks een fixed bestellingId heb om
 			// mee te vergelijken in de while loop

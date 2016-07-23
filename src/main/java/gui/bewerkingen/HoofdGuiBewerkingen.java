@@ -1,5 +1,6 @@
 package gui.bewerkingen;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 
@@ -19,13 +20,17 @@ import model.Klant;
 
 public class HoofdGuiBewerkingen extends AbstractGuiBewerkingen {
 
-	public void zoekKlant(ListView<String> klantListView, String klantId, String voorNaam, String achterNaam, String tussenVoegsel, String email){
+	public void zoekKlant(ListView<String> klantListView, Klant klant){
 		klantListView.getItems().clear();
-		Klant klant = new Klant(!klantId.equals("") ? Long.parseLong(klantId) : 0, voorNaam, achterNaam, tussenVoegsel, email, null);
 
 		try {
-			Iterator<Klant> klantIterator = GuiPojo.klantDAO.getKlantOpKlant(klant);
-			verwerkKlantResultSet(klantIterator, klantListView);
+			ArrayList<Klant> klantAdres = GuiPojo.klantDAO.getKlantOpAdres(klant.getAdresGegevens());			
+			klant.setAdresGegevens(null);
+			ArrayList<Klant> klantKlant = GuiPojo.klantDAO.getKlantOpKlant(klant);
+			
+			klantKlant.retainAll(klantAdres);
+
+			verwerkKlantResultSet(klantKlant, klantListView);
 		} catch (GeneriekeFoutmelding e) {
 			e.printStackTrace();
 			errorBox.setMessageAndStart(e.getMessage());
@@ -36,20 +41,18 @@ public class HoofdGuiBewerkingen extends AbstractGuiBewerkingen {
 
 	public void zoekBestelling(String bron, ListView<Long> bestellingListView, String klantIdField, String bestellingIdField, boolean actieveItems){
 		try{
-			Iterator<Bestelling> it = bron.equals("klantId") ? GuiPojo.bestelDAO.getBestellingOpKlantId(Long.parseLong(klantIdField), actieveItems) : GuiPojo.bestelDAO.getBestellingOpBestellingId(Long.parseLong(bestellingIdField), actieveItems);
+			ArrayList<Bestelling> list = bron.equals("klantId") ? GuiPojo.bestelDAO.getBestellingOpKlantId(Long.parseLong(klantIdField), actieveItems) : GuiPojo.bestelDAO.getBestellingOpBestellingId(Long.parseLong(bestellingIdField), actieveItems);
 
-			populateBestellingListView(bestellingListView, it);
+			populateBestellingListView(bestellingListView, list);
 		}catch(NumberFormatException | GeneriekeFoutmelding | NullPointerException e){
 			errorBox.setMessageAndStart(e.getMessage());
 		}
 	}
 
-	public void verwerkKlantResultSet(Iterator<Klant> klantIterator, ListView<String> klantListView) throws GeneriekeFoutmelding{
+	public void verwerkKlantResultSet(ArrayList<Klant> klantIterator, ListView<String> klantListView) throws GeneriekeFoutmelding{
 		try{
-			Klant klant;
 			String gegevens;
-			while(klantIterator.hasNext()){
-				klant = klantIterator.next();
+			for(Klant klant : klantIterator){
 				if(klant.getTussenvoegsel() == null)
 					klant.setTussenvoegsel("");
 				gegevens = klant.getTussenvoegsel().equals("") ? klant.getKlantId() + ": " + klant.getVoornaam() + " " + klant.getAchternaam() : klant.getKlantId() + ": " + klant.getVoornaam() + " " + klant.getTussenvoegsel() + " " + klant.getAchternaam();
@@ -195,12 +198,11 @@ public class HoofdGuiBewerkingen extends AbstractGuiBewerkingen {
 		}
 	}
 
-
 	public void zoekViaBestellingKlant() {
 		Klant klant = new Klant();
 		klant.setKlantId(GuiPojo.bestelling.getKlantId());
 		try {
-			GuiPojo.klant = GuiPojo.klantDAO.getKlantOpKlant(klant).next();
+			GuiPojo.klant = GuiPojo.klantDAO.getKlantOpKlant(klant).get(0);
 		} catch (GeneriekeFoutmelding e) {
 			DeLogger.getLogger().error("kan de klant niet vinden aan de hand van klantId {}", GuiPojo.bestelling.getKlantId(), e.getStackTrace());
 			errorBox.setMessageAndStart("kan de klant niet vinden aan de hand van klantId " + GuiPojo.bestelling.getKlantId());

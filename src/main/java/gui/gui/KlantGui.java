@@ -1,4 +1,6 @@
 package gui.gui;
+
+import org.apache.commons.validator.EmailValidator;
 import exceptions.GeneriekeFoutmelding;
 import gui.model.GuiPojo;
 import javafx.application.Application;
@@ -15,6 +17,7 @@ import javafx.stage.Stage;
 import model.Adres;
 import model.Klant;
 
+@SuppressWarnings("deprecation")
 public class KlantGui extends Application{
 	TextField voorNaamField = new TextField("");
 	TextField tussenVoegselField = new TextField("");
@@ -25,6 +28,8 @@ public class KlantGui extends Application{
 	TextField huisNummerField = new TextField("");
 	TextField toevoegingField = new TextField("");
 	TextField woonplaatsField = new TextField("");
+
+	EmailValidator validator = EmailValidator.getInstance();
 
 	Label error = new Label();
 
@@ -38,6 +43,7 @@ public class KlantGui extends Application{
 		final BooleanProperty eersteKeer = new SimpleBooleanProperty(true); // Of de stage de eerste keer geladen word
 		setFocus(grid, eersteKeer);
 
+		setPromptText();
 		populateTextFields();
 		populateGrid(grid);
 		maakButtonsEnVoegAanGridToe(grid, klantStage);
@@ -46,14 +52,18 @@ public class KlantGui extends Application{
 		klantStage.getIcons().add(new Image("/images/icon.png"));
 		klantStage.setTitle("Harrie's Tweedehands Beessies");
 		klantStage.show();
-
 	}
 
 	private void maakButtonsEnVoegAanGridToe(GridPane grid, Stage klantStage) {
 		Button maakAan = new Button("Oke");
 		Button cancel = new Button("Cancel");
 
-		maakAan.setOnAction(e -> maakKlantAan(klantStage));
+		maakAan.setOnAction(e ->{
+			if(validator.isValid(emailField.getText()))
+				maakKlantAan(klantStage);	
+			else
+				new ErrorBox().setMessageAndStart("Ongeldig e-mail adres");
+		});
 		cancel.setOnAction(e -> klantStage.close());
 
 		grid.add(maakAan, 0, 6);
@@ -88,7 +98,7 @@ public class KlantGui extends Application{
 		grid.setPadding(new Insets(5));
 	}
 
-	private void populateTextFields(){
+	private void setPromptText(){
 		voorNaamField.setPromptText("Voornaam");
 		tussenVoegselField.setPromptText("Tussenvoegsel");
 		achterNaamField.setPromptText("Achternaam");
@@ -100,6 +110,9 @@ public class KlantGui extends Application{
 		toevoegingField.setPromptText("A");
 		woonplaatsField.setPromptText("Woonplaats");
 
+	}
+
+	private void populateTextFields(){
 		if(!(klant == null)){
 			if(klant.getVoornaam() != null)
 				voorNaamField.setText(klant.getVoornaam());
@@ -113,7 +126,7 @@ public class KlantGui extends Application{
 			if(GuiPojo.klant.getAdresGegevens() != null) {
 				Adres adres = GuiPojo.klant.getAdresGegevens();
 
-				
+
 				if(adres.getStraatnaam() != null)
 					straatNaamField.setText(adres.getStraatnaam());
 				if(adres.getPostcode() != null)
@@ -139,7 +152,7 @@ public class KlantGui extends Application{
 		klant.setAchternaam(achterNaamField.getText());
 		klant.setTussenvoegsel(tussenVoegselField.getText());
 		klant.setEmail(emailField.getText());
-		
+
 		Adres adres = new Adres();
 		if(GuiPojo.klant.getAdresGegevens().getAdresId() != 0)
 			adres.setAdresId(GuiPojo.klant.getAdresGegevens().getAdresId());

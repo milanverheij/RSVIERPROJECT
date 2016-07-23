@@ -201,7 +201,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
 	 * @throws GeneriekeFoutmelding
 	 */
 	@Override
-	public ListIterator<Klant> getAlleKlanten() throws GeneriekeFoutmelding {
+	public ArrayList<Klant> getAlleKlanten() throws GeneriekeFoutmelding {
 		return getKlantOpKlant(new Klant());
 	}
 
@@ -213,9 +213,9 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
 	 * @throws GeneriekeFoutmelding Foutmelding bij SQLException, info wordt meegegeven.
 	 */
 	@Override
-	public ListIterator<Klant> getKlantOpKlant(Klant klant) throws GeneriekeFoutmelding {
+	public ArrayList<Klant> getKlantOpKlant(Klant klant) throws GeneriekeFoutmelding {
 		query = queryGenerator.buildSelectStatement(klant);
-
+		System.out.println(query);
 		try (
 				Connection connection = connPool.verkrijgConnectie();
 				PreparedStatement statement = connection.prepareStatement(query);
@@ -224,7 +224,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
 					ResultSet resultSet = statement.executeQuery();
 					) {
 				klantenLijst = voegResultSetInLijst(resultSet);
-				return klantenLijst.listIterator();
+				return klantenLijst;
 			}
 		} catch (SQLException ex) {
 			DeLogger.getLogger().error("SQL FOUT TIJDENS OPZOEKEN KLANT " + ex.getMessage());
@@ -241,7 +241,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
 	 * @throws GeneriekeFoutmelding Foutmelding bij SQLException, info wordt meegegeven.
 	 */
 	@Override
-	public ListIterator<Klant> getKlantOpAdres(Adres adresgegevens) throws GeneriekeFoutmelding {
+	public ArrayList<Klant> getKlantOpAdres(Adres adresgegevens) throws GeneriekeFoutmelding {
 
 		// Om een query te laten maken door de querygenerator die naar klanten zoekt op basis van een adres
 		// dient er een klant object gegeven te worden met een _notnull_ adresgegevens property.
@@ -256,7 +256,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
 			try (
 					ResultSet resultSet = statement.executeQuery();) {
 				klantenLijst = voegResultSetInLijst(resultSet);
-				return klantenLijst.listIterator();
+				return klantenLijst;
 			}
 
 		} catch (SQLException ex) {
@@ -284,7 +284,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
 	 * @throws GeneriekeFoutmelding Foutmelding bij SQLException, info wordt meegegeven.
 	 */
 	@Override
-	public ListIterator<Klant> getKlantOpBestelling(long bestellingId) throws GeneriekeFoutmelding {
+	public ArrayList<Klant> getKlantOpBestelling(long bestellingId) throws GeneriekeFoutmelding {
 		String query = "SELECT klantId FROM " +
 				"bestelling WHERE " +
 				"bestellingId = ? " +
@@ -405,14 +405,13 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
 	@Override
 	public void schakelStatusKlant(Klant klant) throws GeneriekeFoutmelding {
 
-		ListIterator<Klant> klantListIterator = getKlantOpKlant(klant);
+		ArrayList<Klant> klantListIterator = getKlantOpKlant(klant);
 
-		while (klantListIterator.hasNext()) {
-			Klant tijdelijkeKlant = klantListIterator.next();
+		for(Klant tijdelijkeKlant : klantListIterator)
 			schakelStatusKlant(tijdelijkeKlant.getKlantId(),
 					(tijdelijkeKlant.getKlantActief().charAt(0) == '0' ? 1 : 0));
-		}
 	}
+
 
 	/**
 	 * Methode om een klant te verwijderen op basis van een bestelnummer.
@@ -424,16 +423,15 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
 	public long verwijderKlantOpBestellingId(long bestellingId) throws GeneriekeFoutmelding {
 
 		// Klant wordt opgehaald uit de database om op basis van BestelID het klantID te vinden.
-		ListIterator<Klant> klantenIterator = getKlantOpBestelling(bestellingId);
+		ArrayList<Klant> klantenIterator = getKlantOpBestelling(bestellingId);
 		long verwijderdId = -1;
 
 		// De klantenlijst wordt doorlopen en de klant wordt verwijderd.
-		if (klantenIterator != null) {
-			while (klantenIterator.hasNext()) {
-				Klant tijdelijkeKlant = klantenIterator.next();
-				schakelStatusKlant(tijdelijkeKlant.getKlantId(), 0);
-			}
+		for(Klant tijdelijkeKlant : klantenIterator) {
+
+			schakelStatusKlant(tijdelijkeKlant.getKlantId(), 0);
 		}
+
 
 		// Het verwijderde klantID wordt geretourneerd (o.a. gebruikt om te testen)
 		return verwijderdId;

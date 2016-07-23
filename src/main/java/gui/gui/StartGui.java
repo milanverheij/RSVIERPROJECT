@@ -24,8 +24,6 @@ import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import logger.DeLogger;
 
-import java.awt.*;
-
 public class StartGui extends Application{
 	Stage stage;
 	VBox vbox;
@@ -53,7 +51,7 @@ public class StartGui extends Application{
 	public void start(Stage primaryStage) throws Exception {
 		stage = primaryStage;
 
-		makeMenus();
+		maakMenus();
 		maakDisplayItems();
 		populateVbox();
 		setStageProperties();
@@ -66,9 +64,8 @@ public class StartGui extends Application{
 
 		stage.setResizable(false);
 		stage.setScene(scene);
-		stage.show();
-		System.out.println(menuBar.getHeight());
 		haalFocusVanTextField();
+		stage.show();
 	}
 
 	private void maakDisplayItems() {
@@ -84,7 +81,7 @@ public class StartGui extends Application{
 		inlogButton.setOnAction(e -> controleerGegevens());
 	}
 
-	private void makeMenus() {
+	private void maakMenus() {
 		menuBar = new MenuBar();
 		ToggleGroup databaseGroup = new ToggleGroup();
 		ToggleGroup connectionGroup = new ToggleGroup();

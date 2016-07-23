@@ -223,11 +223,35 @@ public class HoofdGui extends Application{
 	private void zoekKnopKlik(){
 		leegViews();
 
-		if(bestellingIdField.getText().equals(""))
-			guiBewerkingen.zoekKlant(klantListView, klantIdField.getText(), voorNaamField.getText(),
-					achterNaamField.getText(), tussenVoegselField.getText(), emailField.getText());
+		if(bestellingIdField.getText().equals("")){
+			Klant klant = nieuwKlantObject();
+			klant.setAdresGegevens(nieuwAdresObject());
+
+			guiBewerkingen.zoekKlant(klantListView, klant);
+		}
 		else
 			zoekBestelling();
+	}
+
+	private Adres nieuwAdresObject() {
+		Adres adres = new Adres();
+		adres.setHuisnummer((huisnummerField.getText() != null && huisnummerField.getText().equals("")) ? 0 : Integer.parseInt(huisnummerField.getText())); 
+
+		adres.setToevoeging(toevoegingField.getText());
+		adres.setStraatnaam(straatnaamField.getText());
+		adres.setPostcode(postcodeField.getText());
+		adres.setWoonplaats(woonplaatsField.getText());
+		return adres;
+	}
+
+	private Klant nieuwKlantObject() {
+		Klant klant = new Klant();
+		klant.setKlantId((klantIdField != null && klantIdField.getText().equals("")) ? 0 : Long.parseLong(klantIdField.getText()));
+		klant.setVoornaam(voorNaamField.getText());
+		klant.setAchternaam(achterNaamField.getText());
+		klant.setTussenvoegsel(tussenVoegselField.getText());
+		klant.setEmail(emailField.getText());
+		return klant;
 	}
 
 	/* Zoekt bestellingen op de waarde van het klantIdField of op bestellingIdField
@@ -338,6 +362,8 @@ public class HoofdGui extends Application{
 					if(!klantListView.getItems().contains(gegevens))
 						klantListView.getItems().add(gegevens);				}
 			}
+			getKlantGegevens(); // Vind de klant adhv beschikbare info
+			setKlantGegevens(); // Zet klant gegevens in de textfields
 			setArtikelListView();
 		}
 	}
@@ -357,9 +383,15 @@ public class HoofdGui extends Application{
 				artikelListView.getItems().add("Naam: " + artikel.getArtikelNaam() + "\nPrijs: " + artikel.getArtikelPrijs() +
 						"\nAantal: " + artikel.getAantalBesteld());
 			}
-			if(klantIdField.getText().isEmpty())
-				guiBewerkingen.zoekKlant(klantListView, klantIdField.getText(), voorNaamField.getText(),
-						achterNaamField.getText(), tussenVoegselField.getText(), emailField.getText());
+		}
+	}
+
+
+	private void getKlantGegevens(){
+		if(klantIdField.getText().isEmpty()){
+			Klant klant = nieuwKlantObject();
+			klant.setAdresGegevens(nieuwAdresObject());
+			guiBewerkingen.zoekKlant(klantListView, klant);
 		}
 	}
 

@@ -6,6 +6,7 @@ import model.Adres;
 import model.Bestelling;
 import model.Klant;
 
+import java.util.ArrayList;
 import java.util.ListIterator;
 
 /**
@@ -71,7 +72,7 @@ public interface KlantDAO {
      * @return
      * @throws GeneriekeFoutmelding
      */
-    ListIterator<Klant> getAlleKlanten() throws GeneriekeFoutmelding ;
+    ArrayList<Klant> getAlleKlanten() throws GeneriekeFoutmelding ;
 
     /**
      * Deze method haalt klanten op uit de database op basis van een meegegeven Klant-Object.
@@ -80,7 +81,7 @@ public interface KlantDAO {
      * @return een ListIterator wordt teruggegeven van de ArrayList met daarin Klant-objecten.
      * @throws GeneriekeFoutmelding Foutmelding bij SQLException, info wordt meegegeven.
      */
-    ListIterator<Klant> getKlantOpKlant(Klant klant) throws GeneriekeFoutmelding;
+    ArrayList<Klant> getKlantOpKlant(Klant klant) throws GeneriekeFoutmelding;
 
     /**
      * Deze methode haalt op basis van adresgegevens klanten op uit de database en geeft dit
@@ -90,7 +91,7 @@ public interface KlantDAO {
      * @return een ListIterator wordt teruggegeven van de ArrayList met daarin Klant-objecten.
      * @throws GeneriekeFoutmelding Foutmelding bij SQLException, info wordt meegegeven.
      */
-    ListIterator<Klant> getKlantOpAdres(Adres adresgegevens) throws GeneriekeFoutmelding;
+    ArrayList<Klant> getKlantOpAdres(Adres adresgegevens) throws GeneriekeFoutmelding;
 
     /**
      * Deze methode haalt op basis van bestelId klanten op uit de database en geeft dit
@@ -100,7 +101,7 @@ public interface KlantDAO {
      * @return een ListIterator wordt teruggegeven van de ArrayList met daarin Klant-objecten.
      * @throws GeneriekeFoutmelding Foutmelding bij SQLException, info wordt meegegeven.
      */
-    ListIterator<Klant> getKlantOpBestelling(long bestellingId) throws GeneriekeFoutmelding;
+    ArrayList<Klant> getKlantOpBestelling(long bestellingId) throws GeneriekeFoutmelding;
 
     /** UPDATE METHODS */
 

@@ -1,6 +1,7 @@
 package database.daos.firebird;
 
 import exceptions.GeneriekeFoutmelding;
+import logger.DeLogger;
 import model.Artikel;
 import model.Bestelling;
 
@@ -61,7 +62,7 @@ public class BestellingDAOFireBird extends AbstractDAOFireBird implements Bestel
 	}
 
 	@Override
-	public Iterator<Bestelling> getBestellingOpKlantId(long klantId, boolean bestellingActief) throws GeneriekeFoutmelding{
+	public ArrayList<Bestelling> getBestellingOpKlantId(long klantId, boolean bestellingActief) throws GeneriekeFoutmelding{
 		try(Connection con = connPool.verkrijgConnectie();
 				PreparedStatement statement = con.prepareStatement(
 						"SELECT BESTELLING.klant_id, BESTELLING.bestelling_id, BESTELLING.bestellingActief, ARTIKEL.artikel_id, " +
@@ -83,19 +84,19 @@ public class BestellingDAOFireBird extends AbstractDAOFireBird implements Bestel
 			else
 				statement.setString(2, "%");
 			
-			LinkedHashSet<Bestelling> set = verwerkResultSetGetBestelling(statement);
+			ArrayList<Bestelling> set = verwerkResultSetGetBestelling(statement);
 			
 			if(set == null)
 				return null;
 			else
-				return set.iterator();
+				return set;
 		}catch (SQLException e){
 			throw new GeneriekeFoutmelding("Error in: " + this.getClass() + ": getBestellingOpKlantId: " + e.getMessage());
 		}
 	}
 
 	@Override
-	public Iterator<Bestelling> getBestellingOpBestellingId(long bestellingId, boolean bestellingActief) throws GeneriekeFoutmelding{
+	public ArrayList<Bestelling> getBestellingOpBestellingId(long bestellingId, boolean bestellingActief) throws GeneriekeFoutmelding{
 		try(Connection con = connPool.verkrijgConnectie();
 				PreparedStatement statement = con.prepareStatement(
 
@@ -118,11 +119,11 @@ public class BestellingDAOFireBird extends AbstractDAOFireBird implements Bestel
 				statement.setInt(2, 1);
 			else
 				statement.setString(2, "%");
-			LinkedHashSet<Bestelling> set = verwerkResultSetGetBestelling(statement);
+			ArrayList<Bestelling> set = verwerkResultSetGetBestelling(statement);
 			if(set == null)
 				return null;
 			else
-				return set.iterator();
+				return set;
 		}catch (SQLException e){
 			throw new GeneriekeFoutmelding("Error in: " + this.getClass() + ": getBestellingOpBestellingId: " + e.getMessage());
 		}
@@ -290,9 +291,9 @@ public class BestellingDAOFireBird extends AbstractDAOFireBird implements Bestel
 		}
 	}
 
-	private LinkedHashSet<Bestelling> verwerkResultSetGetBestelling(PreparedStatement statement) throws GeneriekeFoutmelding{
+	private ArrayList<Bestelling> verwerkResultSetGetBestelling(PreparedStatement statement) throws GeneriekeFoutmelding{
 		try(ResultSet rs = statement.executeQuery();){
-			LinkedHashSet<Bestelling> bestellingSet = new LinkedHashSet<Bestelling>();
+			ArrayList<Bestelling> bestellingSet = new ArrayList<Bestelling>();
 
 			// Eerste rij verwerken tot bestelling zodat ik straks een fixed bestellingId heb om
 			// mee te vergelijken in de while loop
@@ -365,7 +366,7 @@ public class BestellingDAOFireBird extends AbstractDAOFireBird implements Bestel
 	}
 	
 	
-	// Meuk om firebird uit te lezen //TODO: Language.. staat misschien minder als het in de presentatie voorbij komt ;)
+	// Code om firebird uit te lezen
 	public void alles(){
 
 		Connection con = null;
@@ -395,15 +396,17 @@ public class BestellingDAOFireBird extends AbstractDAOFireBird implements Bestel
 			}
 
 		} catch (SQLException | GeneriekeFoutmelding e) {
+			DeLogger.getLogger().error("Error: {}", e.getMessage(), e.getStackTrace());
 			e.printStackTrace();
 		}catch(Exception e1){
+			DeLogger.getLogger().error("Error: {}", e1.getMessage(), e1.getStackTrace());
 			e1.printStackTrace();
 		}finally{
 			try {
 				con.close();
 				rs.close();
 			} catch (SQLException e) {
-				// TODO Auto-generated catch block
+				DeLogger.getLogger().error("SQL fout: {}", e.getMessage(), e.getStackTrace());
 				e.printStackTrace();
 			}
 		}

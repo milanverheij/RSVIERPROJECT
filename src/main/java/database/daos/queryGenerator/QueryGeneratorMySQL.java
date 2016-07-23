@@ -179,8 +179,8 @@ public class QueryGeneratorMySQL extends QueryGenerator {
 		for (Field dcField : declaredFields) {
 			try {
 				dcField.setAccessible(true);
-				if (dcField.get(object) != null && !dcField.get(object).toString().isEmpty()) {
-					if (!isPrimitiveZero(dcField.get(object))) {
+				if (dcField.get(object) != null) {
+					if (!isPrimitiveZero(dcField.get(object)) && !dcField.get(object).toString().equals("")) {
 						variableToUpdate++;
 
 						if (variableToUpdate > 1) {

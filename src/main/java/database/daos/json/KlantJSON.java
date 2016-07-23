@@ -55,7 +55,7 @@ public class KlantJSON implements KlantDAO {
     }
 
     @Override
-    public ListIterator<Klant> getAlleKlanten() throws GeneriekeFoutmelding {
+    public ArrayList<Klant> getAlleKlanten() throws GeneriekeFoutmelding {
         ArrayList<Klant> list = new ArrayList<>();
 
         ListIterator<JSONObject> it = krijgIteratorEnSkipEersteENtry();
@@ -64,10 +64,10 @@ public class KlantJSON implements KlantDAO {
             Klant k = maakKlantObject(it.next());
             list.add(k);
         }
-        return list.listIterator();
+        return list;
     }
 
-    public ListIterator<Klant> getKlantOpKlant(long klantId) throws GeneriekeFoutmelding {
+    public ArrayList<Klant> getKlantOpKlant(long klantId) throws GeneriekeFoutmelding {
         ArrayList<Klant> list = new ArrayList<>();
         JSONObject o;
 
@@ -79,10 +79,10 @@ public class KlantJSON implements KlantDAO {
                 list.add(maakKlantObject(o));
             }
         }
-        return list.listIterator();
+        return list;
     }
 
-    public ListIterator<Klant> getKlantOpKlant(String voornaam) throws GeneriekeFoutmelding {
+    public ArrayList<Klant> getKlantOpKlant(String voornaam) throws GeneriekeFoutmelding {
         ArrayList<Klant> list = new ArrayList<>();
         JSONObject o;
 
@@ -94,10 +94,10 @@ public class KlantJSON implements KlantDAO {
                 list.add(maakKlantObject(o));
             }
         }
-        return list.listIterator();
+        return list;
     }
 
-    public ListIterator<Klant> getKlantOpKlant(String voornaam, String achternaam) throws GeneriekeFoutmelding {
+    public ArrayList<Klant> getKlantOpKlant(String voornaam, String achternaam) throws GeneriekeFoutmelding {
         ArrayList<Klant> list = new ArrayList<Klant>();
         JSONObject o;
 
@@ -109,11 +109,11 @@ public class KlantJSON implements KlantDAO {
                 list.add(maakKlantObject(o));
             }
         }
-        return list.listIterator();
+        return list;
     }
 
     @Override
-    public ListIterator<Klant> getKlantOpKlant(Klant klant) throws GeneriekeFoutmelding {
+    public ArrayList<Klant> getKlantOpKlant(Klant klant) throws GeneriekeFoutmelding {
         return getKlantOpKlant(klant.getVoornaam(), klant.getAchternaam());
     }
 
@@ -257,12 +257,12 @@ public class KlantJSON implements KlantDAO {
     }
 
     @Override
-    public ListIterator<Klant> getKlantOpAdres(Adres adresgegevens) throws GeneriekeFoutmelding {
+    public ArrayList<Klant> getKlantOpAdres(Adres adresgegevens) throws GeneriekeFoutmelding {
         throw new GeneriekeFoutmelding("KlantJSON: Methode getKlantOpAdres niet geimplementeerd");
     }
 
     @Override
-    public ListIterator<Klant> getKlantOpBestelling(long bestellingId) throws GeneriekeFoutmelding {
+    public ArrayList<Klant> getKlantOpBestelling(long bestellingId) throws GeneriekeFoutmelding {
         throw new GeneriekeFoutmelding("KlantJSON: Methode getKlantOpBestelling niet geimplementeerd");
     }
 

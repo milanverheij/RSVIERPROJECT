@@ -4,8 +4,6 @@ package JUnit_tests;
 import static org.junit.Assert.*;
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Iterator;
-
 import database.factories.DAOFactory;
 import model.Artikel;
 import model.Bestelling;
@@ -88,7 +86,7 @@ public class BestellingDAOMySQLTest {
 	public void testAangemaakteTuplesLezenOpBestellingId() throws Exception{
 
 		//Eerste bestelling bevat a1, a2, a3
-		Bestelling b1 = dao.getBestellingOpBestellingId(id1, true).next();
+		Bestelling b1 = dao.getBestellingOpBestellingId(id1, true).get(0);
 		ArrayList<Artikel> b1List = b1.getArtikelLijst();
 
 		assertEquals(a1.getArtikelId(), b1List.get(0).getArtikelId());
@@ -109,7 +107,7 @@ public class BestellingDAOMySQLTest {
 	public void actiefInactiefGetBestellingTesten() throws Exception{
 		assertNull(dao.getBestellingOpBestellingId(id2, true));
 
-		Bestelling b1 = dao.getBestellingOpBestellingId(id1, true).next();
+		Bestelling b1 = dao.getBestellingOpBestellingId(id1, true).get(0);
 		ArrayList<Artikel> b1List = b1.getArtikelLijst();
 
 		assertEquals(a1.getArtikelId(), b1List.get(0).getArtikelId());
@@ -131,8 +129,8 @@ public class BestellingDAOMySQLTest {
 	public void testAangemaakteTuplesLezenOpKlantId() throws Exception{
 
 		//Eerste bestelling bevat a1, a2, a3
-		Iterator<Bestelling> b1 = dao.getBestellingOpKlantId(1, false);
-		ArrayList<Artikel> b1List = b1.next().getArtikelLijst();
+		ArrayList<Bestelling> b1 = dao.getBestellingOpKlantId(1, false);
+		ArrayList<Artikel> b1List = b1.get(0).getArtikelLijst();
 
 		assertEquals(a1.getArtikelId(), b1List.get(0).getArtikelId());
 		assertEquals(a1.getArtikelNaam(), b1List.get(0).getArtikelNaam());
@@ -150,7 +148,7 @@ public class BestellingDAOMySQLTest {
 		assertTrue(a3.getAantalBesteld() == b1List.get(2).getAantalBesteld());
 
 		//Tweede bestelling bevat a1, a2
-		ArrayList<Artikel> b2List = b1.next().getArtikelLijst();
+		ArrayList<Artikel> b2List = b1.get(1).getArtikelLijst();
 
 		assertEquals(a1.getArtikelId(), b2List.get(0).getArtikelId());
 		assertEquals(a1.getArtikelNaam(), b2List.get(0).getArtikelNaam());
@@ -172,7 +170,7 @@ public class BestellingDAOMySQLTest {
 		bestelling2.setBestellingId(id2);
 		dao.updateBestelling(bestelling2);
 
-		ArrayList<Artikel> bList = dao.getBestellingOpBestellingId(id2, false).next().getArtikelLijst();
+		ArrayList<Artikel> bList = dao.getBestellingOpBestellingId(id2, false).get(0).getArtikelLijst();
 		assertEquals(a2.getArtikelId(), bList.get(0).getArtikelId());
 		assertEquals(a2.getArtikelNaam(), bList.get(0).getArtikelNaam());
 		assertTrue(a2.getArtikelPrijs().compareTo(bList.get(0).getArtikelPrijs()) == 0);
@@ -184,13 +182,13 @@ public class BestellingDAOMySQLTest {
 
 	@Test
 	public void setAlsInactiefEenBestellingUitDeDatabase() throws Exception{
-		assertTrue(dao.getBestellingOpBestellingId(id1, false).next().getBestellingActief());
+		assertTrue(dao.getBestellingOpBestellingId(id1, false).get(0).getBestellingActief());
 		dao.setEnkeleBestellingInactief(id1);
-		assertEquals(dao.getBestellingOpBestellingId(id1, false).next().getBestellingActief(), false);
+		assertEquals(dao.getBestellingOpBestellingId(id1, false).get(0).getBestellingActief(), false);
 
-		assertFalse(dao.getBestellingOpBestellingId(id2, false).next().getBestellingActief());
+		assertFalse(dao.getBestellingOpBestellingId(id2, false).get(1).getBestellingActief());
 		dao.setEnkeleBestellingInactief(id2);
-		assertFalse(dao.getBestellingOpBestellingId(id2, false).next().getBestellingActief());
+		assertFalse(dao.getBestellingOpBestellingId(id2, false).get(1).getBestellingActief());
 	}
 
 	@Test
