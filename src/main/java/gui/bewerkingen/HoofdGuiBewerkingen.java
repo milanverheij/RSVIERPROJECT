@@ -33,7 +33,7 @@ public class HoofdGuiBewerkingen extends AbstractGuiBewerkingen {
 			verwerkKlantResultSet(klantKlant, klantListView);
 		} catch (GeneriekeFoutmelding e) {
 			e.printStackTrace();
-			errorBox.setMessageAndStart(e.getMessage());
+			GuiPojo.errorBox.setMessageAndStart(e.getMessage());
 		}catch(Exception e){
 			e.printStackTrace();
 		}
@@ -45,7 +45,7 @@ public class HoofdGuiBewerkingen extends AbstractGuiBewerkingen {
 
 			populateBestellingListView(bestellingListView, list);
 		}catch(NumberFormatException | GeneriekeFoutmelding | NullPointerException e){
-			errorBox.setMessageAndStart(e.getMessage());
+			GuiPojo.errorBox.setMessageAndStart(e.getMessage());
 		}
 	}
 
@@ -74,7 +74,7 @@ public class HoofdGuiBewerkingen extends AbstractGuiBewerkingen {
 			GuiPojo.artikel.setArtikelPrijs(nieuwArtikel.getArtikelPrijs());
 			setArtikelLijst();
 		}catch (NumberFormatException | GeneriekeFoutmelding e){
-			errorBox.setMessageAndStart(e.getMessage());
+			GuiPojo.errorBox.setMessageAndStart(e.getMessage());
 		}
 	}
 
@@ -84,11 +84,11 @@ public class HoofdGuiBewerkingen extends AbstractGuiBewerkingen {
 				BestellingGuiBewerkingen bestellingBewerken = new BestellingGuiBewerkingen();
 				bestellingBewerken.setAndRun(GuiPojo.bestelling.getKlantId(), GuiPojo.bestelling, true);
 			}else{
-				errorBox.setMessageAndStart("Selecteer eerst een bestelling");
+				GuiPojo.errorBox.setMessageAndStart("Selecteer eerst een bestelling");
 			}
 			GuiPojo.bestelDAO.updateBestelling(GuiPojo.bestelling);
 		}catch (GeneriekeFoutmelding e){
-			errorBox.setMessageAndStart(e.getMessage());
+			GuiPojo.errorBox.setMessageAndStart(e.getMessage());
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -105,7 +105,7 @@ public class HoofdGuiBewerkingen extends AbstractGuiBewerkingen {
 
 			GuiPojo.bestelDAO.verwijderEnkeleBestelling(GuiPojo.bestelling.getBestellingId());
 		}catch (GeneriekeFoutmelding e){
-			errorBox.setMessageAndStart(e.getMessage());
+			GuiPojo.errorBox.setMessageAndStart(e.getMessage());
 		}
 		GuiPojo.bestelling = new Bestelling();
 	}
@@ -137,7 +137,7 @@ public class HoofdGuiBewerkingen extends AbstractGuiBewerkingen {
 				}
 			}
 		}catch (GeneriekeFoutmelding e){
-			errorBox.setMessageAndStart(String.format("Fout bij ophalen alle adressen van klant %d", GuiPojo.klant.getKlantId()));
+			GuiPojo.errorBox.setMessageAndStart(String.format("Fout bij ophalen alle adressen van klant %d", GuiPojo.klant.getKlantId()));
 			e.printStackTrace();
 		}
 	}
@@ -166,27 +166,27 @@ public class HoofdGuiBewerkingen extends AbstractGuiBewerkingen {
 				bestellingBewerken.setAndRun(GuiPojo.klant.getKlantId(), bestellingListView, false);
 			} catch (Exception e) {
 				e.printStackTrace();
-				errorBox.setMessageAndStart(e.getMessage());
+				GuiPojo.errorBox.setMessageAndStart(e.getMessage());
 			}
 		}else{
-			errorBox.setMessageAndStart("Selecteer eerst een klant");
+			GuiPojo.errorBox.setMessageAndStart("Selecteer eerst een klant");
 		}
 	}
 
 	public void updateKlant() {
 		try {
 			if(GuiPojo.klant.getKlantId() == 0)
-				errorBox.setMessageAndStart("Selecteer eerst een klant");
+				GuiPojo.errorBox.setMessageAndStart("Selecteer eerst een klant");
 			else{
 				KlantGui nieuweKlant = new KlantGui();
 				nieuweKlant.start(new Stage());
 			}
 		}catch(GeneriekeFoutmelding e){
-			errorBox.setMessageAndStart(e.getMessage());
+			GuiPojo.errorBox.setMessageAndStart(e.getMessage());
 		}catch(NullPointerException e){
 			e.printStackTrace();
 		}catch (Exception e) {
-			errorBox.setMessageAndStart(e.getMessage());
+			GuiPojo.errorBox.setMessageAndStart(e.getMessage());
 		}
 	}
 
@@ -194,7 +194,7 @@ public class HoofdGuiBewerkingen extends AbstractGuiBewerkingen {
 		try {
 			new KlantGui().start(new Stage());
 		} catch (Exception e) {
-			errorBox.setMessageAndStart(e.getMessage());
+			GuiPojo.errorBox.setMessageAndStart(e.getMessage());
 		}
 	}
 
@@ -205,7 +205,7 @@ public class HoofdGuiBewerkingen extends AbstractGuiBewerkingen {
 			GuiPojo.klant = GuiPojo.klantDAO.getKlantOpKlant(klant).get(0);
 		} catch (GeneriekeFoutmelding e) {
 			DeLogger.getLogger().error("kan de klant niet vinden aan de hand van klantId {}", GuiPojo.bestelling.getKlantId(), e.getStackTrace());
-			errorBox.setMessageAndStart("kan de klant niet vinden aan de hand van klantId " + GuiPojo.bestelling.getKlantId());
+			GuiPojo.errorBox.setMessageAndStart("kan de klant niet vinden aan de hand van klantId " + GuiPojo.bestelling.getKlantId());
 			e.printStackTrace();
 		}
 	}

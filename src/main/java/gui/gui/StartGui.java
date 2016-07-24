@@ -1,6 +1,8 @@
 package gui.gui;
 
+import gui.bewerkingen.StartGuiBewerkingen;
 import gui.model.GuiPojo;
+
 import javafx.application.Application;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -22,6 +24,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
+
 import logger.DeLogger;
 
 public class StartGui extends Application{
@@ -40,6 +43,8 @@ public class StartGui extends Application{
 
 	String databaseSelected = "MySQL";
 	String connectionSelected = "HikariCP";
+	
+	StartGuiBewerkingen guiBewerkingen = new StartGuiBewerkingen();
 
 	final BooleanProperty firstTime = new SimpleBooleanProperty(true); // Variable to store the focus on stage load
 
@@ -160,14 +165,14 @@ public class StartGui extends Application{
 	}
 
 	private void controleerGegevens(){
-		if(inlogNaamField.getText().equals("Harrie") && wachtwoordField.getText().equals("1234")){
+		if(guiBewerkingen.controleerGegevens(inlogNaamField.getText(), wachtwoordField.getText())){
 			HoofdGui hoofd = new HoofdGui();
 			try {
 				hoofd.setConnection(databaseSelected, connectionSelected);
 				hoofd.start(new Stage());
 				DeLogger.getLogger().info("Succesvol ingelogd");
 			} catch (Exception e) {
-				DeLogger.getLogger().error(e.getMessage());
+				DeLogger.getLogger().error("Fout bij inloggen: {}", e.getMessage(), e.getStackTrace());
 				e.printStackTrace();
 			}
 			stage.close();

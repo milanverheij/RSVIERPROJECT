@@ -62,7 +62,7 @@ public class KlantGui extends Application{
 			if(validator.isValid(emailField.getText()))
 				maakKlantAan(klantStage);	
 			else
-				new ErrorBox().setMessageAndStart("Ongeldig e-mail adres");
+				GuiPojo.errorBox.setMessageAndStart("Ongeldig e-mail adres");
 		});
 		cancel.setOnAction(e -> klantStage.close());
 
@@ -173,7 +173,7 @@ public class KlantGui extends Application{
 
 			klantStage.close();
 		} catch (GeneriekeFoutmelding e) {
-			new ErrorBox().setMessageAndStart(e.getMessage());
+			GuiPojo.errorBox.setMessageAndStart(e.getMessage());
 		}
 	}
 

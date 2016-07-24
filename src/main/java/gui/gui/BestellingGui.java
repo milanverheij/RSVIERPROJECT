@@ -2,6 +2,7 @@ package gui.gui;
 
 import java.math.BigDecimal;
 import gui.bewerkingen.BestellingGuiBewerkingen;
+import gui.model.GuiPojo;
 import gui.model.SubGuiPojo;
 import javafx.application.Application;
 import javafx.geometry.Insets;
@@ -21,8 +22,6 @@ import model.Bestelling;
 public class BestellingGui extends Application{
 
 	BestellingGuiBewerkingen guiBewerkingen = new BestellingGuiBewerkingen();
-
-	private ErrorBox errorBox = new ErrorBox();
 
 	Insets inset = new Insets(6);
 	
@@ -126,7 +125,7 @@ public class BestellingGui extends Application{
 			else if(aantal.getText().length() < 10)
 				totaalPrijs.setText(SubGuiPojo.huidigArtikel.getArtikelPrijs().multiply(new BigDecimal(Long.parseLong(newValue))).toString());
 			else
-				errorBox.setMessageAndStart("We kunnen niet meer dan 999.999.999 van een artikel leveren");
+				GuiPojo.errorBox.setMessageAndStart("We kunnen niet meer dan 999.999.999 van een artikel leveren");
 		});
 	}
 

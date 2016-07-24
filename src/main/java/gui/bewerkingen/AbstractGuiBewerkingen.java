@@ -5,7 +5,6 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 
 import exceptions.GeneriekeFoutmelding;
-import gui.gui.ErrorBox;
 import gui.interfaces.GuiBewerkingen;
 import gui.model.GuiPojo;
 import javafx.scene.control.ListView;
@@ -14,7 +13,6 @@ import model.Bestelling;
 import model.Klant;
 
 public abstract class AbstractGuiBewerkingen implements GuiBewerkingen{
-	ErrorBox errorBox = new ErrorBox();
 
 	public void leegKlantBestellingArtikel(){
 		GuiPojo.bestelling = new Bestelling();

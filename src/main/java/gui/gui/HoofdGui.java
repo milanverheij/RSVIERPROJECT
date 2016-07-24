@@ -1,8 +1,10 @@
 package gui.gui;
 
 import exceptions.GeneriekeFoutmelding;
+
 import gui.bewerkingen.HoofdGuiBewerkingen;
 import gui.model.GuiPojo;
+
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
@@ -19,14 +21,13 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+
 import model.Adres;
 import model.Artikel;
 import model.Klant;
 
 public class HoofdGui extends Application{
 	private final Insets INSET = new Insets(13);
-
-	ErrorBox errorBox = new ErrorBox();
 
 	HoofdGuiBewerkingen guiBewerkingen = new HoofdGuiBewerkingen();
 

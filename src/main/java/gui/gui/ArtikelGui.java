@@ -41,8 +41,6 @@ public class ArtikelGui extends Application{
 	TextField verwachteLevertijdField;
 	CheckBox inAssortiment;
 
-	ErrorBox errorBox = new ErrorBox();
-
 	public void setAndRun(LinkedHashSet<Artikel> artikelSet) throws Exception{
 		this.artikelSet = artikelSet;
 		start(new Stage());
@@ -154,7 +152,7 @@ public class ArtikelGui extends Application{
 		} catch (GeneriekeFoutmelding e) {
 			e.printStackTrace();
 			DeLogger.getLogger().error("Fout bij aanmaken nieuw artikel", e.getCause());
-			errorBox.setMessageAndStart("Fout bij aanmaken nieuw artikel: " + e.getMessage());
+			GuiPojo.errorBox.setMessageAndStart("Fout bij aanmaken nieuw artikel: " + e.getMessage());
 		}
 	}
 
@@ -186,7 +184,7 @@ public class ArtikelGui extends Application{
 			} catch (GeneriekeFoutmelding e) {
 				e.printStackTrace();
 				DeLogger.getLogger().error("Fout bij update artikel", e.getCause());
-				errorBox.setMessageAndStart("Fout bij update artikel: " + e.getMessage());
+				GuiPojo.errorBox.setMessageAndStart("Fout bij update artikel: " + e.getMessage());
 			}
 		}
 	}
