@@ -215,7 +215,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
 	@Override
 	public ArrayList<Klant> getKlantOpKlant(Klant klant) throws GeneriekeFoutmelding {
 		query = queryGenerator.buildSelectStatement(klant);
-		System.out.println(query);
+//		System.out.println(query);
 		try (
 				Connection connection = connPool.verkrijgConnectie();
 				PreparedStatement statement = connection.prepareStatement(query);

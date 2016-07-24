@@ -244,13 +244,17 @@ public class AdresDAOMySQL extends AbstractDAOMySQL implements AdresDAO {
                 "WHERE " +
                 "klantHeeftAdres.adresIdAdres = adres.adresId " +
                 "AND " +
-                "klantHeeftAdres.klantIdKlant = ?;";
+                "klantHeeftAdres.klantIdKlant LIKE ?;";
 
         try (
                 Connection connection = connPool.verkrijgConnectie();
                 PreparedStatement statement = connection.prepareStatement(query);
         ) {
-            statement.setLong(1, klantId);
+            if (klantId == -1) {
+                statement.setString(1, "%");
+            }
+            else
+                statement.setLong(1, klantId);
 
             try (
                     ResultSet rs = statement.executeQuery();

@@ -59,24 +59,28 @@ public class KlantDAOFireBird extends AbstractDAOFireBird implements KlantDAO {
 			Adres adresgegevens,
 			Bestelling bestelGegevens) throws GeneriekeFoutmelding {
 
-		query = queryGenerator.buildInsertStatement(nieuweKlant) + " RETURNING klantId;";
+		query = queryGenerator.buildInsertStatement(nieuweKlant) + " RETURNING klant_id;";
+//		System.out.println(query);
 
 		try (
 				Connection connection = connPool.verkrijgConnectie();
 				PreparedStatement statement = connection.prepareStatement(query);
 				) {
-			//            statement.execute();
+
+//			statement.execute();
 
 			// Ophalen van de laatste genegeneerde sleutel (de nieuwe klantId)
+			// TODO: Nieuwe manier van key ophalen? Want nu werkt het niet meer 'can not issue data manipulation
+			// TODO: with executeQuery
 			long nieuwId = 0;
 			try (
 					ResultSet resultSet = statement.executeQuery();
 					) {
 				while (resultSet.next()) {
-					nieuwId = resultSet.getInt("klantId");
+					nieuwId = resultSet.getInt("klant_id");
 				}
-
-				// Als er een adresId wordt meegegeven betekent dit dat er een bestaand adres gekoppeled wordt
+			}
+			// Als er een adresId wordt meegegeven betekent dit dat er een bestaand adres gekoppeled wordt
 				// aan een nieuwe klant
 				if (adresId > 0 && adresgegevens == null) {
 					adresDAO = new AdresDAOFireBird();
@@ -104,7 +108,7 @@ public class KlantDAOFireBird extends AbstractDAOFireBird implements KlantDAO {
 					bestellingDAO.nieuweBestelling(bestelGegevens);
 				}
 
-			}
+
 			return nieuwId;
 
 		} catch (SQLException ex) {
@@ -113,14 +117,15 @@ public class KlantDAOFireBird extends AbstractDAOFireBird implements KlantDAO {
 						//                        getKlantID(voornaam, achternaam, email));
 						"");
 				throw new GeneriekeFoutmelding("KlantDAOFireBird: DEZE KLANT BESTAAT AL IN DE DATABASE MET ID: " +
-						//                        getKlantID(voornaam, achternaam, email));
-						"");
+						                        (nieuweKlant.getVoornaam() + " " + nieuweKlant.getAchternaam()) +
+						" " + ex.getMessage());
 			}
 			else {
 				DeLogger.getLogger().error("SQL FOUT TIJDENS AANMAKEN KLANT: " + ex.getMessage());
 				throw new GeneriekeFoutmelding("KlantDAOFireBird: SQL FOUT TIJDENS AANMAKEN KLANT: " + ex.getMessage());
 			}
 		}
+
 	}
 
 	/**
@@ -165,7 +170,7 @@ public class KlantDAOFireBird extends AbstractDAOFireBird implements KlantDAO {
 	 */
 	@Override
 	public long getKlantID(String voornaam, String achternaam, String email) throws GeneriekeFoutmelding {
-		String query = "SELECT klantId " +
+		String query = "SELECT klant_id " +
 				"FROM KLANT " +
 				"WHERE " +
 				"voornaam = ? AND " +
@@ -222,6 +227,7 @@ public class KlantDAOFireBird extends AbstractDAOFireBird implements KlantDAO {
 					ResultSet resultSet = statement.executeQuery();
 					) {
 				klantenLijst = voegResultSetInLijst(resultSet);
+				System.out.println(klantenLijst);
 				return klantenLijst;
 			}
 		} catch (SQLException ex) {
@@ -283,9 +289,9 @@ public class KlantDAOFireBird extends AbstractDAOFireBird implements KlantDAO {
 	 */
 	@Override
 	public ArrayList<Klant> getKlantOpBestelling(long bestellingId) throws GeneriekeFoutmelding {
-		String query = "SELECT klantId FROM " +
+		String query = "SELECT klant_id FROM " +
 				"BESTELLING WHERE " +
-				"bestellingId = ? " +
+				"bestelling_id = ? " +
 				"LIMIT 1;";
 		try (
 				Connection connection = connPool.verkrijgConnectie();
@@ -328,7 +334,7 @@ public class KlantDAOFireBird extends AbstractDAOFireBird implements KlantDAO {
 			nieuweKlant.setAdresGegevens(null);
 		}
 
-		query = queryGenerator.buildUpdateStatement(nieuweKlant) + " klantId = " + nieuweKlant.getKlantId() + ";";
+		query = queryGenerator.buildUpdateStatement(nieuweKlant) + " klant_id = " + nieuweKlant.getKlantId() + ";";
 
 		try (
 				Connection connection = connPool.verkrijgConnectie();
@@ -375,7 +381,7 @@ public class KlantDAOFireBird extends AbstractDAOFireBird implements KlantDAO {
 						"SET " +
 						"klantActief = ? " +
 						"WHERE " +
-						"klantId = ?";
+						"klant_id = ?";
 
 		@SuppressWarnings("unused")
 		long verwijderdID = -1;

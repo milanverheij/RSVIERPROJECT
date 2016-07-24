@@ -30,7 +30,7 @@ public class C3POConnectionPool {
      */
     private C3POConnectionPool(ConnectieConfiguratie configuratie) throws GeneriekeFoutmelding {
         try {
-            System.out.println("IN C3PO");
+//            System.out.println("IN C3PO");
             cpds = new ComboPooledDataSource();
 
             Properties properties = new Properties();

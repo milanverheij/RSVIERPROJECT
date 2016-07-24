@@ -1,5 +1,6 @@
 package database.daos.queryGenerator;
 
+import annotations.Entity;
 import exceptions.GeneriekeFoutmelding;
 import logger.DeLogger;
 import model.Klant;
@@ -14,11 +15,18 @@ import java.lang.reflect.Field;
 @SuppressWarnings("rawtypes")
 public class QueryGeneratorFireBird extends QueryGenerator {
 
-	@Override
+    @Override
     public String buildInsertStatement(Object object) throws GeneriekeFoutmelding {
         int variableToInsert = 0;
         Class className = object.getClass();
-        String sqlTableName = className.getSimpleName().toUpperCase();
+
+        // Table name via annotations
+        if (!object.getClass().isAnnotationPresent(Entity.class)) {
+            DeLogger.getLogger().error("Entity annotation niet aanwezig in: " + className);
+            throw new GeneriekeFoutmelding("QueryGenerator: Entity annotation niet aanwezig in: " + className);
+        }
+        String sqlTableName = object.getClass().getAnnotation(Entity.class).value();
+
         StringBuilder columns = new StringBuilder();
         StringBuilder values = new StringBuilder();
         Field[] declaredFields = className.getDeclaredFields();
@@ -49,13 +57,14 @@ public class QueryGeneratorFireBird extends QueryGenerator {
                 DeLogger.getLogger().error("Fout bij maken FB insert statement " + "[" + className + "]: " + e.getMessage());
                 throw new GeneriekeFoutmelding("Fout bij maken FB insert statement " + "[" + className + "]: " + e.getMessage());
             }
-
-            if (variableToInsert == 0) {
-                DeLogger.getLogger().warn("Geen declared fields, niets te inserten");
-                throw new GeneriekeFoutmelding("QueryGeneratorFireBird: Geen declared fields, niets te inserten");
-            }
         }
-        return "INSERT INTO " + sqlTableName + "(" + columns  + ") " + "values (" + values + ")";
+
+        if (variableToInsert == 0) {
+            DeLogger.getLogger().warn("Geen declared fields, niets te inserten");
+            throw new GeneriekeFoutmelding("QueryGeneratorFireBird: Geen declared fields, niets te inserten");
+        }
+
+        return "INSERT INTO " + sqlTableName + "(" + columns  + ") " + "VALUES (" + values + ")";
     }
 
     @Override
@@ -149,13 +158,13 @@ public class QueryGeneratorFireBird extends QueryGenerator {
             try {
                 dcField.setAccessible(true);
                 if (dcField.get(object) != null) {
-                    if (!isPrimitiveZero(dcField.get(object))) {
+                    if (!isPrimitiveZero(dcField.get(object)) && !dcField.get(object).toString().equals("")) {
                         variableToUpdate++;
 
                         if (variableToUpdate > 1) {
-                            columnsValues.append(" AND " + dcField.getName());
-                        } else
-                            columnsValues.append(dcField.getName());
+                            columnsValues.append(" AND ");
+                        }
+                        columnsValues.append(dcField.getName());
 
                         if (dcField.get(object) instanceof String) {
                             columnsValues.append(" LIKE \'");

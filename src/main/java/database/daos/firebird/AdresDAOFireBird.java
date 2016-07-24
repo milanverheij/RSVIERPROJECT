@@ -155,7 +155,7 @@ public class AdresDAOFireBird extends AbstractDAOFireBird implements AdresDAO {
                     ResultSet resultSet = statementNieuwAdres.executeQuery();
             ) {
                 while (resultSet.next()) {
-                    nieuw_adresId = resultSet.getInt("adresId");
+                    nieuw_adresId = resultSet.getInt("adres_id");
                 }
             }
 

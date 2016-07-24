@@ -63,6 +63,7 @@ public class ArtikelDAOFireBird extends AbstractDAOFireBird implements ArtikelDA
 			artikelStatement.setString(1, aNieuw.getArtikelNaam());
 			artikelStatement.setInt(2, aNieuw.getPrijsId());
 			artikelStatement.setInt(3, aNieuw.getVerwachteLevertijd());
+
 			// De ternery operator hieronder vertaalt een boolean in een character omdat
 			// Firebird geen boolean bevat."1" = true, "0" = false.
 			artikelStatement.setString(4, ((aNieuw.isInAssortiment())? "1" : "0"));
@@ -87,7 +88,7 @@ public class ArtikelDAOFireBird extends AbstractDAOFireBird implements ArtikelDA
 		catch (SQLException ex) {
 			ex.printStackTrace();
 			DeLogger.getLogger().error("SQL fout tijdens invoeren nieuw artikel");
-			throw new GeneriekeFoutmelding("Niew artikel aanmaken kan niet");
+			throw new GeneriekeFoutmelding("Niew artikel aanmaken kan niet " + ex.getMessage());
 		}
 	}
 

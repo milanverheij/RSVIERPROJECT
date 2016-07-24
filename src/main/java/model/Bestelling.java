@@ -1,6 +1,7 @@
 package model;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
 import annotations.Column;
 import annotations.Entity;
@@ -87,5 +88,19 @@ public class Bestelling {
 
 	public void setBestellingActief(boolean bestellingActief) {
 		this.bestellingActief = bestellingActief;
+	}
+
+	@Override
+	public String toString() {
+		StringBuilder string = new StringBuilder("BESTELLING: " + bestellingId + " van klant " + klantId + "\n");
+
+		Iterator<Artikel> artikelen = getArtikelLijst().iterator();
+
+		while (artikelen.hasNext()) {
+			Artikel artikel = artikelen.next();
+			string.append("\t\t" + artikel + "\n");
+		}
+
+		return string.toString();
 	}
 }
