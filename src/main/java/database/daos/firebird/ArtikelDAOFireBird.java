@@ -180,7 +180,7 @@ public class ArtikelDAOFireBird extends AbstractDAOFireBird implements ArtikelDA
 					artikel.setVerwachteLevertijd(artikelRset.getInt(6));
 					// Omdat Firebird geen booleans bevat wordt de ternary operator gebruikt om de 
 					// waarde uit de firebird database om te zetten in een boolean.
-					artikel.setInAssortiment(artikelRset.getString(6).contains("1") ? true : false);
+					artikel.setInAssortiment(artikelRset.getString(7).contains("1") ? true : false);
 					artikelSet.add(artikel);
 				}
 			}
