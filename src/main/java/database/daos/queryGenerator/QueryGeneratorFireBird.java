@@ -164,7 +164,12 @@ public class QueryGeneratorFireBird extends QueryGenerator {
                         if (variableToUpdate > 1) {
                             columnsValues.append(" AND ");
                         }
-                        columnsValues.append(dcField.getName());
+
+                        //TODO: Workaround voor klant_id
+                        if (dcField.getName().equals("klantId"))
+                            columnsValues.append("klant_id");
+                        else
+                            columnsValues.append(dcField.getName());
 
                         if (dcField.get(object) instanceof String) {
                             columnsValues.append(" LIKE \'");

@@ -217,6 +217,7 @@ public class KlantDAOFireBird extends AbstractDAOFireBird implements KlantDAO {
 	 */
 	@Override
 	public ArrayList<Klant> getKlantOpKlant(Klant klant) throws GeneriekeFoutmelding {
+
 		query = queryGenerator.buildSelectStatement(klant);
 
 		try (
