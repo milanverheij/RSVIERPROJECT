@@ -1,11 +1,10 @@
 package gui.bewerkingen;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
+import java.util.*;
 
 import exceptions.GeneriekeFoutmelding;
 import database.factories.DAOFactory;
+import gui.gui.AdresGui;
 import gui.gui.ArtikelGui;
 import gui.gui.KlantGui;
 import gui.model.GuiPojo;
@@ -146,6 +145,26 @@ public class HoofdGuiBewerkingen extends AbstractGuiBewerkingen {
 		try {
 			ArtikelGui artikelGui = new ArtikelGui();
 			artikelGui.setAndRun(GuiPojo.artikelDAO.getAlleArtikelen(false));
+		} catch (GeneriekeFoutmelding e) {
+			e.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void maakAdresGui(long klantId) {
+		try {
+			AdresGui adresGui = new AdresGui();
+			LinkedHashSet<Adres> adresLinkedHashSet = new LinkedHashSet<>();
+			ListIterator<Adres> adresListIterator = GuiPojo.adresDAO.getAdresOpKlantID(klantId);
+
+			while (adresListIterator.hasNext()) { //TODO: Wat omweg van iterator naar set. Maar even snel werk
+				Adres adres = adresListIterator.next();
+				adresLinkedHashSet.add(adres);
+			}
+
+			adresGui.setAndRun(adresLinkedHashSet);
+
 		} catch (GeneriekeFoutmelding e) {
 			e.printStackTrace();
 		} catch (Exception e) {

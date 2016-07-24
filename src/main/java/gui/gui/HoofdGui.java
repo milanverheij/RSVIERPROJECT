@@ -1,5 +1,6 @@
 package gui.gui;
 
+import com.sun.tools.javac.jvm.Gen;
 import exceptions.GeneriekeFoutmelding;
 
 import gui.bewerkingen.HoofdGuiBewerkingen;
@@ -61,7 +62,8 @@ public class HoofdGui extends Application{
 	Button updateBestellingButton;
 	Button nieuweBestellingButton;
 	Button verwijderBestelling;
-	Button updateArtikelButton;
+	Button artikelModuleButton;
+    Button adresModuleButton;
 	Button nieuweKlantButton;
 	Button updateKlantButton;
 
@@ -85,7 +87,8 @@ public class HoofdGui extends Application{
 		HBox knoppenBox = new HBox();
 		knoppenBox.getChildren().addAll(zoekButton,
 				new Label("  "), leegButton,
-				new Label("  "), updateArtikelButton,
+				new Label("  "), artikelModuleButton,
+                new Label("  "), adresModuleButton,
 				new Label("  "), nieuweBestellingButton, updateBestellingButton, verwijderBestelling,
 				new Label("  "), nieuweKlantButton, updateKlantButton);
 		knoppenBox.setSpacing(5);
@@ -138,7 +141,9 @@ public class HoofdGui extends Application{
 		updateBestellingButton = new Button("Bestelling aanpassen");
 		verwijderBestelling = new Button("Bestelling verwijderen");
 
-		updateArtikelButton = new Button("Artikel module");
+		artikelModuleButton = new Button("Artikel module");
+
+        adresModuleButton = new Button("Adres module");
 
 		nieuweKlantButton = new Button("Klant aanmaken");
 		updateKlantButton = new Button("Klant aanpassen");
@@ -146,7 +151,9 @@ public class HoofdGui extends Application{
 		zoekButton.setOnAction(e -> zoekKnopKlik());
 		leegButton.setOnAction(E -> leegAlles());
 
-		updateArtikelButton.setOnAction(e -> nieuwArtikel());
+		artikelModuleButton.setOnAction(e -> artikelModule());
+
+        adresModuleButton.setOnAction(e -> adresModule());
 
 		nieuweBestellingButton.setOnAction(e -> nieuweBestelling());
 		updateBestellingButton.setOnAction(e -> updateBestelling());
@@ -156,9 +163,15 @@ public class HoofdGui extends Application{
 		updateKlantButton.setOnAction(e -> updateKlant());
 	}
 
-	private void nieuwArtikel() {
+	private void artikelModule() {
 		guiBewerkingen.maakArtikelGui();
 	}
+
+	private void adresModule() {
+        long klantId = Long.valueOf(klantIdField.getText()); // TODO: Werkt maar gooit wel exception als leeg
+
+	    guiBewerkingen.maakAdresGui(klantId);
+    }
 
 	//zoekGrid bevat alle velden met info waarop gezocht kan worden
 	private void populateZoekGrid(){
