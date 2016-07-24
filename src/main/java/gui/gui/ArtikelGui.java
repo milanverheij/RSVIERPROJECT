@@ -111,7 +111,7 @@ public class ArtikelGui extends Application{
 		while(artikelIterator.hasNext()){
 			artikel = artikelIterator.next();
 			artikelListView.getItems().add("Naam: " + artikel.getArtikelNaam() 
-			+ "\nPrijs: " + artikel.getArtikelPrijs());
+										+ "\nPrijs: " + artikel.getArtikelPrijs());
 
 			artikelArrayLijst.add(artikel);
 		}		

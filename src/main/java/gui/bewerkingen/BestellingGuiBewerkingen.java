@@ -82,8 +82,13 @@ public class BestellingGuiBewerkingen {
 		if(artikelLijst != null){
 			listView.getItems().clear();
 			for(Artikel artikel : artikelLijst){
-				listView.getItems().add("Naam: " + artikel.getArtikelNaam() + "\nPrijs: " 
-						+ artikel.getArtikelPrijs() + "\nAantal: " + artikel.getAantalBesteld());
+				listView.getItems().add("Naam: " + artikel.getArtikelNaam() +
+									"\nPrijs: " + artikel.getArtikelPrijs() +
+
+                                    (welkeArtikelLijst.equals("CompleteArtikelLijst") ? // Als complete artikel lijst dan geen aantal
+                                            "" : "\nAantal: " + artikel.getAantalBesteld() +
+                                    "\nTotaalbedrag: " + ((artikel.getArtikelPrijs().doubleValue() *
+                                     artikel.getAantalBesteld()))));
 			}
 		}
 	}

@@ -381,8 +381,11 @@ public class HoofdGui extends Application{
 			guiBewerkingen.setArtikelLijst();
 
 			for(Artikel artikel : GuiPojo.artikelLijst){
-				artikelListView.getItems().add("Naam: " + artikel.getArtikelNaam() + "\nPrijs: " + artikel.getArtikelPrijs() +
-						"\nAantal: " + artikel.getAantalBesteld());
+				artikelListView.getItems().add("Naam: " + artikel.getArtikelNaam() +
+											"\nPrijs: " + artikel.getArtikelPrijs() +
+											"\nAantal: " + artikel.getAantalBesteld() +
+											"\nTotaalbedrag: " + ((artikel.getArtikelPrijs().doubleValue() *
+															artikel.getAantalBesteld())));
 			}
 		}
 	}
