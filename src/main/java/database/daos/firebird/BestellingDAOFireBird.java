@@ -134,7 +134,7 @@ public class BestellingDAOFireBird extends AbstractDAOFireBird implements Bestel
 	public void updateBestelling(Bestelling bestelling) throws GeneriekeFoutmelding{
 		try(Connection con = connPool.verkrijgConnectie();
 				PreparedStatement deleteStatement = con.prepareStatement("DELETE FROM BESTELLING_HEEFT_ARTIKEL WHERE bestelling_id_best = ?;");
-				PreparedStatement setActiefStatement = con.prepareStatement("UPDATE BESTELLING SET bestellingActief = 1 WHERE bestelling_id = ?;")){
+				PreparedStatement setActiefStatement = con.prepareStatement("UPDATE BESTELLING SET bestellingActief = TRUE WHERE bestelling_id = ?;")){
 
 
 			con.setAutoCommit(false);
@@ -163,7 +163,7 @@ public class BestellingDAOFireBird extends AbstractDAOFireBird implements Bestel
 		try(Connection con = connPool.verkrijgConnectie();
 				PreparedStatement updateStatement = con.prepareStatement(
 						"UPDATE BESTELLING "
-								+ "SET bestellingActief = 0 "
+								+ "SET bestellingActief = FALSE "
 								+ "WHERE klant_id = ?;");){
 			updateStatement.setLong(1, klantId);
 			updateStatement.executeUpdate();
@@ -215,7 +215,7 @@ public class BestellingDAOFireBird extends AbstractDAOFireBird implements Bestel
 	public void setEnkeleBestellingInactief(long bestellingId) throws GeneriekeFoutmelding{
 		try(Connection con = connPool.verkrijgConnectie();
 				PreparedStatement statement = con.prepareStatement(
-						"UPDATE BESTELLING SET bestellingActief = 0 WHERE bestelling_id = ?")){
+						"UPDATE BESTELLING SET bestellingActief = FALSE WHERE bestelling_id = ?")){
 			statement.setLong(1, bestellingId);
 			statement.executeUpdate();
 		}catch (SQLException e){
