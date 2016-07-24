@@ -103,7 +103,7 @@ public class HoofdGuiBewerkingen extends AbstractGuiBewerkingen {
 
 			populateBestellingListView(bestellingListView);
 
-			GuiPojo.bestelDAO.verwijderEnkeleBestelling(GuiPojo.bestelling.getBestellingId());
+			GuiPojo.bestelDAO.setEnkeleBestellingInactief(GuiPojo.bestelling.getBestellingId());
 		}catch (GeneriekeFoutmelding e){
 			GuiPojo.errorBox.setMessageAndStart(e.getMessage());
 		}

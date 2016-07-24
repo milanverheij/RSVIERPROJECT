@@ -79,8 +79,9 @@ public class BestellingDAOFireBird extends AbstractDAOFireBird implements Bestel
 
 			statement.setLong(1, klantId);
 
-			if(bestellingActief)
-				statement.setInt(2, 1);
+			if(bestellingActief) {
+				statement.setBoolean(2, true);
+			}
 			else
 				statement.setString(2, "%");
 			
