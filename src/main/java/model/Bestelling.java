@@ -92,7 +92,8 @@ public class Bestelling {
 
 	@Override
 	public String toString() {
-		StringBuilder string = new StringBuilder("BESTELLING: " + bestellingId + " van klant " + klantId + "\n");
+		StringBuilder string = new StringBuilder("BESTELLING: " + bestellingId + " van klant " + klantId +
+				" status actief = " + bestellingActief + "\n");
 
 		Iterator<Artikel> artikelen = getArtikelLijst().iterator();
 
