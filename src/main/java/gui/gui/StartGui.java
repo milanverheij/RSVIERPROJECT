@@ -1,5 +1,8 @@
 package gui.gui;
 
+import gui.bewerkingen.StartGuiBewerkingen;
+import gui.model.GuiPojo;
+
 import javafx.application.Application;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -21,8 +24,8 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
+
 import logger.DeLogger;
-import model.GuiPojo;
 
 public class StartGui extends Application{
 	Stage stage;
@@ -36,8 +39,12 @@ public class StartGui extends Application{
 
 	MenuBar menuBar;
 
+	Image backgroundImage = new Image("/images/achtergrond.jpg");
+
 	String databaseSelected = "MySQL";
 	String connectionSelected = "HikariCP";
+	
+	StartGuiBewerkingen guiBewerkingen = new StartGuiBewerkingen();
 
 	final BooleanProperty firstTime = new SimpleBooleanProperty(true); // Variable to store the focus on stage load
 
@@ -49,7 +56,7 @@ public class StartGui extends Application{
 	public void start(Stage primaryStage) throws Exception {
 		stage = primaryStage;
 
-		makeMenus();
+		maakMenus();
 		maakDisplayItems();
 		populateVbox();
 		setStageProperties();
@@ -57,11 +64,13 @@ public class StartGui extends Application{
 
 		VBox box = new VBox();
 		box.getChildren().addAll(menuBar, stackPane);
-		Scene scene = new Scene(box, 400, 300); // TODO: Dynamic size
 
+		Scene scene = new Scene(box, stage.getWidth(), stage.getHeight());
+
+		stage.setResizable(false);
 		stage.setScene(scene);
-		stage.show();
 		haalFocusVanTextField();
+		stage.show();
 	}
 
 	private void maakDisplayItems() {
@@ -77,7 +86,7 @@ public class StartGui extends Application{
 		inlogButton.setOnAction(e -> controleerGegevens());
 	}
 
-	private void makeMenus() {
+	private void maakMenus() {
 		menuBar = new MenuBar();
 		ToggleGroup databaseGroup = new ToggleGroup();
 		ToggleGroup connectionGroup = new ToggleGroup();
@@ -123,7 +132,7 @@ public class StartGui extends Application{
 
 	private void populateStackPane(){
 		stackPane = new StackPane();
-		Rectangle rect = new Rectangle(400, 300);
+		Rectangle rect = new Rectangle(backgroundImage.getWidth(), backgroundImage.getHeight());
 		rect.setFill(Color.WHITE);
 
 		stackPane.getChildren().add(rect);
@@ -133,13 +142,16 @@ public class StartGui extends Application{
 	}
 
 	private ImageView getAchtergrond(){
-		Image image = new Image("/images/achtergrond.jpg", 300, 300, false, false);
+		Image image = backgroundImage;
 		return new ImageView(image);
 	}
 
 	private void setStageProperties(){
 		stage.getIcons().add(new Image("/images/icon.png"));
 		stage.setTitle("Harrie's Tweedehands Beessies");
+
+		stage.setWidth(backgroundImage.getWidth());
+		stage.setHeight(backgroundImage.getHeight() + 60);
 	}
 
 	private void populateVbox(){
@@ -153,14 +165,14 @@ public class StartGui extends Application{
 	}
 
 	private void controleerGegevens(){
-		if(inlogNaamField.getText().equals("rs4") && wachtwoordField.getText().equals("1234")){
+		if(guiBewerkingen.controleerGegevens(inlogNaamField.getText(), wachtwoordField.getText())){
 			HoofdGui hoofd = new HoofdGui();
 			try {
 				hoofd.setConnection(databaseSelected, connectionSelected);
 				hoofd.start(new Stage());
 				DeLogger.getLogger().info("Succesvol ingelogd");
 			} catch (Exception e) {
-				DeLogger.getLogger().error(e.getMessage());
+				DeLogger.getLogger().error("Fout bij inloggen: {}", e.getMessage(), e.getStackTrace());
 				e.printStackTrace();
 			}
 			stage.close();

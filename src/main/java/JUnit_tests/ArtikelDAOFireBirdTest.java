@@ -7,12 +7,13 @@ import static org.hamcrest.core.Is.is;
 import java.math.BigDecimal;
 import java.util.LinkedHashSet;
 
-import factories.DAOFactoryFireBird;
-import firebird.ArtikelDAOFireBird;
+import database.factories.DAOFactoryFireBird;
 import model.Artikel;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
+import database.daos.firebird.ArtikelDAOFireBird;
 
 public class ArtikelDAOFireBirdTest {
 

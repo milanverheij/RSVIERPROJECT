@@ -8,12 +8,13 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import java.math.BigDecimal;
 import java.util.LinkedHashSet;
 
-import factories.DAOFactoryMySQL;
-import firebird.ArtikelDAOFireBird;
+import database.factories.DAOFactoryMySQL;
 import model.Artikel;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
+import database.daos.firebird.ArtikelDAOFireBird;
 
 public class ArtikelDAOTestFireBird {
 

@@ -1,7 +1,10 @@
 package gui.gui;
 
 import exceptions.GeneriekeFoutmelding;
-import gui.bewerkingen.GuiBewerkingenMySQL;
+
+import gui.bewerkingen.HoofdGuiBewerkingen;
+import gui.model.GuiPojo;
+
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
@@ -18,15 +21,15 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+
+import model.Adres;
 import model.Artikel;
-import model.GuiPojo;
+import model.Klant;
 
 public class HoofdGui extends Application{
-	private final Insets INSET = new Insets(6);
+	private final Insets INSET = new Insets(13);
 
-	ErrorBox errorBox = new ErrorBox();
-
-	GuiBewerkingenMySQL guiBewerkingen = new GuiBewerkingenMySQL();
+	HoofdGuiBewerkingen guiBewerkingen = new HoofdGuiBewerkingen();
 
 	TextField klantIdField;
 	TextField voorNaamField;
@@ -58,13 +61,10 @@ public class HoofdGui extends Application{
 	Button updateBestellingButton;
 	Button nieuweBestellingButton;
 	Button verwijderBestelling;
-	Button updateArtikelButton;
+	Button artikelModuleButton;
+	Button adresModuleButton;
 	Button nieuweKlantButton;
 	Button updateKlantButton;
-
-	public static void main(String[] args){
-		launch();
-	}
 
 	@Override
 	public void start(Stage stage) throws Exception {
@@ -77,37 +77,37 @@ public class HoofdGui extends Application{
 		HBox gridBox = new HBox();
 		gridBox.getChildren().add(zoekGrid);
 		gridBox.getChildren().add(displayGrid);
-		gridBox.setSpacing(5);
+		gridBox.setSpacing(10);
 
 		HBox knoppenBox = new HBox();
 		knoppenBox.getChildren().addAll(zoekButton,
 				new Label("  "), leegButton,
-				new Label("  "), updateArtikelButton,
+				new Label("  "), artikelModuleButton,
+				new Label("  "), adresModuleButton,
 				new Label("  "), nieuweBestellingButton, updateBestellingButton, verwijderBestelling,
 				new Label("  "), nieuweKlantButton, updateKlantButton);
 		knoppenBox.setSpacing(5);
 
 		VBox verticalBox = new VBox();
 		verticalBox.getChildren().addAll(gridBox, knoppenBox);
-		verticalBox.setSpacing(2);
+		verticalBox.setSpacing(10);
 		verticalBox.setPadding(INSET);
 
 		Scene scene = new Scene(verticalBox);
 		stage.setScene(scene);
-		stage.setTitle("Exotische Dieren Emporium");
 		stage.getIcons().add(new Image("/images/icon.png"));
 		stage.setTitle("Harrie's Tweedehands Beessies");
 		stage.show();
 	}
 
 	private void maakListViewsAan(){
-		klantListView = new ListView<String>();
+		klantListView = new ListView<>();
 		klantListView.setOnMouseClicked(e -> getItemVanKlantenLijst());
 
-		bestellingListView = new ListView<Long>();
+		bestellingListView = new ListView<>();
 		bestellingListView.setOnMouseClicked(e -> getItemVanBestellingLijst());
 
-		artikelListView = new ListView<String>();
+		artikelListView = new ListView<>();
 		artikelListView.setOnMouseClicked(e -> getItemVanArtikelLijst());
 	}
 
@@ -132,37 +132,48 @@ public class HoofdGui extends Application{
 		zoekButton = new Button("Zoeken");
 		leegButton = new Button("Leeg velden");
 
-		updateBestellingButton = new Button("Update bestelling");
-		nieuweBestellingButton = new Button("Nieuwe bestelling");
-		verwijderBestelling = new Button("Verwijder bestelling");
+		nieuweBestellingButton = new Button("Bestelling aanmaken");
+		updateBestellingButton = new Button("Bestelling aanpassen");
+		verwijderBestelling = new Button("Bestelling verwijderen");
 
-		updateArtikelButton = new Button("Update Artikel");
+		artikelModuleButton = new Button("Artikel module");
 
-		nieuweKlantButton = new Button("Nieuwe klant");
-		updateKlantButton = new Button("Update klant");
+		adresModuleButton = new Button("Adres module");
+
+		nieuweKlantButton = new Button("Klant aanmaken");
+		updateKlantButton = new Button("Klant aanpassen");
 
 		zoekButton.setOnAction(e -> zoekKnopKlik());
 		leegButton.setOnAction(E -> leegAlles());
 
-		updateArtikelButton.setOnAction(e -> nieuwArtikel());
+		artikelModuleButton.setOnAction(e -> artikelModule());
 
-		updateBestellingButton.setOnAction(e -> updateBestelling());
+		adresModuleButton.setOnAction(e -> adresModule());
+
 		nieuweBestellingButton.setOnAction(e -> nieuweBestelling());
+		updateBestellingButton.setOnAction(e -> updateBestelling());
 		verwijderBestelling.setOnAction(e -> guiBewerkingen.verwijderEnkeleBestelling(bestellingListView));
 
 		nieuweKlantButton.setOnAction(e -> nieuweKlant());
 		updateKlantButton.setOnAction(e -> updateKlant());
 	}
 
-	private void nieuwArtikel() {
+	private void artikelModule() {
 		guiBewerkingen.maakArtikelGui();
+	}
+
+	private void adresModule() {
+		if(!klantIdField.getText().isEmpty())
+			guiBewerkingen.maakAdresGui(Long.valueOf(klantIdField.getText()));
+		else
+			GuiPojo.errorBox.setMessageAndStart("Selecteer eerst een klant");
 	}
 
 	//zoekGrid bevat alle velden met info waarop gezocht kan worden
 	private void populateZoekGrid(){
 		zoekGrid = new GridPane();
 
-		Text zoekOp = new Text("Zoeken op");
+		Text zoekOp = new Text("Zoeken:");
 		zoekOp.setFont(Font.font(Font.getDefault().getName(), FontWeight.BOLD, Font.getDefault().getSize()));
 
 		actieveItems = new CheckBox("Alleen actieve items tonen");
@@ -175,11 +186,11 @@ public class HoofdGui extends Application{
 		zoekGrid.add(new Label("Achternaam"), 0, 4);
 		zoekGrid.add(new Label("E-mail"), 0, 5);
 		zoekGrid.add(new Label(" "), 0, 6);
-		zoekGrid.add(new Label("Bestelling Id"), 0, 7);
+		zoekGrid.add(new Label("Bestelling ID"), 0, 7);
 		zoekGrid.add(new Label(" "), 0, 8);
 		zoekGrid.add(new Label("Straatnaam"), 0, 9);
 		zoekGrid.add(new Label("Huisnummer"), 0, 10);
-		zoekGrid.add(new Label("toevoeging"), 0, 11);
+		zoekGrid.add(new Label("Toevoeging"), 0, 11);
 		zoekGrid.add(new Label("Postcode"), 0, 12);
 		zoekGrid.add(new Label("Woonplaats"), 0, 13);
 		zoekGrid.add(new Label(" "), 0, 14);
@@ -222,11 +233,39 @@ public class HoofdGui extends Application{
 	private void zoekKnopKlik(){
 		leegViews();
 
-		if(bestellingIdField.getText().equals(""))
-			guiBewerkingen.zoekKlant(klantListView, klantIdField.getText(), voorNaamField.getText(),
-					achterNaamField.getText(), tussenVoegselField.getText(), emailField.getText());
+		if(bestellingIdField.getText().equals("")){
+			Klant klant = nieuwKlantObject();
+
+			if(actieveItems.isSelected()) {
+				klant.setKlantActief("1");
+			}
+			klant.setAdresGegevens(nieuwAdresObject());
+
+			guiBewerkingen.zoekKlant(klantListView, klant);
+		}
 		else
 			zoekBestelling();
+	}
+
+	private Adres nieuwAdresObject() {
+		Adres adres = new Adres();
+		adres.setHuisnummer((huisnummerField.getText() != null && huisnummerField.getText().equals("")) ? 0 : Integer.parseInt(huisnummerField.getText())); 
+
+		adres.setToevoeging(toevoegingField.getText());
+		adres.setStraatnaam(straatnaamField.getText());
+		adres.setPostcode(postcodeField.getText());
+		adres.setWoonplaats(woonplaatsField.getText());
+		return adres;
+	}
+
+	private Klant nieuwKlantObject() {
+		Klant klant = new Klant();
+		klant.setKlantId((klantIdField != null && klantIdField.getText().equals("")) ? 0 : Long.parseLong(klantIdField.getText()));
+		klant.setVoornaam(voorNaamField.getText());
+		klant.setAchternaam(achterNaamField.getText());
+		klant.setTussenvoegsel(tussenVoegselField.getText());
+		klant.setEmail(emailField.getText());
+		return klant;
 	}
 
 	/* Zoekt bestellingen op de waarde van het klantIdField of op bestellingIdField
@@ -297,24 +336,28 @@ public class HoofdGui extends Application{
 			artikelListView.getItems().clear();
 
 			if(GuiPojo.klant.getKlantId() > 0){
-				klantIdField.setText("" + GuiPojo.klant.getKlantId());
-				voorNaamField.setText(GuiPojo.klant.getVoornaam());
-				achterNaamField.setText(GuiPojo.klant.getAchternaam());
-				tussenVoegselField.setText(GuiPojo.klant.getTussenvoegsel());
-				emailField.setText(GuiPojo.klant.getEmail());
-
-				guiBewerkingen.getAdres(actieveItems.isSelected());
-
-				straatnaamField.setText(GuiPojo.klant.getAdresGegevens().getStraatnaam());
-				if(GuiPojo.klant.getAdresGegevens().getHuisnummer() != 0)
-					huisnummerField.setText("" + GuiPojo.klant.getAdresGegevens().getHuisnummer());
-				toevoegingField.setText(GuiPojo.klant.getAdresGegevens().getToevoeging());
-				postcodeField.setText(GuiPojo.klant.getAdresGegevens().getPostcode());
-				woonplaatsField.setText(GuiPojo.klant.getAdresGegevens().getWoonplaats());
-
+				setKlantGegevens();
 				zoekBestelling();
 			}
 		}
+	}
+
+	private void setKlantGegevens() {
+		klantIdField.setText("" + GuiPojo.klant.getKlantId());
+		voorNaamField.setText(GuiPojo.klant.getVoornaam());
+		achterNaamField.setText(GuiPojo.klant.getAchternaam());
+		tussenVoegselField.setText(GuiPojo.klant.getTussenvoegsel());
+		emailField.setText(GuiPojo.klant.getEmail());
+
+		guiBewerkingen.getAdres(actieveItems.isSelected());
+
+		Adres adres = GuiPojo.klant.getAdresGegevens().get(0); // TODO nettere manier om adres gegevens te verwerken bedenken
+		straatnaamField.setText(adres.getStraatnaam());
+		if(adres.getHuisnummer() != 0)
+			huisnummerField.setText("" + adres.getHuisnummer());
+		toevoegingField.setText(adres.getToevoeging());
+		postcodeField.setText(adres.getPostcode());
+		woonplaatsField.setText(adres.getWoonplaats());
 	}
 
 	/* Loopt wanneer er op de bestellinglijst op een item geklikt is
@@ -327,7 +370,15 @@ public class HoofdGui extends Application{
 			long selectedItem = bestellingListView.getSelectionModel().getSelectedItem();
 			if(selectedItem >= 0){
 				guiBewerkingen.getItemVanBestellingLijst(selectedItem);
+				if(klantIdField.getText().isEmpty()){
+					guiBewerkingen.zoekViaBestellingKlant();
+					setKlantGegevens();
+					String gegevens = GuiPojo.klant.getTussenvoegsel().equals("") ? GuiPojo.klant.getKlantId() + ": " + GuiPojo.klant.getVoornaam() + " " + GuiPojo.klant.getAchternaam() : GuiPojo.klant.getKlantId() + ": " + GuiPojo.klant.getVoornaam() + " " + GuiPojo.klant.getTussenvoegsel() + " " + GuiPojo.klant.getAchternaam();
+					if(!klantListView.getItems().contains(gegevens))
+						klantListView.getItems().add(gegevens);				}
 			}
+			getKlantGegevens(); // Vind de klant adhv beschikbare info
+			setKlantGegevens(); // Zet klant gegevens in de textfields
 			setArtikelListView();
 		}
 	}
@@ -344,12 +395,21 @@ public class HoofdGui extends Application{
 			guiBewerkingen.setArtikelLijst();
 
 			for(Artikel artikel : GuiPojo.artikelLijst){
-				artikelListView.getItems().add("Naam: " + artikel.getArtikelNaam() + "\nPrijs: " + artikel.getArtikelPrijs() +
-						"\nAantal: " + artikel.getAantalBesteld());
+				artikelListView.getItems().add("Naam: " + artikel.getArtikelNaam() +
+						"\nPrijs: " + artikel.getArtikelPrijs() +
+						"\nAantal: " + artikel.getAantalBesteld() +
+						"\nTotaalbedrag: " + ((artikel.getArtikelPrijs().doubleValue() *
+								artikel.getAantalBesteld())));
 			}
-			if(klantIdField.getText().isEmpty())
-				guiBewerkingen.zoekKlant(klantListView, klantIdField.getText(), voorNaamField.getText(),
-						achterNaamField.getText(), tussenVoegselField.getText(), emailField.getText());
+		}
+	}
+
+
+	private void getKlantGegevens(){
+		if(klantIdField.getText().isEmpty()){
+			Klant klant = nieuwKlantObject();
+			klant.setAdresGegevens(nieuwAdresObject());
+			guiBewerkingen.zoekKlant(klantListView, klant);
 		}
 	}
 
@@ -390,6 +450,7 @@ public class HoofdGui extends Application{
 
 	/* Lanceert een nieuw Stage waar een nieuwe klant gemaakt kan worden.*/
 	private void nieuweKlant(){
+		GuiPojo.klant = new Klant();
 		guiBewerkingen.nieuweKlant();
 	}
 

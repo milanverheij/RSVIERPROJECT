@@ -13,7 +13,7 @@ import annotations.Entity;
  * in een LinkedHasMap kunnen worden opgeslagen in de database.
  */
 @Entity("artikel")
-public class Artikel implements Comparable{
+public class Artikel implements Comparable<Artikel>{
 	//Data field
 	@Id
 	@Column(values = "artikel_id")
@@ -37,7 +37,7 @@ public class Artikel implements Comparable{
 	public Artikel() {
 	}
 	public Artikel(String artikelNaam, BigDecimal artikelPrijs,
-				   String datumAanmaak, int verwachteLevertijd, boolean inAssortiment) {
+			String datumAanmaak, int verwachteLevertijd, boolean inAssortiment) {
 		this.artikelNaam = artikelNaam;
 		this.artikelPrijs = artikelPrijs;
 		this.datumAanmaak = datumAanmaak;
@@ -109,21 +109,18 @@ public class Artikel implements Comparable{
 
 	@Override
 	public String toString(){
-		return "artikel " + artikelId + "\t " + artikelNaam + "\t $" + artikelPrijs.toPlainString()
-				+ "\t prijs id " + prijsId + "\t " + datumAanmaak + "\t " + verwachteLevertijd + "\t "
-				+ inAssortiment;
+		return "ARTIKEL: " + artikelId + "\t " + artikelNaam + "\t $" + artikelPrijs.toPlainString()
+		+ "\t prijs id " + prijsId + "\t " + datumAanmaak + "\t " + verwachteLevertijd + "\t "
+		+ inAssortiment;
 	}
 
 	@Override
-	public int compareTo(Object o) {
-		if (this.artikelId == ((Artikel)o).getArtikelId()) {
+	public int compareTo(Artikel o) {
+		if (this.artikelId == o.getArtikelId())
 			return 0;
-		}
-		else if (this.artikelId > ((Artikel)o).getArtikelId()) {
+		else if (this.artikelId > o.getArtikelId())
 			return 1;
-		}
-		else {
+		else
 			return -1;
-		}
 	}
 }

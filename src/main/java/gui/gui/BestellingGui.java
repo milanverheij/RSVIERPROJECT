@@ -1,9 +1,9 @@
 package gui.gui;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-
-import gui.bewerkingen.BestellingGUIBewerkingen;
+import gui.bewerkingen.BestellingGuiBewerkingen;
+import gui.model.GuiPojo;
+import gui.model.SubGuiPojo;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
@@ -12,196 +12,167 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import model.Artikel;
 import model.Bestelling;
 
-public class BestellingGui extends Application {
-    private BestellingGUIBewerkingen bestellingGUIBewerkingen = new BestellingGUIBewerkingen();
-    private Artikel huidigArtikel;
-    private Bestelling bestelling;
+public class BestellingGui extends Application{
 
-    private ErrorBox errorBox = new ErrorBox();
+	BestellingGuiBewerkingen guiBewerkingen = new BestellingGuiBewerkingen();
 
-    private Stage bestellingStage;
+	Insets inset = new Insets(6);
+	
+	private Stage bestellingStage;
 
-    private Button voegToeButton;
-    private Button haalWegButton;
-    private Button okeButton;
-    private Button cancelButton;
+	private Button voegToeButton;
+	private Button haalWegButton;
+	private Button okeButton;
+	private Button cancelButton;
 
-    private CheckBox bestellingActief;
+	private CheckBox bestellingActief;
 
-    private boolean bestellingAanpassen = false;
+	private ListView<String> huidigeBestellingListView;
+	private ListView<String> artikelenListView;
 
-    private ArrayList<Artikel> artikelArrayList;
+	private TextField totaalPrijs;
+	private TextField aantal;
 
-    private ListView<Long> bestellingListView;
-    private ListView<String> huidigeBestellingListView;
-    private ListView<String> artikelenListView;
+	@Override
+	public void start(Stage bestellingStage) throws Exception {
+		this.bestellingStage = bestellingStage;
 
-    private TextField totaalPrijs;
-    private TextField aantal;
+		if(SubGuiPojo.bestellingBewerken){
+			bestellingStage.setTitle("Bestelling aanpassen");
+		}else{
+			SubGuiPojo.bestelling = new Bestelling();
+			bestellingStage.setTitle("Nieuwe bestelling");
+		}
+		bestellingStage.getIcons().add(new Image("/images/icon.png"));
+		maakButtons();
+		maakListViews();
+		populateArrayList();
+		
+		guiBewerkingen.populateListView(artikelenListView, "CompleteArtikelLijst");
+		
+		if(SubGuiPojo.bestellingBewerken)
+			guiBewerkingen.populateListView(huidigeBestellingListView, "BestellingArtikelLijst");
+		maakTextFields();
 
-    private long klantId;
+		GridPane bestelGrid = populateBestelGrid();
 
-    // Voor aanpassen bestelling
-    public void setAndRun(long klantId) throws Exception{
-        this.klantId = klantId;
-        start(new Stage());
-    }
+		HBox winkelwagenBox = new HBox(); //Bevat knoppen om dingen in/uit de winkelwagen te doen
+		winkelwagenBox.getChildren().addAll(voegToeButton, haalWegButton);
+		winkelwagenBox.setSpacing(3);
 
-    // Voor nieuwe bestelling
-    public void setAndRun(long klantId, ListView<Long> bestellingListView) throws Exception {
-        this.klantId = klantId;
+		HBox okeCancelBox = new HBox();
+		okeCancelBox.getChildren().addAll(okeButton, cancelButton);
+		okeCancelBox.setSpacing(3);
 
-        this.bestellingListView = bestellingListView;
-        start(new Stage());
-    }
+		VBox vbox = new VBox();
+		vbox.setPadding(inset);
+		vbox.setSpacing(3);
+		vbox.getChildren().addAll(bestelGrid, winkelwagenBox, okeCancelBox);
 
-    @Override
-    public void start(Stage bestellingStage) throws Exception {
-        this.bestellingStage = bestellingStage;
+		HBox box = new HBox();
+		box.setPadding(inset);
+		box.getChildren().addAll(artikelenListView, vbox, huidigeBestellingListView);
 
-        if(bestelling != null){
-            bestellingStage.setTitle("Bestelling aanpassen");
-            bestellingAanpassen = true;
-        }
+		bestellingStage.setScene(new Scene(box));
+		bestellingStage.show();
+	}
 
-        if(bestelling == null){
-            bestelling = new Bestelling();
-            bestellingStage.setTitle("Nieuwe bestelling");
-            bestellingAanpassen = false;
-        }
+	private GridPane populateBestelGrid(){
+		GridPane bestelGrid = new GridPane();
+		bestelGrid.setVgap(2);
+		bestelGrid.setHgap(5);
+		bestelGrid.setPadding(new Insets(4));
 
-        maakButtons();
-        maakListViews();
-        bestellingGUIBewerkingen.populateArrayListsEnListView(artikelenListView);
-        bestellingGUIBewerkingen.populateBestellingListView(huidigeBestellingListView, bestelling);
-        maakTextFields();
+		bestelGrid.add(new Label("Aantal"), 0, 0);
+		bestelGrid.add(new Label("Prijs"), 0, 1);
 
-        GridPane bestelGrid = populateBestelGrid();
+		bestelGrid.add(aantal, 1, 0);
+		bestelGrid.add(totaalPrijs, 1, 1);
 
-        HBox winkelwagenBox = new HBox(); //Bevat knoppen om dingen in/uit de winkelwagen te doen
-        winkelwagenBox.getChildren().addAll(voegToeButton, haalWegButton);
-        winkelwagenBox.setSpacing(3);
+		bestelGrid.add(bestellingActief, 0, 2);
 
-        HBox okeCancelBox = new HBox();
-        okeCancelBox.getChildren().addAll(okeButton, cancelButton);
-        okeCancelBox.setSpacing(3);
+		return bestelGrid;
+	}
 
-        VBox vbox = new VBox();
-        vbox.setPadding(new Insets(6));
-        vbox.setSpacing(3);
-        vbox.getChildren().addAll(bestelGrid, winkelwagenBox, okeCancelBox);
+	private void maakListViews(){
+		artikelenListView = new ListView<String>();
+		artikelenListView.setOnMouseClicked(e -> getItemVanListView(artikelenListView, "CompleteArtikelLijst"));
 
-        HBox box = new HBox();
-        box.setPadding(new Insets(6));
-        box.getChildren().addAll(artikelenListView, vbox, huidigeBestellingListView);
+		huidigeBestellingListView = new ListView<String>();
+		huidigeBestellingListView.setOnMouseClicked(e ->  getItemVanListView(huidigeBestellingListView, "BestellingArtikelLijst"));
+	}
 
-        bestellingStage.setScene(new Scene(box));
-        bestellingStage.show();
-    }
+	private void populateArrayList(){
+		guiBewerkingen.populateArrayList();
+	}
+	
+	private void maakTextFields() {
+		totaalPrijs = new TextField();
+		totaalPrijs.setEditable(false);
 
-    private void maakTextFields() {
-        totaalPrijs = new TextField();
-        totaalPrijs.setEditable(false);
+		aantal = new TextField();
 
-        aantal = new TextField();
+		aantal.textProperty().addListener((observable, oldValue, newValue) -> {
+			if(newValue.isEmpty() || Long.parseLong(newValue) < 1) //Wanneer er geen aantal of 0 is opgegeven
+				totaalPrijs.setText("0");
+			else if(aantal.getText().length() < 10)
+				totaalPrijs.setText(SubGuiPojo.huidigArtikel.getArtikelPrijs().multiply(new BigDecimal(Long.parseLong(newValue))).toString());
+			else
+				GuiPojo.errorBox.setMessageAndStart("We kunnen niet meer dan 999.999.999 van een artikel leveren");
+		});
+	}
 
-        aantal.textProperty().addListener((observable, oldValue, newValue) -> {
-            if(newValue.isEmpty() || Long.parseLong(newValue) < 1) //Wanneer er geen aantal of 0 is opgegeven
-                totaalPrijs.setText("0");
-            else if(aantal.getText().length() < 10)
-                totaalPrijs.setText(huidigArtikel.getArtikelPrijs().multiply(new BigDecimal(Long.parseLong(newValue))).toString());
-            else
-                errorBox.setMessageAndStart("We kunnen niet meer dan 999.999.999 van een artikel leveren");
-        });
-    }
+	private void maakButtons(){
+		bestellingActief = new CheckBox("Bestelling actief");
 
-    private void maakButtons(){
-        bestellingActief = new CheckBox("Bestelling actief");
+		okeButton = new Button("Oke");
+		okeButton.setOnAction(e -> maakbestelling());
 
-        okeButton = new Button("Oke");
-        okeButton.setOnAction(e -> bestellingGUIBewerkingen.maakbestelling(klantId, bestelling, bestellingActief,
-                bestellingListView, bestellingStage));
+		cancelButton = new Button("Cancel");
+		cancelButton.setOnAction(e -> bestellingStage.close());
 
-        cancelButton = new Button("Cancel");
-        cancelButton.setOnAction(e -> bestellingStage.close());
+		if(SubGuiPojo.bestellingBewerken){
+			voegToeButton = new Button("Voeg toe / Update");
+			bestellingActief.setSelected(SubGuiPojo.bestelling.getBestellingActief());
+		}else{
+			voegToeButton = new Button("Voeg toe");
+			bestellingActief.setSelected(true);
+			bestellingActief.setDisable(true);
+		}
+		voegToeButton.setOnAction(e -> voegArtikelenAanBestellingToe());
 
-        if(bestellingAanpassen){
-            voegToeButton = new Button("Voeg toe / Update");
-            bestellingActief.setSelected(bestelling.getBestellingActief());
-        }else{
-            voegToeButton = new Button("Voeg toe");
-            bestellingActief.setSelected(true);
-            bestellingActief.setDisable(true);
-        }
-        voegToeButton.setOnAction(e -> voegArtikelenAanBestellingToe());
+		haalWegButton = new Button("Haal uit winkelwagen");
+		haalWegButton.setOnAction(e -> haalUitBestelling());
+	}
 
-        haalWegButton = new Button("Haal uit winkelwagen");
-        haalWegButton.setOnAction(e -> haalUitBestelling());
-    }
+	private void haalUitBestelling() {
+		guiBewerkingen.verwijderArtikel(SubGuiPojo.huidigArtikel);
+		guiBewerkingen.populateListView(huidigeBestellingListView, "BestellingArtikelLijst");
+	}
+	
+	private void voegArtikelenAanBestellingToe(){
+		if(!aantal.getText().isEmpty()){
+			guiBewerkingen.voegArtikelenAanBestellingToe(Integer.parseInt(aantal.getText()));
+		}
 
-    private void haalUitBestelling() {
-        bestelling.verwijderArtikel(huidigArtikel);
-        bestellingGUIBewerkingen.populateBestellingListView(huidigeBestellingListView, bestelling);
-    }
+		guiBewerkingen.populateListView(huidigeBestellingListView, "BestellingArtikelLijst");
+	}
 
-    private void voegArtikelenAanBestellingToe(){
-        if(!aantal.getText().isEmpty())
-            if(!(Long.parseLong(aantal.getText()) < 1)){ //Er moet minimaal 1 besteld worden
-                huidigArtikel.setAantalBesteld(Integer.parseInt(aantal.getText()));
-                if(!bestelling.getArtikelLijst().contains(huidigArtikel)){ //Als het er niet in staat, voeg het toe
-                    bestelling.voegArtikelToe(huidigArtikel);
-                }
-                bestellingGUIBewerkingen.populateBestellingListView(huidigeBestellingListView, bestelling);
-            }else{
-                errorBox.setMessageAndStart("Geef een geldig aantal op");
-            }
-    }
+	private void maakbestelling(){
+		if(guiBewerkingen.maakBestelling(SubGuiPojo.bestellingBewerken, bestellingActief.isSelected())){
+			bestellingStage.close();
+		}
+	}	
 
-    private GridPane populateBestelGrid(){
-        GridPane bestelGrid = new GridPane();
-        bestelGrid.setVgap(2);
-        bestelGrid.setHgap(5);
-        bestelGrid.setPadding(new Insets(4));
-
-        bestelGrid.add(new Label("Aantal"), 0, 0);
-        bestelGrid.add(new Label("Prijs"), 0, 1);
-
-        bestelGrid.add(aantal, 1, 0);
-        bestelGrid.add(totaalPrijs, 1, 1);
-
-        bestelGrid.add(bestellingActief, 0, 2);
-
-        return bestelGrid;
-    }
-
-    private void maakListViews(){
-        artikelenListView = new ListView<String>();
-        artikelenListView.setOnMouseClicked(e -> getItemVanListView(artikelenListView, artikelArrayList));
-
-        huidigeBestellingListView = new ListView<String>();
-        huidigeBestellingListView.setOnMouseClicked(e -> getItemVanListView(huidigeBestellingListView, bestelling.getArtikelLijst()));
-    }
-
-    private void getItemVanListView(ListView<String> listView, ArrayList<Artikel> artikelArrayList) {
-        try{
-            int selectedIndex = listView.getSelectionModel().getSelectedIndex();
-            if(selectedIndex != -1){
-                huidigArtikel = artikelArrayList.get(selectedIndex);
-                aantal.setText("" + huidigArtikel.getAantalBesteld());
-            }
-        }catch(ArrayIndexOutOfBoundsException e){
-            e.printStackTrace();
-        }
-    }
-
-    public void setBestelling(Bestelling bestelling){
-        this.bestelling = bestelling;
-    }
+	private void getItemVanListView(ListView<String> listView, String welkeArtikelLijst) {
+		guiBewerkingen.getItemVanListView(listView.getSelectionModel().getSelectedIndex(), welkeArtikelLijst);
+		aantal.setText("" + guiBewerkingen.getAantal());
+	}
 }

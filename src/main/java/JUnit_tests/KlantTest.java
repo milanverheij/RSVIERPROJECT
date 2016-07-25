@@ -69,7 +69,7 @@ public class KlantTest {
 
     @Test
     public void getAdresGegevens() throws Exception {
-        assertTrue(ADRES == testKlant.getAdresGegevens());
+        assertTrue(ADRES == testKlant.getAdresGegevens().get(0));
     }
 
     @Test
@@ -131,7 +131,7 @@ public class KlantTest {
     public void setAdresGegevens() throws Exception {
         Adres testAdres = new Adres();
         testKlant.setAdresGegevens(testAdres);
-        assertTrue(testAdres == testKlant.getAdresGegevens());
+        assertTrue(testAdres == testKlant.getAdresGegevens().get(0));
     }
 
     @Test

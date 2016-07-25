@@ -1,21 +1,18 @@
 package gui.bewerkingen;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 
 import exceptions.GeneriekeFoutmelding;
-import gui.gui.ErrorBox;
-import interfaces.GuiBewerkingen;
+import gui.interfaces.GuiBewerkingen;
+import gui.model.GuiPojo;
 import javafx.scene.control.ListView;
 import model.Artikel;
 import model.Bestelling;
-import model.GuiPojo;
 import model.Klant;
 
 public abstract class AbstractGuiBewerkingen implements GuiBewerkingen{
-	ErrorBox errorBox = new ErrorBox();
 
 	public void leegKlantBestellingArtikel(){
 		GuiPojo.bestelling = new Bestelling();
@@ -42,17 +39,13 @@ public abstract class AbstractGuiBewerkingen implements GuiBewerkingen{
 		GuiPojo.artikelLijst = GuiPojo.bestelling.getArtikelLijst();
 	}
 
-	public void populateBestellingListView(ListView<Long> bestellingListView, Iterator<Bestelling> it) throws GeneriekeFoutmelding{
-		if(it == null)
-			it = GuiPojo.bestellingLijst.values().iterator();
-		while(it.hasNext()){
-			Bestelling bestelling = it.next();
+	public void populateBestellingListView(ListView<Long> bestellingListView, ArrayList<Bestelling> list) throws GeneriekeFoutmelding{
+		for(Bestelling bestelling : list)
 			if(!bestellingListView.getItems().contains(bestelling.getBestellingId()) && bestelling.getBestellingId() != 0){
 				bestellingListView.getItems().add(bestelling.getBestellingId());
 				GuiPojo.bestellingLijst.put(bestelling.getBestellingId(), bestelling);
 			}
 		}
-	}
 
 	public void populateBestellingListView(ListView<Long> bestellingListView) throws GeneriekeFoutmelding{
 		Iterator<Bestelling> it = GuiPojo.bestellingLijst.values().iterator();
@@ -95,14 +88,4 @@ public abstract class AbstractGuiBewerkingen implements GuiBewerkingen{
 	public void getItemVanArtikelLijst(int index){
 		GuiPojo.artikel = GuiPojo.artikelLijst.get(index);
 	}
-
-	public abstract void updateArtikel(Artikel nieuwArtikel);
-
-	public abstract void zoekKlant(ListView<String> klantListView, String klantId, String voorNaam, String achterNaam, String tussenVoegsel, String email);
-
-	public abstract void zoekBestelling(String bron, ListView<Long> bestellingListView, String klantIdField, String bestellingIdField, boolean actieveItems) throws SQLException;
-
-	public abstract void updateBestelling() throws SQLException, GeneriekeFoutmelding;
-
-	public abstract void verwijderEnkeleBestelling(ListView<Long> bestellingListView) throws GeneriekeFoutmelding, SQLException;
 }

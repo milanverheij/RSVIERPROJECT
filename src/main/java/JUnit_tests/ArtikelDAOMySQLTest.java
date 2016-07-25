@@ -7,12 +7,14 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import java.math.BigDecimal;
 import java.util.LinkedHashSet;
 
-import factories.DAOFactoryMySQL;
+import database.factories.DAOFactoryMySQL;
 import model.Artikel;
-import mysql.ArtikelDAOMySQL;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
+import database.daos.mysql.ArtikelDAOMySQL;
 
 public class ArtikelDAOMySQLTest {
 		

@@ -1,14 +1,13 @@
 package JUnit_tests;
 
-import connection_pools.HikariCPAdapter;
+import database.interfaces.AdresDAO;
+import database.interfaces.KlantDAO;
+import database.daos.mysql.AdresDAOMySQL;
+import database.daos.mysql.KlantDAOMySQL;
 import exceptions.GeneriekeFoutmelding;
-import interfaces.AdresDAO;
-import interfaces.KlantDAO;
 import model.Adres;
 import model.Klant;
-import mysql.AbstractDAOMySQL;
-import mysql.AdresDAOMySQL;
-import mysql.KlantDAOMySQL;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;

@@ -48,7 +48,7 @@ public class ErrorBox extends Application{
 		vBox.getChildren().add(okeButton);
 
 		errorStage.setTitle("Dat doettie anders nooit...");
-		errorStage.getIcons().add(new Image("/images/icon.jpg"));
+		errorStage.getIcons().add(new Image("/images/icon.png"));
 		errorStage.setScene(new Scene(vBox, 400, 150));
 		errorStage.show();
 	}
