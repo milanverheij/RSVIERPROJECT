@@ -235,6 +235,10 @@ public class HoofdGui extends Application{
 
 		if(bestellingIdField.getText().equals("")){
 			Klant klant = nieuwKlantObject();
+
+			if(actieveItems.isSelected()) {
+				klant.setKlantActief("1");
+			}
 			klant.setAdresGegevens(nieuwAdresObject());
 
 			guiBewerkingen.zoekKlant(klantListView, klant);

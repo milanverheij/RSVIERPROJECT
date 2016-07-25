@@ -161,7 +161,7 @@ public class AdresGui extends Application{
 		adres.setAdresId(0);
 
 		try {
-			GuiPojo.adresDAO.nieuwAdres(GuiPojo.klant.getKlantId(), adres); //TODO: KlantID moet hier nog naar toe gegooid worden.
+			GuiPojo.adresDAO.nieuwAdres(GuiPojo.klant.getKlantId(), adres);
 		} catch (GeneriekeFoutmelding e) {
 			e.printStackTrace();
 			DeLogger.getLogger().error("Fout bij aanmaken nieuw adres", e.getCause());

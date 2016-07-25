@@ -61,6 +61,9 @@ public class KlantGui extends Application{
 		Button maakAan = new Button("Oke");
 		Button cancel = new Button("Cancel");
 
+		Button schakelStatusAan = new Button("Zet actief");
+		Button schakelStatusUit = new Button("Zet inactief");
+
 		maakAan.setOnAction(e ->{
 			if(validator.isValid(emailField.getText()))
 				maakKlantAan(klantStage);	
@@ -69,8 +72,21 @@ public class KlantGui extends Application{
 		});
 		cancel.setOnAction(e -> klantStage.close());
 
+		schakelStatusAan.setOnAction(e -> schakelKlant(klant, 1));
+		schakelStatusUit.setOnAction(e -> schakelKlant(klant, 0 ));
+
 		grid.add(maakAan, 0, 6);
 		grid.add(cancel, 1, 6);
+		grid.add(schakelStatusAan, 2, 6);
+		grid.add(schakelStatusUit, 3, 6);
+	}
+
+	private void schakelKlant(Klant klant, int status) {
+		try {
+			GuiPojo.klantDAO.schakelStatusKlant(klant.getKlantId(), status);
+		} catch (GeneriekeFoutmelding ex) {
+			GuiPojo.errorBox.setMessageAndStart(ex.getMessage());
+		}
 	}
 
 	private void setFocus(GridPane grid, BooleanProperty eersteKeer){
