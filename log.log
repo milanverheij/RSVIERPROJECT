@@ -1,0 +1,155 @@
+INFO  gui.bewerkingen.HoofdGuiBewerkingen [JavaFX Application Thread]: 119 Database: MySQL Connection pool: HikariCP
+INFO  gui.gui.StartGui [JavaFX Application Thread]: 173 Succesvol ingelogd
+INFO  gui.bewerkingen.HoofdGuiBewerkingen [JavaFX Application Thread]: 131 Database: MySQL Connection pool: HikariCP
+INFO  gui.gui.StartGui [JavaFX Application Thread]: 173 Succesvol ingelogd
+ERROR gui.bewerkingen.HoofdGuiBewerkingen [JavaFX Application Thread]: 237 Fout bij nieuweKlant GUI Index: 0, Size: 0
+INFO  gui.bewerkingen.HoofdGuiBewerkingen [JavaFX Application Thread]: 131 Database: MySQL Connection pool: HikariCP
+INFO  gui.gui.StartGui [JavaFX Application Thread]: 173 Succesvol ingelogd
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 839 HikariPool-1 - configuration:
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 855 allowPoolSuspension.............false
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 855 autoCommit......................true
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 855 catalog.........................null
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 855 connectionInitSql...............null
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 855 connectionTestQuery.............null
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 855 connectionTimeout...............30000
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 855 dataSource......................null
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 855 dataSourceClassName............."com.mysql.jdbc.jdbc2.optional.MysqlDataSource"
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 855 dataSourceJNDI..................null
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 855 dataSourceProperties............{port=3306, user=rsvierproject, password=<masked>, databaseName=RSVIERPROJECTDEEL3, serverName=milanverheij.nl}
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 855 driverClassName.................null
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 855 healthCheckProperties...........{}
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 855 healthCheckRegistry.............null
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 855 idleTimeout.....................600000
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 855 initializationFailFast..........true
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 855 isolateInternalQueries..........false
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 855 jdbc4ConnectionTest.............false
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 855 jdbcUrl.........................null
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 855 leakDetectionThreshold..........0
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 855 maxLifetime.....................1800000
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 855 maximumPoolSize.................2
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 855 metricRegistry..................null
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 855 metricsTrackerFactory...........null
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 855 minimumIdle.....................1
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 855 password........................<masked>
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 855 poolName........................"HikariPool-1"
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 855 readOnly........................false
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 855 registerMbeans..................false
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 855 scheduledExecutorService........null
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 855 threadFactory...................null
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 855 transactionIsolation............null
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 855 username........................null
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 855 validationTimeout...............5000
+INFO  com.zaxxer.hikari.HikariDataSource [JavaFX Application Thread]: 70 HikariPool-1 - Started.
+INFO  database.connection_pools.HikariCPConnectionPool [JavaFX Application Thread]: 74 HikariCP MySQL geconfigureerd
+DEBUG com.zaxxer.hikari.pool.HikariPool [HikariPool-1 housekeeper]: 379 HikariPool-1 - Pool stats (total=0, active=0, idle=0, waiting=1)
+DEBUG com.zaxxer.hikari.pool.HikariPool [HikariPool-1 connection adder]: 446 HikariPool-1 - Added connection com.mysql.jdbc.JDBC4Connection@aa156d1
+DEBUG com.zaxxer.hikari.pool.HikariPool [HikariPool-1 connection adder]: 446 HikariPool-1 - Added connection com.mysql.jdbc.JDBC4Connection@3a72d79e
+DEBUG com.zaxxer.hikari.pool.HikariPool [HikariPool-1 connection adder]: 379 HikariPool-1 - After adding stats (total=2, active=0, idle=2, waiting=0)
+ERROR gui.bewerkingen.HoofdGuiBewerkingen [JavaFX Application Thread]: 237 Fout bij nieuweKlant GUI Index: 0, Size: 0
+DEBUG com.zaxxer.hikari.pool.HikariPool [HikariPool-1 housekeeper]: 379 HikariPool-1 - Before cleanup stats (total=2, active=0, idle=2, waiting=0)
+DEBUG com.zaxxer.hikari.pool.HikariPool [HikariPool-1 housekeeper]: 379 HikariPool-1 - After cleanup  stats (total=2, active=0, idle=2, waiting=0)
+INFO  gui.bewerkingen.HoofdGuiBewerkingen [JavaFX Application Thread]: 131 Database: MySQL Connection pool: HikariCP
+INFO  gui.gui.StartGui [JavaFX Application Thread]: 173 Succesvol ingelogd
+INFO  gui.bewerkingen.HoofdGuiBewerkingen [JavaFX Application Thread]: 131 Database: MySQL Connection pool: HikariCP
+INFO  gui.gui.StartGui [JavaFX Application Thread]: 173 Succesvol ingelogd
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 839 HikariPool-1 - configuration:
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 855 allowPoolSuspension.............false
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 855 autoCommit......................true
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 855 catalog.........................null
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 855 connectionInitSql...............null
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 855 connectionTestQuery.............null
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 855 connectionTimeout...............30000
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 855 dataSource......................null
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 855 dataSourceClassName............."com.mysql.jdbc.jdbc2.optional.MysqlDataSource"
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 855 dataSourceJNDI..................null
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 855 dataSourceProperties............{port=3306, user=rsvierproject, password=<masked>, databaseName=RSVIERPROJECTDEEL3, serverName=milanverheij.nl}
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 855 driverClassName.................null
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 855 healthCheckProperties...........{}
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 855 healthCheckRegistry.............null
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 855 idleTimeout.....................600000
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 855 initializationFailFast..........true
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 855 isolateInternalQueries..........false
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 855 jdbc4ConnectionTest.............false
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 855 jdbcUrl.........................null
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 855 leakDetectionThreshold..........0
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 855 maxLifetime.....................1800000
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 855 maximumPoolSize.................2
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 855 metricRegistry..................null
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 855 metricsTrackerFactory...........null
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 855 minimumIdle.....................1
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 855 password........................<masked>
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 855 poolName........................"HikariPool-1"
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 855 readOnly........................false
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 855 registerMbeans..................false
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 855 scheduledExecutorService........null
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 855 threadFactory...................null
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 855 transactionIsolation............null
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 855 username........................null
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 855 validationTimeout...............5000
+INFO  com.zaxxer.hikari.HikariDataSource [JavaFX Application Thread]: 70 HikariPool-1 - Started.
+INFO  database.connection_pools.HikariCPConnectionPool [JavaFX Application Thread]: 74 HikariCP MySQL geconfigureerd
+DEBUG com.zaxxer.hikari.pool.HikariPool [HikariPool-1 housekeeper]: 379 HikariPool-1 - Pool stats (total=0, active=0, idle=0, waiting=1)
+DEBUG com.zaxxer.hikari.pool.HikariPool [HikariPool-1 connection adder]: 446 HikariPool-1 - Added connection com.mysql.jdbc.JDBC4Connection@15a52096
+DEBUG com.zaxxer.hikari.pool.HikariPool [HikariPool-1 connection adder]: 446 HikariPool-1 - Added connection com.mysql.jdbc.JDBC4Connection@4388f47a
+DEBUG com.zaxxer.hikari.pool.HikariPool [HikariPool-1 connection adder]: 379 HikariPool-1 - After adding stats (total=2, active=0, idle=2, waiting=0)
+DEBUG com.zaxxer.hikari.pool.HikariPool [HikariPool-1 housekeeper]: 379 HikariPool-1 - Before cleanup stats (total=2, active=0, idle=2, waiting=0)
+DEBUG com.zaxxer.hikari.pool.HikariPool [HikariPool-1 housekeeper]: 379 HikariPool-1 - After cleanup  stats (total=2, active=0, idle=2, waiting=0)
+DEBUG com.zaxxer.hikari.pool.PoolBase [JavaFX Application Thread]: 206 HikariPool-1 - Reset (autoCommit) on connection com.mysql.jdbc.JDBC4Connection@4388f47a
+DEBUG com.zaxxer.hikari.pool.HikariPool [HikariPool-1 housekeeper]: 379 HikariPool-1 - Before cleanup stats (total=2, active=0, idle=2, waiting=0)
+DEBUG com.zaxxer.hikari.pool.HikariPool [HikariPool-1 housekeeper]: 379 HikariPool-1 - After cleanup  stats (total=2, active=0, idle=2, waiting=0)
+DEBUG com.zaxxer.hikari.pool.HikariPool [HikariPool-1 housekeeper]: 379 HikariPool-1 - Before cleanup stats (total=2, active=0, idle=2, waiting=0)
+DEBUG com.zaxxer.hikari.pool.HikariPool [HikariPool-1 housekeeper]: 379 HikariPool-1 - After cleanup  stats (total=2, active=0, idle=2, waiting=0)
+DEBUG com.zaxxer.hikari.pool.HikariPool [HikariPool-1 housekeeper]: 379 HikariPool-1 - Before cleanup stats (total=2, active=0, idle=2, waiting=0)
+DEBUG com.zaxxer.hikari.pool.HikariPool [HikariPool-1 housekeeper]: 379 HikariPool-1 - After cleanup  stats (total=2, active=0, idle=2, waiting=0)
+DEBUG com.zaxxer.hikari.pool.PoolBase [JavaFX Application Thread]: 206 HikariPool-1 - Reset (autoCommit) on connection com.mysql.jdbc.JDBC4Connection@15a52096
+DEBUG com.zaxxer.hikari.pool.HikariPool [HikariPool-1 housekeeper]: 379 HikariPool-1 - Before cleanup stats (total=2, active=0, idle=2, waiting=0)
+DEBUG com.zaxxer.hikari.pool.HikariPool [HikariPool-1 housekeeper]: 379 HikariPool-1 - After cleanup  stats (total=2, active=0, idle=2, waiting=0)
+DEBUG com.zaxxer.hikari.pool.HikariPool [HikariPool-1 housekeeper]: 379 HikariPool-1 - Before cleanup stats (total=2, active=0, idle=2, waiting=0)
+DEBUG com.zaxxer.hikari.pool.HikariPool [HikariPool-1 housekeeper]: 379 HikariPool-1 - After cleanup  stats (total=2, active=0, idle=2, waiting=0)
+DEBUG com.zaxxer.hikari.pool.HikariPool [HikariPool-1 housekeeper]: 379 HikariPool-1 - Before cleanup stats (total=2, active=0, idle=2, waiting=0)
+DEBUG com.zaxxer.hikari.pool.HikariPool [HikariPool-1 housekeeper]: 379 HikariPool-1 - After cleanup  stats (total=2, active=0, idle=2, waiting=0)
+INFO  gui.bewerkingen.HoofdGuiBewerkingen [JavaFX Application Thread]: 131 Database: MySQL Connection pool: HikariCP
+INFO  gui.gui.StartGui [JavaFX Application Thread]: 173 Succesvol ingelogd
+INFO  gui.bewerkingen.HoofdGuiBewerkingen [JavaFX Application Thread]: 131 Database: FireBird Connection pool: HikariCP
+INFO  gui.gui.StartGui [JavaFX Application Thread]: 173 Succesvol ingelogd
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 839 HikariPool-1 - configuration:
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 855 allowPoolSuspension.............false
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 855 autoCommit......................true
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 855 catalog.........................null
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 855 connectionInitSql...............null
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 855 connectionTestQuery.............null
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 855 connectionTimeout...............30000
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 855 dataSource......................null
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 855 dataSourceClassName............."org.firebirdsql.pool.FBSimpleDataSource"
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 855 dataSourceJNDI..................null
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 855 dataSourceProperties............{password=<masked>, database=//milanverheij.nl:3050//var//lib//firebird//2.5//data//RSVIERPROJECTDEEL3.fdb, userName=rsvierproject}
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 855 driverClassName.................null
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 855 healthCheckProperties...........{}
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 855 healthCheckRegistry.............null
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 855 idleTimeout.....................600000
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 855 initializationFailFast..........true
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 855 isolateInternalQueries..........false
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 855 jdbc4ConnectionTest.............false
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 855 jdbcUrl.........................null
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 855 leakDetectionThreshold..........0
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 855 maxLifetime.....................1800000
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 855 maximumPoolSize.................2
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 855 metricRegistry..................null
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 855 metricsTrackerFactory...........null
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 855 minimumIdle.....................1
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 855 password........................<masked>
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 855 poolName........................"HikariPool-1"
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 855 readOnly........................false
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 855 registerMbeans..................false
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 855 scheduledExecutorService........null
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 855 threadFactory...................null
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 855 transactionIsolation............null
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 855 username........................null
+DEBUG com.zaxxer.hikari.HikariConfig [JavaFX Application Thread]: 855 validationTimeout...............5000
+INFO  com.zaxxer.hikari.HikariDataSource [JavaFX Application Thread]: 70 HikariPool-1 - Started.
+INFO  com.zaxxer.hikari.pool.PoolBase [JavaFX Application Thread]: 444 HikariPool-1 - Driver does not support get/set network timeout for connections. (Not yet implemented.)
+INFO  database.connection_pools.HikariCPConnectionPool [JavaFX Application Thread]: 60 HikariCP FireBird geconfigureerd
+DEBUG com.zaxxer.hikari.pool.HikariPool [HikariPool-1 housekeeper]: 379 HikariPool-1 - Pool stats (total=0, active=0, idle=0, waiting=1)
+DEBUG com.zaxxer.hikari.pool.HikariPool [HikariPool-1 connection adder]: 446 HikariPool-1 - Added connection org.firebirdsql.jdbc.FBConnection@2f68bb5
+DEBUG com.zaxxer.hikari.pool.HikariPool [HikariPool-1 connection adder]: 446 HikariPool-1 - Added connection org.firebirdsql.jdbc.FBConnection@4ba89af4
+DEBUG com.zaxxer.hikari.pool.HikariPool [HikariPool-1 connection adder]: 379 HikariPool-1 - After adding stats (total=2, active=1, idle=1, waiting=0)

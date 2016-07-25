@@ -22,10 +22,12 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="true" />
+        <module name="RSVIERPROJECT" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
       <module name="HikariCP" target="1.7" />
+      <module name="RSVIERPROJECT" target="1.8" />
     </bytecodeTargetLevel>
   </component>
 </project>

@@ -1,9 +1,0 @@
-<component name="libraryTable">
-  <library name="HikariCP-2.4.7-SNAPSHOT">
-    <CLASSES>
-      <root url="jar://$MAVEN_REPOSITORY$/com/zaxxer/HikariCP/2.4.7-SNAPSHOT/HikariCP-2.4.7-SNAPSHOT.jar!/" />
-    </CLASSES>
-    <JAVADOC />
-    <SOURCES />
-  </library>
-</component>
