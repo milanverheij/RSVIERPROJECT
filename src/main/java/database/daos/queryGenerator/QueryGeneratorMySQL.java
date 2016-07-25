@@ -5,6 +5,7 @@ import exceptions.GeneriekeFoutmelding;
 import logger.DeLogger;
 import model.Klant;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 
 /**
  * Created by Milan_Verheij on 01-07-16.
@@ -34,7 +35,8 @@ public class QueryGeneratorMySQL extends QueryGenerator {
 		for (Field dcField : declaredFields) {
 			try {
 				dcField.setAccessible(true);
-				if (dcField.get(object) != null) {
+				System.out.println((dcField.get(object) instanceof ArrayList));
+				if (dcField.get(object) != null && !(dcField.get(object) instanceof ArrayList)) {
 					if (!isPrimitiveZero(dcField.get(object))) {
 						variableToInsert++;
 
@@ -133,7 +135,7 @@ public class QueryGeneratorMySQL extends QueryGenerator {
 		if (object instanceof Klant && ((Klant)object).getAdresGegevens() != null ) {
 
 			// Haal de adreskolommen op waar naar gezocht moet worden
-			StringBuilder columnsValues = buildInsertColumnValues(((Klant) object).getAdresGegevens());
+			StringBuilder columnsValues = buildInsertColumnValues(((Klant) object).getAdresGegevens().get(0));
 
 			// Als er een leeg adres wordt meegegeven, dan worden alle klanten geselecteerd
 			if (columnsValues.length() == 0)

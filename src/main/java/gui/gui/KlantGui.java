@@ -1,5 +1,7 @@
 package gui.gui;
 
+import java.util.ArrayList;
+
 import org.apache.commons.validator.EmailValidator;
 import exceptions.GeneriekeFoutmelding;
 import gui.model.GuiPojo;
@@ -14,6 +16,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
+import logger.DeLogger;
 import model.Adres;
 import model.Klant;
 
@@ -124,19 +127,21 @@ public class KlantGui extends Application{
 				emailField.setText(klant.getEmail());
 
 			if(GuiPojo.klant.getAdresGegevens() != null) {
-				Adres adres = GuiPojo.klant.getAdresGegevens();
+				ArrayList<Adres> alleAdressen = GuiPojo.klant.getAdresGegevens();
+				if(!alleAdressen.isEmpty()){
+					Adres adres = alleAdressen.get(0);
 
-
-				if(adres.getStraatnaam() != null)
-					straatNaamField.setText(adres.getStraatnaam());
-				if(adres.getPostcode() != null)
-					postcodeField.setText(adres.getPostcode());
-				if(adres.getHuisnummer() != 0)
-					huisNummerField.setText("" + adres.getHuisnummer());
-				if(adres.getToevoeging() != null)
-					toevoegingField.setText(adres.getToevoeging());
-				if(adres.getWoonplaats() != null)
-					woonplaatsField.setText(adres.getWoonplaats());
+					if(adres.getStraatnaam() != null)
+						straatNaamField.setText(adres.getStraatnaam());
+					if(adres.getPostcode() != null)
+						postcodeField.setText(adres.getPostcode());
+					if(adres.getHuisnummer() != 0)
+						huisNummerField.setText("" + adres.getHuisnummer());
+					if(adres.getToevoeging() != null)
+						toevoegingField.setText(adres.getToevoeging());
+					if(adres.getWoonplaats() != null)
+						woonplaatsField.setText(adres.getWoonplaats());
+				}
 			}
 		}
 	}
@@ -154,8 +159,8 @@ public class KlantGui extends Application{
 		klant.setEmail(emailField.getText());
 
 		Adres adres = new Adres();
-		if(GuiPojo.klant.getAdresGegevens().getAdresId() != 0)
-			adres.setAdresId(GuiPojo.klant.getAdresGegevens().getAdresId());
+		if(!GuiPojo.klant.getAdresGegevens().isEmpty() && GuiPojo.klant.getAdresGegevens().get(0).getAdresId() != 0)		//TODO: Nettere manier om adressen weer te geven in de klantmodule
+			adres.setAdresId(GuiPojo.klant.getAdresGegevens().get(0).getAdresId());
 		adres.setWoonplaats(woonplaatsField.getText());
 		adres.setPostcode(postcodeField.getText());
 		adres.setHuisnummer(Integer.parseInt(huisNummerField.getText()));
@@ -168,11 +173,14 @@ public class KlantGui extends Application{
 			if(GuiPojo.klant.getKlantId() == 0){
 				GuiPojo.klant.setKlantId(GuiPojo.klantDAO.nieuweKlant(GuiPojo.klant, 0));
 			} else {
+				GuiPojo.adresDAO.updateAdres(adres.getAdresId(), adres);
 				GuiPojo.klantDAO.updateKlant(GuiPojo.klant);
 			}
 
 			klantStage.close();
 		} catch (GeneriekeFoutmelding e) {
+			e.printStackTrace();
+			DeLogger.getLogger().error("Fout bij verwerken klantgegevens {}", e.getMessage(), e.getStackTrace());
 			GuiPojo.errorBox.setMessageAndStart(e.getMessage());
 		}
 	}

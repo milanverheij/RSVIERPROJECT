@@ -1,5 +1,7 @@
 package model;
 
+import java.util.ArrayList;
+
 import annotations.Column;
 import annotations.Entity;
 import annotations.Id;
@@ -43,7 +45,7 @@ public class Klant {
     @Column(values = "klantActief")
     private String klantActief;
 
-    private Adres adresGegevens = null;
+    private ArrayList<Adres> adresGegevens = new ArrayList<Adres>();
     private Bestelling bestellingGegevens;
 
     //  Default public no-arg constructor
@@ -58,8 +60,10 @@ public class Klant {
                  String email,
                  Adres adresGegevens) {
 
-        if (adresGegevens != null)
-            this.adresGegevens = adresGegevens;
+        if (adresGegevens != null && adresGegevens.getPostcode() != null){
+        	this.adresGegevens.add(adresGegevens);
+        }
+        
 
         this.klantId = klantId;
         this.voornaam = voornaam;
@@ -81,8 +85,9 @@ public class Klant {
                  Adres adresGegevens,
                  Bestelling bestellingGegevens) {
 
-        if (adresGegevens != null)
-            this.adresGegevens = adresGegevens;
+    	if (adresGegevens != null && adresGegevens.getPostcode() != null){
+    		this.adresGegevens.add(adresGegevens);
+    	}
 
         this.klantId = klantId;
         this.voornaam = voornaam;
@@ -126,7 +131,7 @@ public class Klant {
     public void setEmail(String email) {
         this.email = email;
     }
-    public Adres getAdresGegevens() {
+    public ArrayList<Adres> getAdresGegevens() {
         return adresGegevens;
     }
     public String getDatumAanmaak() {
@@ -148,8 +153,12 @@ public class Klant {
         this.klantActief = klantActief;
     }
     public void setAdresGegevens(Adres adresGegevens) {
-        this.adresGegevens = adresGegevens;
+        if(adresGegevens == null)
+        	this.adresGegevens = null;
+        else if(!this.adresGegevens.contains(adresGegevens))
+        	this.adresGegevens.add(adresGegevens);
     } // Enkel bij testen gebruikt
+    
     public Bestelling getBestellingGegevens() {
         return bestellingGegevens;
     }

@@ -23,7 +23,7 @@ public class HoofdGuiBewerkingen extends AbstractGuiBewerkingen {
 		klantListView.getItems().clear();
 
 		try {
-			ArrayList<Klant> klantAdres = GuiPojo.klantDAO.getKlantOpAdres(klant.getAdresGegevens());			
+			ArrayList<Klant> klantAdres = GuiPojo.klantDAO.getKlantOpAdres(klant.getAdresGegevens().get(0)); // TODO ook hier nettere manier voor adresgegevens			
 			klant.setAdresGegevens(null);
 			ArrayList<Klant> klantKlant = GuiPojo.klantDAO.getKlantOpKlant(klant);
 			
@@ -32,9 +32,12 @@ public class HoofdGuiBewerkingen extends AbstractGuiBewerkingen {
 			verwerkKlantResultSet(klantKlant, klantListView);
 		} catch (GeneriekeFoutmelding e) {
 			e.printStackTrace();
+			DeLogger.getLogger().error("Fout bij verwerken klantgegevens {}", e.getMessage(), e.getStackTrace());
 			GuiPojo.errorBox.setMessageAndStart(e.getMessage());
 		}catch(Exception e){
 			e.printStackTrace();
+			DeLogger.getLogger().error("Fout bij zoeken klant {}", e.getMessage(), e.getStackTrace());
+			GuiPojo.errorBox.setMessageAndStart(String.format("Fout bij zoeken klant"));
 		}
 	}
 
@@ -44,6 +47,8 @@ public class HoofdGuiBewerkingen extends AbstractGuiBewerkingen {
 
 			populateBestellingListView(bestellingListView, list);
 		}catch(NumberFormatException | GeneriekeFoutmelding | NullPointerException e){
+			e.printStackTrace();
+			DeLogger.getLogger().error("Fout bij zoeken bestelling {}", e.getMessage(), e.getStackTrace());
 			GuiPojo.errorBox.setMessageAndStart(e.getMessage());
 		}
 	}
@@ -73,6 +78,8 @@ public class HoofdGuiBewerkingen extends AbstractGuiBewerkingen {
 			GuiPojo.artikel.setArtikelPrijs(nieuwArtikel.getArtikelPrijs());
 			setArtikelLijst();
 		}catch (NumberFormatException | GeneriekeFoutmelding e){
+			e.printStackTrace();
+			DeLogger.getLogger().error("Fout bij updaten artikel {}", e.getMessage(), e.getStackTrace());
 			GuiPojo.errorBox.setMessageAndStart(e.getMessage());
 		}
 	}
@@ -87,10 +94,13 @@ public class HoofdGuiBewerkingen extends AbstractGuiBewerkingen {
 			}
 			GuiPojo.bestelDAO.updateBestelling(GuiPojo.bestelling);
 		}catch (GeneriekeFoutmelding e){
+			e.printStackTrace();
+			DeLogger.getLogger().error("Fout bij updaten bestelling {}", e.getMessage(), e.getStackTrace());
 			GuiPojo.errorBox.setMessageAndStart(e.getMessage());
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+			DeLogger.getLogger().error("Onbekende error {}", e.getMessage(), e.getStackTrace());
+			GuiPojo.errorBox.setMessageAndStart("Onbekende fout");
 		}
 	}
 
@@ -104,7 +114,9 @@ public class HoofdGuiBewerkingen extends AbstractGuiBewerkingen {
 
 			GuiPojo.bestelDAO.setEnkeleBestellingInactief(GuiPojo.bestelling.getBestellingId());
 		}catch (GeneriekeFoutmelding e){
-			GuiPojo.errorBox.setMessageAndStart(e.getMessage());
+			e.printStackTrace();
+			DeLogger.getLogger().error("Fout bij verwijderen bestelling {}", e.getMessage(), e.getStackTrace());
+			GuiPojo.errorBox.setMessageAndStart("Fout bij verwijderen bestelling " + e.getMessage());
 		}
 		GuiPojo.bestelling = new Bestelling();
 	}
@@ -136,8 +148,9 @@ public class HoofdGuiBewerkingen extends AbstractGuiBewerkingen {
 				}
 			}
 		}catch (GeneriekeFoutmelding e){
-			GuiPojo.errorBox.setMessageAndStart(String.format("Fout bij ophalen alle adressen van klant %d", GuiPojo.klant.getKlantId()));
 			e.printStackTrace();
+			DeLogger.getLogger().error("Fout bij ophalen alle adressen van klant {}", e.getMessage(), e.getStackTrace());
+			GuiPojo.errorBox.setMessageAndStart(String.format("Fout bij ophalen alle adressen van klant %d", GuiPojo.klant.getKlantId()));
 		}
 	}
 
@@ -185,7 +198,8 @@ public class HoofdGuiBewerkingen extends AbstractGuiBewerkingen {
 				bestellingBewerken.setAndRun(GuiPojo.klant.getKlantId(), bestellingListView, false);
 			} catch (Exception e) {
 				e.printStackTrace();
-				GuiPojo.errorBox.setMessageAndStart(e.getMessage());
+				DeLogger.getLogger().error("Fout bij maken nieuwe bestelling {}", e.getMessage(), e.getStackTrace());
+				GuiPojo.errorBox.setMessageAndStart(String.format("Fout bij maken nieuwe bestelling", GuiPojo.klant.getKlantId()));
 			}
 		}else{
 			GuiPojo.errorBox.setMessageAndStart("Selecteer eerst een klant");
@@ -201,11 +215,17 @@ public class HoofdGuiBewerkingen extends AbstractGuiBewerkingen {
 				nieuweKlant.start(new Stage());
 			}
 		}catch(GeneriekeFoutmelding e){
-			GuiPojo.errorBox.setMessageAndStart(e.getMessage());
+			e.printStackTrace();
+			DeLogger.getLogger().error("Fout bij updaten klant {}", e.getMessage(), e.getStackTrace());
+			GuiPojo.errorBox.setMessageAndStart(String.format("Fout bij updaten klant %d", GuiPojo.klant.getKlantId()));
 		}catch(NullPointerException e){
 			e.printStackTrace();
+			DeLogger.getLogger().error("Fout bij updaten klant {}", e.getMessage(), e.getStackTrace());
+			GuiPojo.errorBox.setMessageAndStart(String.format("Fout bij updaten klant %d", GuiPojo.klant.getKlantId()));
 		}catch (Exception e) {
-			GuiPojo.errorBox.setMessageAndStart(e.getMessage());
+			e.printStackTrace();
+			DeLogger.getLogger().error("Fout bij updaten klant {}", e.getMessage(), e.getStackTrace());
+			GuiPojo.errorBox.setMessageAndStart(String.format("Fout bij updaten klant %d", GuiPojo.klant.getKlantId()));
 		}
 	}
 
@@ -213,7 +233,9 @@ public class HoofdGuiBewerkingen extends AbstractGuiBewerkingen {
 		try {
 			new KlantGui().start(new Stage());
 		} catch (Exception e) {
-			GuiPojo.errorBox.setMessageAndStart(e.getMessage());
+			e.printStackTrace();
+			DeLogger.getLogger().error("Fout bij nieuweKlant GUI {}", e.getMessage(), e.getStackTrace());
+			GuiPojo.errorBox.setMessageAndStart(String.format("Fout bij nieuweKlant GUI"));
 		}
 	}
 

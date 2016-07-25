@@ -64,7 +64,8 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
 			DeLogger.getLogger().warn(("KAN GEEN KLANT MAKEN ZONDER VOOR EN ACHTERNAAM"));
 			throw new GeneriekeFoutmelding("KlantDAOMySQL: KAN GEEN KLANT MAKEN ZONDER VOOR EN ACHTERNAAM");
 		}
-
+		
+		
 		// Bouw de query
 		query = queryGenerator.buildInsertStatement(nieuweKlant);
 
@@ -114,6 +115,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
 			return nieuwId;
 
 		} catch (SQLException ex) {
+			ex.printStackTrace();
 			if (ex.getMessage().contains("Duplicate entry")) {
 				DeLogger.getLogger().warn("KlantDAOMySQL: DEZE KLANT BESTAAT AL IN DE DATABASE MET ID: " +
 						getKlantID(nieuweKlant.getVoornaam(), nieuweKlant.getAchternaam(), nieuweKlant.getEmail()));
@@ -143,7 +145,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
 		// aan de main method en in het model weer op null gezet zodat de query goed
 		// gemaakt kan worden
 		if (nieuweKlant.getAdresGegevens() != null) {
-			tijdelijkAdres = nieuweKlant.getAdresGegevens();
+			tijdelijkAdres = nieuweKlant.getAdresGegevens().get(0);
 			nieuweKlant.setAdresGegevens(null);
 		}
 
@@ -215,7 +217,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
 	@Override
 	public ArrayList<Klant> getKlantOpKlant(Klant klant) throws GeneriekeFoutmelding {
 		query = queryGenerator.buildSelectStatement(klant);
-//		System.out.println(query);
+
 		try (
 				Connection connection = connPool.verkrijgConnectie();
 				PreparedStatement statement = connection.prepareStatement(query);
@@ -260,7 +262,7 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
 			}
 
 		} catch (SQLException ex) {
-			DeLogger.getLogger().error("SQL FOUT TIJDENS OPZOEKEN KLANT OP VOLLE ADRES: " + ex.getMessage());
+			DeLogger.getLogger().error("SQL FOUT TIJDENS OPZOEKEN KLANT OP VOLLE ADRES: {}", ex.getMessage(), ex.getStackTrace());
 			throw new GeneriekeFoutmelding("KlantDAOMySQL: SQL FOUT TIJDENS OPZOEKEN KLANT OP VOLLE ADRES: " + ex.getMessage());
 		}
 	}
@@ -325,13 +327,12 @@ public class KlantDAOMySQL extends AbstractDAOMySQL implements KlantDAO {
 		// Check of er een adres is meegegeven, deze wordt afzonderlijk door de adresDAO
 		// behandeld en daarna op null gezet anders neemt de querygenerator deze foutief mee.
 		if (nieuweKlant.getAdresGegevens() != null) {
-			adresDAO = new AdresDAOMySQL();
-			adresDAO.updateAdres(nieuweKlant.getAdresGegevens().getAdresId(), nieuweKlant.getAdresGegevens());
+//			adresDAO = new AdresDAOMySQL();  // TODO De GUI roept nu los de update van de klant en het adres aan 
+//			adresDAO.updateAdres(nieuweKlant.getAdresGegevens().get(0).getAdresId(), nieuweKlant.getAdresGegevens().get(0));
 			nieuweKlant.setAdresGegevens(null);
 		}
 
 		query = queryGenerator.buildUpdateStatement(nieuweKlant) + " klantId = " + nieuweKlant.getKlantId() + ";";
-
 		try (
 				Connection connection = connPool.verkrijgConnectie();
 				PreparedStatement statement = connection.prepareStatement(query);

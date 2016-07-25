@@ -150,7 +150,7 @@ public class KlantDAOFireBird extends AbstractDAOFireBird implements KlantDAO {
 		// aan de main method en in het model weer op null gezet zodat de query goed
 		// gemaakt kan worden
 		if (nieuweKlant.getAdresGegevens() != null) {
-			tijdelijkAdres = nieuweKlant.getAdresGegevens();
+			tijdelijkAdres = nieuweKlant.getAdresGegevens().get(0);
 			nieuweKlant.setAdresGegevens(null);
 		}
 
@@ -228,7 +228,6 @@ public class KlantDAOFireBird extends AbstractDAOFireBird implements KlantDAO {
 					ResultSet resultSet = statement.executeQuery();
 					) {
 				klantenLijst = voegResultSetInLijst(resultSet);
-				System.out.println(klantenLijst);
 				return klantenLijst;
 			}
 		} catch (SQLException ex) {
@@ -331,7 +330,7 @@ public class KlantDAOFireBird extends AbstractDAOFireBird implements KlantDAO {
 		// behandeld en daarna op null gezet anders neemt de querygenerator deze foutief mee.
 		if (nieuweKlant.getAdresGegevens() != null) {
 			adresDAO = new AdresDAOFireBird();
-			adresDAO.updateAdres(nieuweKlant.getAdresGegevens().getAdresId(), nieuweKlant.getAdresGegevens());
+			adresDAO.updateAdres(nieuweKlant.getAdresGegevens().get(0).getAdresId(), nieuweKlant.getAdresGegevens().get(0));
 			nieuweKlant.setAdresGegevens(null);
 		}
 

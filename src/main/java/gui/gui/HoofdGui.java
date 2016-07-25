@@ -1,6 +1,5 @@
 package gui.gui;
 
-import com.sun.tools.javac.jvm.Gen;
 import exceptions.GeneriekeFoutmelding;
 
 import gui.bewerkingen.HoofdGuiBewerkingen;
@@ -63,13 +62,9 @@ public class HoofdGui extends Application{
 	Button nieuweBestellingButton;
 	Button verwijderBestelling;
 	Button artikelModuleButton;
-    Button adresModuleButton;
+	Button adresModuleButton;
 	Button nieuweKlantButton;
 	Button updateKlantButton;
-
-	public static void main(String[] args){
-		launch();
-	}
 
 	@Override
 	public void start(Stage stage) throws Exception {
@@ -88,7 +83,7 @@ public class HoofdGui extends Application{
 		knoppenBox.getChildren().addAll(zoekButton,
 				new Label("  "), leegButton,
 				new Label("  "), artikelModuleButton,
-                new Label("  "), adresModuleButton,
+				new Label("  "), adresModuleButton,
 				new Label("  "), nieuweBestellingButton, updateBestellingButton, verwijderBestelling,
 				new Label("  "), nieuweKlantButton, updateKlantButton);
 		knoppenBox.setSpacing(5);
@@ -143,7 +138,7 @@ public class HoofdGui extends Application{
 
 		artikelModuleButton = new Button("Artikel module");
 
-        adresModuleButton = new Button("Adres module");
+		adresModuleButton = new Button("Adres module");
 
 		nieuweKlantButton = new Button("Klant aanmaken");
 		updateKlantButton = new Button("Klant aanpassen");
@@ -153,7 +148,7 @@ public class HoofdGui extends Application{
 
 		artikelModuleButton.setOnAction(e -> artikelModule());
 
-        adresModuleButton.setOnAction(e -> adresModule());
+		adresModuleButton.setOnAction(e -> adresModule());
 
 		nieuweBestellingButton.setOnAction(e -> nieuweBestelling());
 		updateBestellingButton.setOnAction(e -> updateBestelling());
@@ -168,10 +163,11 @@ public class HoofdGui extends Application{
 	}
 
 	private void adresModule() {
-        long klantId = Long.valueOf(klantIdField.getText()); // TODO: Werkt maar gooit wel exception als leeg
-
-	    guiBewerkingen.maakAdresGui(klantId);
-    }
+		if(!klantIdField.getText().isEmpty())
+			guiBewerkingen.maakAdresGui(Long.valueOf(klantIdField.getText()));
+		else
+			GuiPojo.errorBox.setMessageAndStart("Selecteer eerst een klant");
+	}
 
 	//zoekGrid bevat alle velden met info waarop gezocht kan worden
 	private void populateZoekGrid(){
@@ -351,12 +347,13 @@ public class HoofdGui extends Application{
 
 		guiBewerkingen.getAdres(actieveItems.isSelected());
 
-		straatnaamField.setText(GuiPojo.klant.getAdresGegevens().getStraatnaam());
-		if(GuiPojo.klant.getAdresGegevens().getHuisnummer() != 0)
-			huisnummerField.setText("" + GuiPojo.klant.getAdresGegevens().getHuisnummer());
-		toevoegingField.setText(GuiPojo.klant.getAdresGegevens().getToevoeging());
-		postcodeField.setText(GuiPojo.klant.getAdresGegevens().getPostcode());
-		woonplaatsField.setText(GuiPojo.klant.getAdresGegevens().getWoonplaats());
+		Adres adres = GuiPojo.klant.getAdresGegevens().get(0); // TODO nettere manier om adres gegevens te verwerken bedenken
+		straatnaamField.setText(adres.getStraatnaam());
+		if(adres.getHuisnummer() != 0)
+			huisnummerField.setText("" + adres.getHuisnummer());
+		toevoegingField.setText(adres.getToevoeging());
+		postcodeField.setText(adres.getPostcode());
+		woonplaatsField.setText(adres.getWoonplaats());
 	}
 
 	/* Loopt wanneer er op de bestellinglijst op een item geklikt is
@@ -395,10 +392,10 @@ public class HoofdGui extends Application{
 
 			for(Artikel artikel : GuiPojo.artikelLijst){
 				artikelListView.getItems().add("Naam: " + artikel.getArtikelNaam() +
-											"\nPrijs: " + artikel.getArtikelPrijs() +
-											"\nAantal: " + artikel.getAantalBesteld() +
-											"\nTotaalbedrag: " + ((artikel.getArtikelPrijs().doubleValue() *
-															artikel.getAantalBesteld())));
+						"\nPrijs: " + artikel.getArtikelPrijs() +
+						"\nAantal: " + artikel.getAantalBesteld() +
+						"\nTotaalbedrag: " + ((artikel.getArtikelPrijs().doubleValue() *
+								artikel.getAantalBesteld())));
 			}
 		}
 	}
@@ -450,7 +447,6 @@ public class HoofdGui extends Application{
 	/* Lanceert een nieuw Stage waar een nieuwe klant gemaakt kan worden.*/
 	private void nieuweKlant(){
 		GuiPojo.klant = new Klant();
-		GuiPojo.klant.setAdresGegevens(new Adres());
 		guiBewerkingen.nieuweKlant();
 	}
 
