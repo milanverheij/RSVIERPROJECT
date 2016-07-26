@@ -1,0 +1,34 @@
+<persistence xmlns="http://xmlns.jcp.org/xml/ns/persistence"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence
+             http://xmlns.jcp.org/xml/ns/persistence/persistence_2_1.xsd"
+             version="2.1">
+
+<persistence-unit name="workshop2PU">
+
+        <properties>
+            <!-- Hibernate properties -->
+            <property name="hibernate.archive.autodetection" value="class, hbm"/>
+            <property name="hibernate.hbm2ddl.auto" value="create"/>
+            <property name="hibernate.show_sql" value="true" />
+            <property name="hibernate.format_sql" value="true"/>
+            <property name="hibernate.use_sql_comments" value="true"/>
+            <property name="hibernate.dialect" value = "org.hibernate.dialect.MySQL5InnoDBDialect"/>
+
+            <!-- Configuratie JDBC properties -->
+            <property name="hibernate.connection.driver_class" value = "com.mysql.jdbc.Driver"/>
+            <property name="hibernate.connection.url" value = "jdbc:mysql://milanverheij.nl/JavaPersistence"/>
+            <property name="hibernate.connection.username" value = "rsvierproject"/>
+            <property name="hibernate.connection.password" value = "slechtwachtwoord"/>
+
+            <!-- Configuratie Connection Pool voor HikariCP -->
+            <property name ="hibernate.hikari.dataSource.url" value ="${database.connection}"/>
+            <property name ="hibernate.hikari.dataSource.user" value ="${database.username}"/>
+            <property name ="hibernate.hikari.dataSource.password" value = "${database.password}"/>
+            <property name ="hibernate.hikari.dataSource.cachePrepStmts" value="true"/>
+            <property name ="hibernate.hikari.dataSource.prepStmtCacheSize" value ="250"/>
+            <property name ="hibernate.hikari.dataSource.prepStmtCacheSqlLimit" value="2048"/>
+        </properties>
+
+    </persistence-unit>
+</persistence>
