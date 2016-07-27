@@ -36,7 +36,17 @@
     </build>
 
     <dependencies>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.1.7</version>
+        </dependency>
 
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-core</artifactId>
+            <version>1.1.7</version>
+        </dependency>
 
         <dependency>
             <groupId>javax.resource</groupId>
@@ -44,6 +54,11 @@
             <version>1.7</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.zaxxer</groupId>
+            <artifactId>HikariCP</artifactId>
+            <version>2.4.7</version>
+        </dependency>
 
         <dependency>
             <groupId>junit</groupId>
@@ -58,9 +73,29 @@
             <version>5.1.39</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.firebirdsql.jdbc</groupId>
+            <artifactId>jaybird</artifactId>
+            <version>2.2.5</version>
+        </dependency>
 
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>1.7.21</version>
+        </dependency>
 
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-search-orm</artifactId>
+            <version>5.5.4.Final</version>
+        </dependency>
 
+        <dependency>
+            <groupId>com.mchange</groupId>
+            <artifactId>c3p0</artifactId>
+            <version>0.9.5.2</version>
+        </dependency>
 
         <dependency>
             <groupId>com.googlecode.json-simple</groupId>
@@ -72,36 +107,6 @@
         	<groupId>commons-validator</groupId>
         	<artifactId>commons-validator</artifactId>
         	<version>1.5.1</version>
-        </dependency>
-        <dependency>
-        	<groupId>org.hibernate</groupId>
-        	<artifactId>hibernate-entitymanager</artifactId>
-        	<version>5.2.1.Final</version>
-        </dependency>
-        <dependency>
-        	<groupId>org.apache.commons</groupId>
-        	<artifactId>commons-collections4</artifactId>
-        	<version>4.1</version>
-        </dependency>
-        <dependency>
-        	<groupId>commons-logging</groupId>
-        	<artifactId>commons-logging</artifactId>
-        	<version>1.2</version>
-        </dependency>
-        <dependency>
-        	<groupId>org.hibernate</groupId>
-        	<artifactId>hibernate-hikaricp</artifactId>
-        	<version>5.2.1.Final</version>
-        </dependency>
-        <dependency>
-        	<groupId>org.apache.logging.log4j</groupId>
-        	<artifactId>log4j-core</artifactId>
-        	<version>2.6.2</version>
-        </dependency>
-        <dependency>
-        	<groupId>org.apache.logging.log4j</groupId>
-        	<artifactId>log4j-slf4j-impl</artifactId>
-        	<version>2.6.2</version>
         </dependency>
     </dependencies>
 
